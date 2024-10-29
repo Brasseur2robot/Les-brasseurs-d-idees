@@ -191,7 +191,7 @@ double MeterToTop(double meter)
 {
   double nTop = 0;
   //nTop = meter * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL * PI);
-  nTop = meter * 8912.676813;
+  nTop = meter * METER_TO_TOP;
   return nTop;
 }
 
@@ -199,7 +199,7 @@ double TopToMeter(double top)
 {
   double meter = 0.0;
   //meter = top * (DIAMETER_WHEEL * PI) / N_TOP_PER_WHEEL_TURN;
-  meter = top / 8912.676813;
+  meter = top / METER_TO_TOP;
   return meter;
 }
 
@@ -207,7 +207,7 @@ double TopToRad(double nTop)
 {
   double radian = 0.0;
   //radian = (nTop / N_TOP_PER_WHEEL_TURN) * (DIAMETER_WHEEL / DIAMETER_ROBOT ) * 2.0 * PI;
-  radian = nTop / ( 445.633840657 * 2.23 );
+  radian = nTop / RAD_TO_TOP;
   return radian;
 }
 
@@ -215,6 +215,6 @@ double RadToTop(double radian)
 {
   double nTop = 0.0;
   //nTop = radian * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL / DIAMETER_ROBOT ) / 2.0 / PI;
-  nTop = radian * (445.633840657 * 2.23 );
+  nTop = radian * RAD_TO_TOP;
   return nTop;
 }

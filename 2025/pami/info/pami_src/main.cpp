@@ -43,8 +43,8 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000UL);
 
-  pinMode(INTERRUPTEUR_START_PIN, INPUT_PULLUP);
-  pinMode(INTERRUPTEUR_MODE_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_START_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
 
   /* Init de tous les modules */
   LedInit();
@@ -54,7 +54,7 @@ void setup() {
   PositionMgrInit();
 
   /* On attend le bouton le top départ */
-  while (digitalRead(INTERRUPTEUR_START_PIN) == 1)
+  while (digitalRead(SWITCH_START_PIN) == 1)
   {
     LedAnimK2000();
   }
@@ -62,7 +62,7 @@ void setup() {
   LedAnimAllOff();
 
   //CustomTimerInit();
-  //PositionMgrGotoOrientationDegree(360);
+  //PositionMgrGotoOrientationDegree(360.0);
 }
 
 void loop() {
@@ -70,6 +70,7 @@ void loop() {
   static uint8_t trajectoryIndex_u8 = 0;
 
   LedUpdate(false);
+  
   PositionMgrUpdate();
   
   if (PositionMgrGetStatus() == 1)
