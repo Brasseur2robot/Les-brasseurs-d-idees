@@ -10,29 +10,15 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define PID_DISTANCE_OUPTUT_SATURATION  200.0
-#define PID_ORIENTATION_OUPTUT_SATURATION  200.0
+#define PID_DISTANCE_OUPTUT_SATURATION      200.0
+#define PID_ORIENTATION_OUPTUT_SATURATION   200.0
 
-#define PID_DISTANCE_DEBUG      false
-#define PID_ORIENTATION_DEBUG   false
+#define PID_DISTANCE_DEBUG                  false
+#define PID_ORIENTATION_DEBUG               false
 
 /******************************************************************************
   Types declarations
 ******************************************************************************/
-typedef struct
-{
-  double reference_d;
-  double error_d;
-  double previousError_d;
-  double kp_d;
-  double ki_d;
-  double kd_d;
-  double integral_d;
-  double derivative_d;
-  double output_d;
-  bool enable_b;
-  bool antiWindup_b;
-} PidControllerSt; /* typedef for ramp parameters */
 
 /******************************************************************************
    Static Functions Declarations
@@ -45,10 +31,6 @@ typedef struct
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
-double deltaTime_d = 0.0;
-
-PidControllerSt pidDistance_st_g;
-PidControllerSt pidOrientation_st_g;
 
 /******************************************************************************
    Functions Definitions
@@ -56,159 +38,96 @@ PidControllerSt pidOrientation_st_g;
 /**
    @brief     This function inits the pid module.
 
-   @param     none
+   @param     pid_pst :   the pid structure to initialize
 
    @result    none
 
 */
-void PidInit()
+void PidInit(PidControllerSt * pid_pst)
 {
-  pidDistance_st_g.reference_d = 0.0;
-  pidDistance_st_g.error_d = 0.0;
-  pidDistance_st_g.previousError_d = 0.0;
-  pidDistance_st_g.kp_d = KP_DISTANCE;
-  pidDistance_st_g.ki_d = KI_DISTANCE;
-  pidDistance_st_g.kd_d = KD_DISTANCE;
-  pidDistance_st_g.integral_d = 0.0;
-  pidDistance_st_g.derivative_d = 0.0;
-  pidDistance_st_g.output_d = 0.0;
-  pidDistance_st_g.enable_b = true;
-  pidDistance_st_g.antiWindup_b = true;
-
-  pidOrientation_st_g.reference_d = 0.0;
-  pidOrientation_st_g.error_d = 0.0;
-  pidOrientation_st_g.previousError_d = 0.0;
-  pidOrientation_st_g.kp_d = KP_ORIENTATION;
-  pidOrientation_st_g.ki_d = KI_ORIENTATION;
-  pidOrientation_st_g.kd_d = KD_ORIENTATION;
-  pidOrientation_st_g.integral_d = 0.0;
-  pidOrientation_st_g.derivative_d = 0.0;
-  pidOrientation_st_g.output_d = 0.0;
-  pidOrientation_st_g.enable_b = true;
-  pidOrientation_st_g.antiWindup_b = true;
+  pid_pst->enable_b = false;
+  pid_pst->antiWindup_b = false;
+  pid_pst->deltaTime_d = 0.0;
+  pid_pst->reference_d = 0.0;
+  pid_pst->error_d = 0.0;
+  pid_pst->previousError_d = 0.0;
+  pid_pst->kp_d = 0.0;
+  pid_pst->ki_d = 0.0;
+  pid_pst->kd_d = 0.0;
+  pid_pst->integral_d = 0.0;
+  pid_pst->derivative_d = 0.0;
+  pid_pst->output_d = 0.0;
 }
 
-void PidDistanceSetReference(double value)
+void PidStart(PidControllerSt * pid_pst)
 {
-  pidDistance_st_g.reference_d = value;
+  /* Takes care of starting a Pid */
+  pid_pst->enable_b = true;
+  pid_pst->antiWindup_b = true;
 }
 
-void PidOrientationSetReference(double value)
+void PidStop(PidControllerSt * pid_pst)
 {
-  pidOrientation_st_g.reference_d = value;
+  /* Takes care of stopping a Pid */
+  pid_pst->enable_b = false;
 }
 
-void PidSetDeltaTime(double value)
+void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b)
 {
-  deltaTime_d = value;
+  pid_pst->antiWindup_b = value_b;
 }
 
-void PidDistanceSetKp(double value)
+void PidSetDeltaTime(PidControllerSt * pid_pst, double value_d)
 {
-  pidDistance_st_g.kp_d = value;
+  pid_pst->deltaTime_d = value_d;
 }
 
-void PidOrientationSetKp(double value)
+void PidSetReference(PidControllerSt * pid_pst, double value_d)
 {
-  pidOrientation_st_g.kp_d = value;
+  pid_pst->reference_d = value_d;
 }
 
-void PidDistanceSetKi(double value)
+void PidSetCoefficients(PidControllerSt * pid_pst, double kp_d, double ki_d, double kd_d)
 {
-  pidDistance_st_g.ki_d = value;
+  pid_pst->kp_d = kp_d;
+  pid_pst->ki_d = ki_d;
+  pid_pst->kd_d = kd_d;
 }
 
-void PidOrientationSetKi(double value)
+bool PidGetEnable(PidControllerSt * pid_pst)
 {
-  pidOrientation_st_g.ki_d = value;
+  return pid_pst->enable_b;
 }
 
-void PidDistanceSetKd(double value)
+double PidGetDeltaTime(PidControllerSt * pid_pst)
 {
-  pidDistance_st_g.kd_d = value;
+  return pid_pst->deltaTime_d;
 }
 
-void PidOrientationSetKd(double value)
+double PidGetError(PidControllerSt * pid_pst)
 {
-  pidOrientation_st_g.kd_d = value;
+  return pid_pst->error_d;
 }
 
-void PidDistanceSetAntiWindUp(bool value_b)
+double PidGetProportionnal(PidControllerSt * pid_pst)
 {
-  pidDistance_st_g.antiWindup_b = value_b;
+  return (pid_pst->kp_d * pid_pst->error_d);
 }
 
-void PidOrientationSetAntiWindUp(bool value_b)
+double PidGetIntegral(PidControllerSt * pid_pst)
 {
-  pidOrientation_st_g.antiWindup_b = value_b;
+  return (pid_pst->ki_d * pid_pst->integral_d);
 }
 
-double PidGetDeltaTime()
+double PidGetDerivative(PidControllerSt * pid_pst)
 {
-  return deltaTime_d;
+  return (pid_pst->kd_d * pid_pst->derivative_d);
 }
 
-double PidDistanceGetErreur()
-{
-  return pidDistance_st_g.error_d;
-}
 
-double PidOrientationGetErreur()
-{
-  return pidOrientation_st_g.error_d;
-}
 
-double PidDistanceGetProportionnal()
-{
-  return (pidDistance_st_g.kp_d * pidDistance_st_g.error_d);
-}
 
-double PidOrientationGetProportionnal()
-{
-  return (pidOrientation_st_g.kp_d * pidOrientation_st_g.error_d);
-}
-
-double PidDistanceGetIntegral()
-{
-  return (pidDistance_st_g.ki_d * pidDistance_st_g.integral_d);
-}
-
-double PidOrientationGetIntegral()
-{
-  return (pidOrientation_st_g.ki_d * pidOrientation_st_g.integral_d);
-}
-
-double PidDistanceGetDerivative()
-{
-  return (pidDistance_st_g.kd_d * pidDistance_st_g.derivative_d);
-}
-
-double PidOrientationGetDerivative()
-{
-  return (pidOrientation_st_g.kd_d * pidOrientation_st_g.derivative_d);
-}
-
-bool PidDistanceGetEnable()
-{
-  return pidDistance_st_g.enable_b;
-}
-
-bool PidOrientationGetEnable()
-{
-  return pidOrientation_st_g.enable_b;
-}
-
-void PidDistanceEnable(bool value_b)
-{
-  pidDistance_st_g.enable_b = value_b;
-}
-
-void PidOrientationEnable(bool value_b)
-{
-  pidOrientation_st_g.enable_b = value_b;
-}
-
-double PidDistanceUpdate(double mesure_d, bool timeMeasure_b)
+double PidUpdate(PidControllerSt * pid_pst, double mesure_d, bool timeMeasure_b)
 {
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
@@ -218,184 +137,89 @@ double PidDistanceUpdate(double mesure_d, bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   /* Calculer l’erreur */
-  pidDistance_st_g.error_d = pidDistance_st_g.reference_d - mesure_d;
+  pid_pst->error_d = pid_pst->reference_d - mesure_d;
 
   /* Calculer l’intégrale */
-  if ( (pidDistance_st_g.antiWindup_b == true) && ( (pidDistance_st_g.output_d > 255.0) || (pidDistance_st_g.output_d < -255.0) ) )
+  if ( (pid_pst->antiWindup_b == true) && ( (pid_pst->output_d > 255.0) || (pid_pst->output_d < -255.0) ) )
   {
-    pidDistance_st_g.integral_d = pidDistance_st_g.integral_d;
+    pid_pst->integral_d = pid_pst->integral_d;
   }
   else
   {
-    if (( pidDistance_st_g.ki_d >= 0.0001 ) || (pidDistance_st_g.ki_d <= -0.0001))
+    if (( pid_pst->ki_d >= 0.0001 ) || (pid_pst->ki_d <= -0.0001))
     {
-      pidDistance_st_g.integral_d = pidDistance_st_g.integral_d + pidDistance_st_g.error_d * deltaTime_d;
+      pid_pst->integral_d = pid_pst->integral_d + pid_pst->error_d * pid_pst->deltaTime_d;
     }
     else
     {
-      pidDistance_st_g.integral_d = 0.0;
+      pid_pst->integral_d = 0.0;
     }
   }
 
   /* Calculer le dérivée */
-  if (( pidDistance_st_g.kd_d >= 0.0001 ) || (pidDistance_st_g.kd_d <= -0.0001))
+  if (( pid_pst->kd_d >= 0.0001 ) || (pid_pst->kd_d <= -0.0001))
   {
-    pidDistance_st_g.derivative_d = (pidDistance_st_g.error_d - pidDistance_st_g.previousError_d) / deltaTime_d;
-    pidDistance_st_g.previousError_d = pidDistance_st_g.error_d;
+    pid_pst->derivative_d = (pid_pst->error_d - pid_pst->previousError_d) / pid_pst->deltaTime_d;
+    pid_pst->previousError_d = pid_pst->error_d;
 
   }
   else
   {
-    pidDistance_st_g.derivative_d = 0.0;
+    pid_pst->derivative_d = 0.0;
   }
 
   /* Calculer la commande à appliquer */
-  if (pidDistance_st_g.enable_b == true)
+  if (pid_pst->enable_b == true)
   {
-    pidDistance_st_g.output_d = pidDistance_st_g.kp_d * pidDistance_st_g.error_d + pidDistance_st_g.ki_d * pidDistance_st_g.integral_d + pidDistance_st_g.kd_d * pidDistance_st_g.derivative_d;
+    pid_pst->output_d = pid_pst->kp_d * pid_pst->error_d + pid_pst->ki_d * pid_pst->integral_d + pid_pst->kd_d * pid_pst->derivative_d;
   }
   else
   {
-    pidDistance_st_g.output_d = 0.0;
+    pid_pst->output_d = 0.0;
   }
 
   /* Saturate output */
-  if (pidDistance_st_g.output_d > PID_DISTANCE_OUPTUT_SATURATION)
+  if (pid_pst->output_d > PID_DISTANCE_OUPTUT_SATURATION)
   {
-    pidDistance_st_g.output_d = PID_DISTANCE_OUPTUT_SATURATION;
+    pid_pst->output_d = PID_DISTANCE_OUPTUT_SATURATION;
   }
-  if (pidDistance_st_g.output_d < -PID_DISTANCE_OUPTUT_SATURATION)
+  if (pid_pst->output_d < -PID_DISTANCE_OUPTUT_SATURATION)
   {
-    pidDistance_st_g.output_d = -PID_DISTANCE_OUPTUT_SATURATION;
+    pid_pst->output_d = -PID_DISTANCE_OUPTUT_SATURATION;
   }
 
   if (PID_DISTANCE_DEBUG)
   {
     //Serial.print("Distance : ");
-    Serial.print(pidDistance_st_g.reference_d);
+    Serial.print(pid_pst->reference_d);
     Serial.print(", ");
     Serial.print(mesure_d);
     Serial.print(", ");
-    Serial.print(pidDistance_st_g.error_d);
-//    Serial.print(", ");
-//    Serial.print(pidDistance_st_g.previousError_d);
-//    Serial.print(", ");
-//    Serial.print(pidDistance_st_g.kp_d);
-//    Serial.print(", ");
-//    Serial.print(pidDistance_st_g.ki_d);
-//    Serial.print(", ");
-//    Serial.print(pidDistance_st_g.kd_d);
-//    Serial.print(", ");
-//    Serial.print(pidDistance_st_g.integral_d);
-//    Serial.print(", ");
-//    Serial.print(pidDistance_st_g.derivative_d);
+    Serial.print(pid_pst->error_d);
+    //    Serial.print(", ");
+    //    Serial.print(pid_pst->previousError_d);
+    //    Serial.print(", ");
+    //    Serial.print(pid_pst->kp_d);
+    //    Serial.print(", ");
+    //    Serial.print(pid_pst->ki_d);
+    //    Serial.print(", ");
+    //    Serial.print(pid_pst->kd_d);
+    //    Serial.print(", ");
+    //    Serial.print(pid_pst->integral_d);
+    //    Serial.print(", ");
+    //    Serial.print(pid_pst->derivative_d);
     Serial.print(", ");
-    Serial.print(pidDistance_st_g.output_d);
+    Serial.print(pid_pst->output_d);
     Serial.println();
   }
 
   if (timeMeasure_b == true)
   {
     durationMeasure_u32 = micros() - durationMeasureStart_u32;
-    Serial.print("Pid Distance lasted ");
+    Serial.print("Pid lasted ");
     Serial.print(durationMeasure_u32);
     Serial.print(" us, ");
   }
 
-  return pidDistance_st_g.output_d;
-}
-
-double PidOrientationUpdate(double mesure_d, bool timeMeasure_b)
-{
-  uint32_t durationMeasureStart_u32 = 0;
-  uint32_t durationMeasure_u32 = 0;
-
-  /* Start Time if time mesurement */
-  if (timeMeasure_b == true)
-    durationMeasureStart_u32 = micros();
-
-  /* Calculer l’erreur */
-  pidOrientation_st_g.error_d = pidOrientation_st_g.reference_d - mesure_d;
-
-  /* Calculer l’intégrale */
-  if ( (pidOrientation_st_g.antiWindup_b == true) && ( (pidOrientation_st_g.output_d > 255.0) || (pidOrientation_st_g.output_d < -255.0) ) )
-  {
-    pidOrientation_st_g.integral_d = pidOrientation_st_g.integral_d;
-  }
-  else
-  {
-    if ( (pidOrientation_st_g.ki_d >= 0.0001) || (pidOrientation_st_g.ki_d <= -0.0001) )
-    {
-      pidOrientation_st_g.integral_d = pidOrientation_st_g.integral_d + pidOrientation_st_g.error_d * deltaTime_d;
-    }
-    else
-    {
-      pidOrientation_st_g.integral_d = 0.0;
-    }
-  }
-
-  /* Calculer le dérivée */
-  if ( (pidOrientation_st_g.kd_d >= 0.0001) || (pidOrientation_st_g.kd_d <= -0.0001) )
-  {
-    pidOrientation_st_g.derivative_d = (pidOrientation_st_g.error_d - pidOrientation_st_g.previousError_d) / deltaTime_d;
-    pidOrientation_st_g.previousError_d = pidOrientation_st_g.error_d;
-  }
-  else
-  {
-    pidOrientation_st_g.derivative_d = 0.0;
-  }
-
-  /* Calculer la commande à appliquer */
-  if (pidOrientation_st_g.enable_b == true)
-  {
-    pidOrientation_st_g.output_d = pidOrientation_st_g.kp_d * pidOrientation_st_g.error_d + pidOrientation_st_g.ki_d * pidOrientation_st_g.integral_d + pidOrientation_st_g.kd_d * pidOrientation_st_g.derivative_d;
-  }
-  else
-  {
-    pidOrientation_st_g.output_d = 0.0;
-  }
-
-  /* Saturate output */
-  if (pidOrientation_st_g.output_d > PID_ORIENTATION_OUPTUT_SATURATION)
-  {
-    pidOrientation_st_g.output_d = PID_ORIENTATION_OUPTUT_SATURATION;
-  }
-  if (pidOrientation_st_g.output_d < -PID_ORIENTATION_OUPTUT_SATURATION)
-  {
-    pidOrientation_st_g.output_d = -PID_ORIENTATION_OUPTUT_SATURATION;
-  }
-
-  if (PID_ORIENTATION_DEBUG)
-  {
-    Serial.print("Orientation : ");
-    Serial.print(pidOrientation_st_g.reference_d);
-    Serial.print(", ");
-    Serial.print(mesure_d);
-    Serial.print(", ");
-    Serial.print(pidOrientation_st_g.error_d);
-    Serial.print(", ");
-//    Serial.print(pidOrientation_st_g.previousError_d);
-//    Serial.print(", ");
-//    Serial.print(pidOrientation_st_g.kp_d);
-//    Serial.print(", ");
-//    Serial.print(pidOrientation_st_g.ki_d);
-//    Serial.print(", ");
-//    Serial.print(pidOrientation_st_g.kd_d);
-//    Serial.print(", ");
-    Serial.print(pidOrientation_st_g.integral_d);
-    Serial.print(", ");
-    Serial.print(pidOrientation_st_g.derivative_d);
-    Serial.print(", ");
-    Serial.print(pidOrientation_st_g.output_d);
-    Serial.println();
-  }
-
-  if (timeMeasure_b == true)
-  {
-    durationMeasure_u32 = micros() - durationMeasureStart_u32;
-    Serial.print("Pid Orientation lasted ");
-    Serial.print(durationMeasure_u32);
-    Serial.print(" us, ");
-  }
-  return pidOrientation_st_g.output_d;
+  return pid_pst->output_d;
 }

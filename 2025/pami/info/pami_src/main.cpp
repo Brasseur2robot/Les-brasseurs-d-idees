@@ -51,8 +51,6 @@ void setup() {
   MotorInit();
   ObstacleSensorInit();
   OdometryInit();
-  PidInit();
-  PidSetDeltaTime(DELTA_TIME_S);
   RampInit();
 
   PositionMgrInit();

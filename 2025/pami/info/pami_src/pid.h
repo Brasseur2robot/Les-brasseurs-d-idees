@@ -2,7 +2,7 @@
 #define pid_h_
 
 /******************************************************************************
- * Constants and Macros
+   Constants and Macros
  ******************************************************************************/
 #define KP_DISTANCE  1.0
 #define KI_DISTANCE  0.0
@@ -13,42 +13,43 @@
 #define KD_ORIENTATION  0.0 // 0.0005
 
 /******************************************************************************
- * Function Declarations
+   Types declarations
  ******************************************************************************/
-void PidInit();
-double PidGetDeltaTime();
-void PidSetDeltaTime(double value);
+typedef struct
+{
+  bool enable_b;
+  bool antiWindup_b;
+  double deltaTime_d;
+  double reference_d;
+  double error_d;
+  double previousError_d;
+  double kp_d;
+  double ki_d;
+  double kd_d;
+  double integral_d;
+  double derivative_d;
+  double output_d;
+} PidControllerSt; /* typedef for ramp parameters */
 
-void PidDistanceSetReference(double value);
-void PidDistanceSetKp(double value);
-void PidDistanceSetKi(double value);
-void PidDistanceSetKd(double value);
-void PidDistanceSetAntiWindUp( bool value_b);
+/******************************************************************************
+   Function Declarations
+ ******************************************************************************/
+void PidInit(PidControllerSt * pid_pst);
+void PidStart(PidControllerSt * pid_pst);
+void PidStop(PidControllerSt * pid_pst);
 
-double PidDistanceGetErreur();
-double PidDistanceGetProportionnal();
-double PidDistanceGetIntegral();
-double PidDistanceGetDerivative();
+void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b);
+void PidSetDeltaTime(PidControllerSt * pid_pst, double value_d);
+void PidSetReference(PidControllerSt * pid_pst, double value_d);
+void PidSetCoefficients(PidControllerSt * pid_pst, double kp_d, double ki_d, double kd_d);
 
-void PidDistanceEnable(bool value_bue);
-bool PidDistanceGetEnable();
+bool PidGetEnable(PidControllerSt * pid_pst);
+double PidGetDeltaTime(PidControllerSt * pid_pst);
+double PidGetError(PidControllerSt * pid_pst);
+double PidGetProportionnal(PidControllerSt * pid_pst);
+double PidGetIntegral(PidControllerSt * pid_pst);
+double PidGetDerivative(PidControllerSt * pid_pst);
 
-double PidDistanceUpdate(double mesure, bool timeMeasure_b);
-
-void PidOrientationSetReference(double value);
-void PidOrientationSetKp(double value);
-void PidOrientationSetKi(double value);
-void PidOrientationSetKd(double value);
-void PidOrientationSetAntiWindUp( bool value_b);
-
-double PidOrientationGetErreur();
-double PidOrientationGetProportionnal();
-double PidOrientationGetIntegral();
-double PidOrientationGetDerivative();
-
-void PidOrientationEnable(bool value_b);
-bool PidOrientationGetEnable();
-
-double PidOrientationUpdate(double mesure, bool timeMeasure_b);
+double PidUpdate(PidControllerSt * pid_pst, double mesure, bool timeMeasure_b);
 
 #endif

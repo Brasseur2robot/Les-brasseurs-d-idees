@@ -38,6 +38,9 @@ int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
 PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 
+PidControllerSt pidDistance_st_g;
+PidControllerSt pidOrientation_st_g;
+
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
@@ -59,6 +62,19 @@ void PositionMgrInit()
 {
   positionMgrMvtType_en_g = MVT_TYPE_NONE;
   positionMgrStatus_u8_g = 1;
+
+  /* init submodules */
+  PidInit(&pidDistance_st_g);
+  PidInit(&pidOrientation_st_g);
+
+  PidSetDeltaTime(&pidDistance_st_g, DELTA_TIME_S);
+  PidSetDeltaTime(&pidOrientation_st_g, DELTA_TIME_S);
+
+  PidSetCoefficients(&pidDistance_st_g, KP_DISTANCE, KI_DISTANCE, KD_DISTANCE);
+  PidSetCoefficients(&pidOrientation_st_g, KP_ORIENTATION, KI_ORIENTATION, KD_ORIENTATION);
+
+  PidStart(&pidDistance_st_g);
+  PidStart(&pidOrientation_st_g);
 }
 
 /**
@@ -83,7 +99,7 @@ void PositionMgrUpdate()
   currentTime_u32 = millis();
 
   /* Manages the update loop every pidGetDeltaTime() */
-  if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (PidGetDeltaTime() * 1000.0) )
+  if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
   {
     /* issue a warning if more than a 50% increase in loop time */
     //    if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (PidGetDeltaTime() * 1000.0 * 1.5) )
@@ -150,16 +166,16 @@ void PositionMgrUpdate()
     }
 
     /* Sets the new reference on the pids */
-    PidDistanceSetReference(consigneDistance_d);
-    PidOrientationSetReference(consigneOrientation_d);
+    PidSetReference(&pidDistance_st_g, consigneDistance_d);
+    PidSetReference(&pidOrientation_st_g, consigneOrientation_d);
 
     /* Gets the current distance and orientation of the robot */
     double mesureDistance_d = OdometryGetDistanceTop();
     double mesureOrientation_d = OdometryGetOrientationTop();
 
     /* Sets the current distance and orientation in the pids, they compute the outputs for the motors */
-    double commandeDistance_d = PidDistanceUpdate(mesureDistance_d, DEBUG_TIME);
-    double commandeOrientation_d = PidOrientationUpdate(mesureOrientation_d, DEBUG_TIME);
+    double commandeDistance_d = PidUpdate(&pidDistance_st_g, mesureDistance_d, DEBUG_TIME);
+    double commandeOrientation_d = PidUpdate(&pidOrientation_st_g, mesureOrientation_d, DEBUG_TIME);
 
     /* Sends the pids outputs to the motors */
     MotorLeftSetSpeed(commandeDistance_d - commandeOrientation_d);
