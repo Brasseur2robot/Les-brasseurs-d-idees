@@ -24,7 +24,7 @@ typedef enum
   MVT_TYPE_NONE = 0u,         /* No profile selected */
   MVT_TYPE_DISTANCE = 1u,     /* Ramp of triangular profil */
   MVT_TYPE_ORIENTATION = 2u,  /* Ramp of trapezoïdal profil */
-} PositionMangerMvtTypeEn;    /* Enumeration used to select the mvt type */
+} PositionManagerMvtTypeEn;    /* Enumeration used to select the mvt type */
 
 /******************************************************************************
    Static Functions Declarations
@@ -36,7 +36,7 @@ typedef enum
 uint8_t positionMgrStatus_u8_g;
 int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
-PositionMangerMvtTypeEn positionMgrMvtType_en_g;
+PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 
 /******************************************************************************
    Module Global Variables
