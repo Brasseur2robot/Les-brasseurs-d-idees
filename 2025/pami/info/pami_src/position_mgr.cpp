@@ -41,6 +41,9 @@ PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 PidControllerSt pidDistance_st_g;
 PidControllerSt pidOrientation_st_g;
 
+RampParametersSt rampDistance_st_g;
+RampParametersSt rampOrientation_st_g;
+
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
@@ -63,7 +66,7 @@ void PositionMgrInit()
   positionMgrMvtType_en_g = MVT_TYPE_NONE;
   positionMgrStatus_u8_g = 1;
 
-  /* init submodules */
+  /* init pid submodule */
   PidInit(&pidDistance_st_g);
   PidInit(&pidOrientation_st_g);
 
@@ -75,6 +78,10 @@ void PositionMgrInit()
 
   PidStart(&pidDistance_st_g);
   PidStart(&pidOrientation_st_g);
+
+  /* init ramp submodule */
+  RampInit(&rampDistance_st_g);
+  RampInit(&rampOrientation_st_g);
 }
 
 /**
@@ -121,7 +128,8 @@ void PositionMgrUpdate()
     if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b == false) )
     {
       emergencyActivated_b = true;
-      RampEmergencyStop();
+      RampEmergencyStop(&rampDistance_st_g);
+      RampEmergencyStop(&rampOrientation_st_g);
       LedSetAnim(LED3_ID, ANIM_STATE_BLINK);
       LedSetBlinkNb(LED3_ID, 2);
     }
@@ -133,16 +141,16 @@ void PositionMgrUpdate()
     {
       case MVT_TYPE_DISTANCE:
         /* Should keep the orientation, and ramps in distance */
-        RampUpdate(currentTime_u32 - lastExecutionTime_u32, DEBUG_TIME);
-        consigneDistance_d = startDistance_i32_g + RampGetDistance();
+        RampUpdate(&rampDistance_st_g, currentTime_u32 - lastExecutionTime_u32, DEBUG_TIME);
+        consigneDistance_d = startDistance_i32_g + RampGetDistance(&rampDistance_st_g);
         consigneOrientation_d = startOrientation_i32_g;
         break;
 
       case MVT_TYPE_ORIENTATION:
         /* Should keep the distance and ramps in orientation */
-        RampUpdate(currentTime_u32 - lastExecutionTime_u32, DEBUG_TIME);
+        RampUpdate(&rampOrientation_st_g, currentTime_u32 - lastExecutionTime_u32, DEBUG_TIME);
         consigneDistance_d = startDistance_i32_g;
-        consigneOrientation_d = startOrientation_i32_g + RampGetDistance();
+        consigneOrientation_d = startOrientation_i32_g + RampGetDistance(&rampOrientation_st_g);
         break;
 
       default:
@@ -151,9 +159,9 @@ void PositionMgrUpdate()
         break;
     }
 
-    ObstacleSensorSetThreshold( (uint16_t)(1.2 * TopToMeter(RampGetDistanceBrake()) * 1000) );
+    ObstacleSensorSetThreshold( (uint16_t)(1.2 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
-    if ( (RampGetState() == RAMP_STATE_FINISHED) || (RampGetState() == RAMP_STATE_INIT) )
+    if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
     {
       if (emergencyActivated_b == false )
         positionMgrStatus_u8_g = 1;
@@ -255,11 +263,11 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
   startDistance_i32_g = OdometryGetDistanceTop();
   startOrientation_i32_g = OdometryGetOrientationTop();
 
-  //RampSetNew((int32_t)MeterToTop(distance_m), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+  /* Test if braking at the end of the ramp is required */
   if (braking_b == true)
-    RampNew((int32_t)MeterToTop(distance_m), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+    RampNew(&rampDistance_st_g, (int32_t)MeterToTop(distance_m), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
   else
-    RampNew((int32_t)MeterToTop(distance_m), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+    RampNew(&rampDistance_st_g, (int32_t)MeterToTop(distance_m), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
 }
 
 /**
@@ -279,8 +287,7 @@ void PositionMgrGotoOrientationDegree(double theta_deg)
   startDistance_i32_g = OdometryGetDistanceTop();
   startOrientation_i32_g = OdometryGetOrientationTop();
 
-  //RampSetNew((int32_t)RadToTop(theta_deg * PI / 180.0), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
-  RampNew((int32_t)RadToTop(theta_deg * PI / 180.0), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+  RampNew(&rampOrientation_st_g, (int32_t)RadToTop(theta_deg * PI / 180.0), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
 }
 
 /**

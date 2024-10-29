@@ -51,8 +51,6 @@ void setup() {
   MotorInit();
   ObstacleSensorInit();
   OdometryInit();
-  RampInit();
-
   PositionMgrInit();
 
   /* On attend le bouton le top départ */
