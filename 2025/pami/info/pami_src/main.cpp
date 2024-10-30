@@ -74,7 +74,7 @@ void loop() {
 
   if (PositionMgrGetStatus() == 1)
   {
-    TrajectoryCalibrateSquare(trajectoryIndex_u8, 2.0, true);
+    TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
     trajectoryIndex_u8 ++;
   }
 }

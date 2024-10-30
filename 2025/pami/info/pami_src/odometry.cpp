@@ -129,8 +129,8 @@ void OdometryUpdate(bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   // Récupérons les mesures des codeurs
-  int32_t distanceLeft = encoderLeft.read();
-  int32_t distanceRight = encoderRight.read();
+  int32_t distanceLeft = encoderLeft.read() * FACTOR_WHEEL_LEFT;
+  int32_t distanceRight = encoderRight.read() * FACTOR_WHEEL_RIGHT;
 
   odometryDistanceTop_i32_g = ( distanceRight + distanceLeft ) / 2; // distance en pas parcourue à tn
   int32_t orient = orient_init + (distanceRight - distanceLeft); //correspond à qn mais en pas

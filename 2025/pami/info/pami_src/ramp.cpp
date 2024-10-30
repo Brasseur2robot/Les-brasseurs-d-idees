@@ -14,8 +14,8 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define RAMP_NEW_DEBUG          true
-#define RAMP_UPDATE_DEBUG       true
+#define RAMP_NEW_DEBUG          false
+#define RAMP_UPDATE_DEBUG       false
 #define RAMP_EMERGENCY_DEBUG    false
 
 /******************************************************************************
