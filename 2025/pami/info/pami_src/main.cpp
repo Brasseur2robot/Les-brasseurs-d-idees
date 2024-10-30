@@ -24,8 +24,7 @@
 /******************************************************************************
    Static Functions Declarations
  ******************************************************************************/
-void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_d);
-void TrajectoryCalibrateSquareCcw(uint8_t trajectoryIndex_u8);
+void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d, bool direction_b);
 
 /******************************************************************************
    Global Variables Declarations
@@ -70,20 +69,39 @@ void loop() {
   static uint8_t trajectoryIndex_u8 = 0;
 
   LedUpdate(false);
-  
+
   PositionMgrUpdate();
-  
+
   if (PositionMgrGetStatus() == 1)
   {
-    TrajectoryCalibrateSquareCw(trajectoryIndex_u8, 1.0);
+    TrajectoryCalibrateSquare(trajectoryIndex_u8, 2.0, true);
     trajectoryIndex_u8 ++;
   }
 }
 
-void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_d)
+/**
+   @brief     This function makes the robot do a calibration square.
+
+
+   @param     trajectoryIndex_u8    Index used by the manager to determine which part of the trajectory it is on.
+
+              squareSizeM_d         Size in meters of the sides of the square.
+
+              direction_b           Direction (true cw, false, ccw).
+
+   @result    none
+
+*/
+void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d, bool direction_b)
 {
   static int8_t trajectoryIndexLast_i8 = -1;
   static bool trajectoryFinished_b = false;
+
+  double angleDeg_d = 0;
+  if (direction_b == true)
+    angleDeg_d = 90.0;
+  else
+    angleDeg_d = -90.0;
 
   if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
   {
@@ -98,7 +116,7 @@ void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_
         break;
       case 1:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(90);
+        PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 2:
         //Serial.print(", Distance : 1m");
@@ -106,7 +124,7 @@ void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_
         break;
       case 3:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(90);
+        PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 4:
         //Serial.print(", Distance : 1m");
@@ -114,7 +132,7 @@ void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_
         break;
       case 5:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(90);
+        PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 6:
         //Serial.print(", Distance : 1m");
@@ -122,7 +140,7 @@ void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_
         break;
       case 7:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(90);
+        PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 8:
         // trajectory over
@@ -134,16 +152,4 @@ void TrajectoryCalibrateSquareCw(uint8_t trajectoryIndex_u8, double squareSizeM_
     }
     trajectoryIndexLast_i8 = trajectoryIndex_u8;
   }
-}
-
-void TrajectoryCalibrateSquareCcw(uint8_t trajectoryIndex_u8)
-{
-  PositionMgrGotoDistanceMeter(1, true);
-  PositionMgrGotoOrientationDegree(-90);
-  PositionMgrGotoDistanceMeter(1, true);
-  PositionMgrGotoOrientationDegree(-90);
-  PositionMgrGotoDistanceMeter(1, true);
-  PositionMgrGotoOrientationDegree(-90);
-  PositionMgrGotoDistanceMeter(1, true);
-  PositionMgrGotoOrientationDegree(-90);
 }
