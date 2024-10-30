@@ -1,3 +1,6 @@
+#ifndef config_pins_h_
+#define config_pins_h_
+
 /* Led pins */
 #define LED_NUMBER  5
 #define LED1_PIN    4
@@ -24,3 +27,5 @@
 
 /* Servo pins */
 #define SERVO_PIN             13
+
+#endif

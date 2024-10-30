@@ -1,3 +1,6 @@
+#ifndef config_h_
+#define config_h_
+
 /* Choose which robot is running the code */
 //#define SUMO_ZOPHON
 #define PAMI
@@ -23,3 +26,5 @@
 /* Utils */
 #define DEG_TO_RAD            PI / 180.0
 #define RAD_TO_DEG            180.0 / PI
+
+#endif

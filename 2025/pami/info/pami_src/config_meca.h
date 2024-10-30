@@ -1,5 +1,5 @@
-/* Mechanical parameters of the robot */
-
+#ifndef config_meca_h_
+#define config_meca_h_
 
 /******************************************************************************
    This is the mechanical configuration of Zophon's Sumo robot
@@ -77,5 +77,7 @@
 #define WHEELBASE_M           0.083     /* Wheelbase of the pami [m] */
 //#define RAD_TO_TOP            N_TOP_PER_WHEEL_TURN / (WHEEL_DIAMETER_M / WHEELBASE_M ) / PI
 #define RAD_TO_TOP            2774.0706580917
+
+#endif
 
 #endif
