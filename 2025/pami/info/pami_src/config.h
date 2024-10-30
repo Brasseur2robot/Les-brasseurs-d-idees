@@ -7,6 +7,7 @@
 
 #include "config_pins.h"
 #include "config_meca.h"
+#include "config_control.h"
 
 /* Common parameters */
 #define SERIAL_SPEED          1000000
