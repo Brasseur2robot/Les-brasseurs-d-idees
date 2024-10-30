@@ -8,7 +8,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-
+#define DEBUG_MOTOR     false
 /******************************************************************************
   Types declarations
 ******************************************************************************/
@@ -112,12 +112,22 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   if (motorSpeed_d > 0)
   {
     digitalWrite(MOTOR_LEFT_PIN_INA1, HIGH);
-    analogWrite(MOTOR_LEFT_PIN_INA2, short(255 - motorSpeed_d));
+    analogWrite(MOTOR_LEFT_PIN_INA2, int16_t(255 - motorSpeed_d));
   }
   else
   {
     digitalWrite(MOTOR_LEFT_PIN_INA1, LOW);
-    analogWrite(MOTOR_LEFT_PIN_INA2, short(-motorSpeed_d));
+    analogWrite(MOTOR_LEFT_PIN_INA2, int16_t(-motorSpeed_d));
+  }
+
+  if (DEBUG_MOTOR)
+  {
+    Serial.print("Left Motor Command : ");
+    if (motorSpeed_d > 0)
+      Serial.print(int16_t(255 - motorSpeed_d));
+    else
+      Serial.print(int16_t(-motorSpeed_d));
+    Serial.println();
   }
 }
 
@@ -157,12 +167,22 @@ void MotorRightSetSpeed(double motorSpeed_d)
   if (motorSpeed_d > 0)
   {
     digitalWrite(MOTOR_RIGHT_PIN_INA1, HIGH); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, short(255 - motorSpeed_d));
+    analogWrite(MOTOR_RIGHT_PIN_INA2, int16_t(255 - motorSpeed_d));
   }
   else
   {
     digitalWrite(MOTOR_RIGHT_PIN_INA1, LOW); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, short(-motorSpeed_d));
+    analogWrite(MOTOR_RIGHT_PIN_INA2, int16_t(-motorSpeed_d));
+  }
+
+  if (DEBUG_MOTOR)
+  {
+    Serial.print("Right Motor Command : ");
+    if (motorSpeed_d > 0)
+      Serial.print(int16_t(255 - motorSpeed_d));
+    else
+      Serial.print(int16_t(-motorSpeed_d));
+    Serial.println();
   }
 }
 

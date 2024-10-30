@@ -14,7 +14,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define PID_DISTANCE_DEBUG      true
+#define PID_DISTANCE_DEBUG      false
 #define PID_ORIENTATION_DEBUG   false
 #define POSITION_MGR_DEBUG      false
 
@@ -105,7 +105,7 @@ void PositionMgrUpdate()
 
   currentTime_u32 = millis();
   static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution
-  
+
   /* Manages the update loop every pidGetDeltaTime() */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
   {
@@ -247,7 +247,7 @@ void PositionMgrUpdate()
     {
       Serial.print("Time [ms] : ");
       Serial.print(currentTime_u32);
-      Serial.print("X [m] : ");
+      Serial.print(", X [m] : ");
       Serial.print(OdometryGetXMeter());
       Serial.print(", Y {m] : ");
       Serial.print(OdometryGetYMeter());
@@ -262,10 +262,10 @@ void PositionMgrUpdate()
       Serial.print(", orientation [top] : ");
       Serial.print(mesureOrientation_d);
       Serial.print(", commande Distance : ");
-      //      Serial.print(commandeDistance_d);
-      //      Serial.print(", commande Orientation : ");
-      //      Serial.print(commandeOrientation_d);
-      //      Serial.print(", commande gauche : ");
+      Serial.print(commandeDistance_d);
+      Serial.print(", commande Orientation : ");
+      Serial.print(commandeOrientation_d);
+      Serial.print(", commande gauche : ");
       Serial.print(commandeDistance_d - commandeOrientation_d);
       Serial.print(", commande droite : ");
       Serial.print(commandeDistance_d + commandeOrientation_d);

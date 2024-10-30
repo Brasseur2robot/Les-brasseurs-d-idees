@@ -29,6 +29,7 @@
 /******************************************************************************
    Global Variables Declarations
  ******************************************************************************/
+  int8_t direction_g_i8;
 
 /******************************************************************************
    Functions Definitions
@@ -44,6 +45,8 @@
 */
 void RampInit(RampParametersSt * ramp_pst)
 {
+  direction_g_i8 = 0;
+  
   ramp_pst->timeStartMs_u32 = 0;
   ramp_pst->timeCurrentMs_u32 = 0;
 
@@ -77,6 +80,11 @@ void RampInit(RampParametersSt * ramp_pst)
 */
 void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t speedTotalTopPerS_i32, int32_t speedMaxTopPerS_i32, int32_t accelerationMaxTopPerS_i32)
 {
+  if (distanceTotalTop_i32 < 0)
+    direction_g_i8 = -1;
+  else
+    direction_g_i8 = 1;
+
   ramp_pst->timeStartMs_u32 = millis();
   ramp_pst->timeCurrentMs_u32 = 0;
 
@@ -85,12 +93,12 @@ void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t 
   ramp_pst->distanceBrakeTop_i32 = 0;
 
   //ramp_pst->speedCurrentTopPerS_i32 = ramp_pst->speedCurrentTopPerS_i32;
-  ramp_pst->speedTotalTopPerS_i32 = speedTotalTopPerS_i32;
+  ramp_pst->speedTotalTopPerS_i32 = direction_g_i8 * speedTotalTopPerS_i32;
 
   /* If we start a move from scratch, acceleration should be accelerationMaxTopPerS_i32 */
   if (ramp_pst->speedCurrentTopPerS_i32 == 0)
   {
-    ramp_pst->accelerationCurrentTopPerS_i32 = accelerationMaxTopPerS_i32;
+    ramp_pst->accelerationCurrentTopPerS_i32 = direction_g_i8 * accelerationMaxTopPerS_i32;
     ramp_pst->rampState_en = RAMP_STATE_RAMPUP;
   }
   else /* But if its another stretch on top of a non-braking move, acceleration should be null */
@@ -99,8 +107,8 @@ void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t 
     ramp_pst->rampState_en = RAMP_STATE_CONTINUOUS;
   }
 
-  ramp_pst->speedMaxTopPerS_i32 = speedMaxTopPerS_i32;
-  ramp_pst->accelerationMaxTopPerS_i32 = accelerationMaxTopPerS_i32;
+  ramp_pst->speedMaxTopPerS_i32 = direction_g_i8 * speedMaxTopPerS_i32;
+  ramp_pst->accelerationMaxTopPerS_i32 = direction_g_i8 * accelerationMaxTopPerS_i32;
 
 
   if (RAMP_NEW_DEBUG)
@@ -129,7 +137,7 @@ void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t 
 
    @param     ramp_pst            the ramp structure to update
               timeCurrent_u32     the current time for computations
-              timeMeasure_b       true for duration measurement in uS 
+              timeMeasure_b       true for duration measurement in uS
 
    @result    none
 
@@ -153,14 +161,14 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
   ramp_pst->distanceCurrentTop_i32 += ramp_pst->accelerationCurrentTopPerS_i32 / 2 * ((int32_t)ramp_pst->timeCurrentMs_u32 * (int32_t)ramp_pst->timeCurrentMs_u32) / 1000000 + ramp_pst->speedCurrentTopPerS_i32 * (int32_t)ramp_pst->timeCurrentMs_u32 / 1000;
 
   /* compute distance to go */
-  int32_t distanceTogoTop_i32 = ramp_pst->distanceTotalTop_i32 - ramp_pst->distanceCurrentTop_i32;
+  int32_t distanceTogoTop_i32 = direction_g_i8 * (ramp_pst->distanceTotalTop_i32 - ramp_pst->distanceCurrentTop_i32);
 
   if (distanceTogoTop_i32 > 0)
   {
     if (ramp_pst->speedTotalTopPerS_i32 == 0)
     {
       /* Compute breaking distance */
-      ramp_pst->distanceBrakeTop_i32 = ramp_pst->speedCurrentTopPerS_i32 * ramp_pst->speedCurrentTopPerS_i32 / 2 / ramp_pst->accelerationMaxTopPerS_i32;
+      ramp_pst->distanceBrakeTop_i32 = direction_g_i8 * (ramp_pst->speedCurrentTopPerS_i32 * ramp_pst->speedCurrentTopPerS_i32 / 2 / ramp_pst->accelerationMaxTopPerS_i32);
 
       /* if breaking distance is >= distance to go, should ramp down , because speedTotal is 0 */
       if (ramp_pst->distanceBrakeTop_i32 >= distanceTogoTop_i32)
@@ -170,15 +178,15 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
       }
     }
     /* if speed is already speedMax, ramp continuous */
-    if ( (ramp_pst->speedCurrentTopPerS_i32 > ramp_pst->speedMaxTopPerS_i32) && (ramp_pst->rampState_en == RAMP_STATE_RAMPUP) )
+    if ( (abs(ramp_pst->speedCurrentTopPerS_i32) > abs(ramp_pst->speedMaxTopPerS_i32)) && (ramp_pst->rampState_en == RAMP_STATE_RAMPUP) )
     {
       /* saturate speed */
       ramp_pst->speedCurrentTopPerS_i32 = ramp_pst->speedMaxTopPerS_i32;
       ramp_pst->accelerationCurrentTopPerS_i32 = 0;
       ramp_pst->rampState_en = RAMP_STATE_CONTINUOUS;
     }
-    
-    if ( (ramp_pst->speedCurrentTopPerS_i32 <= 0) && (ramp_pst->rampState_en == RAMP_STATE_RAMPDOWN) )
+
+    if ( ((direction_g_i8 * ramp_pst->speedCurrentTopPerS_i32) <= 0) && (ramp_pst->rampState_en == RAMP_STATE_RAMPDOWN) )
     {
       /* if speed decreased to 0 */
       ramp_pst->speedCurrentTopPerS_i32 = 0;
@@ -201,10 +209,10 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
     Serial.print(", ");
     Serial.print(ramp_pst->distanceCurrentTop_i32);
     Serial.print(", ");
-    //    Serial.print(distanceTogoTop_i32);
-    //    Serial.print(", ");
-    //    Serial.print(ramp_pst->distanceBrakeTop_i32);
-    //    Serial.print(", ");
+    Serial.print(distanceTogoTop_i32);
+    Serial.print(", ");
+    Serial.print(ramp_pst->distanceBrakeTop_i32);
+    Serial.print(", ");
     Serial.print(ramp_pst->speedCurrentTopPerS_i32);
     Serial.print(", ");
     Serial.print(ramp_pst->accelerationCurrentTopPerS_i32);
