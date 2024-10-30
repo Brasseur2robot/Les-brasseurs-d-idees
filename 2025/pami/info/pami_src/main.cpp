@@ -44,6 +44,8 @@ void setup() {
 
   pinMode(SWITCH_START_PIN, INPUT_PULLUP);
   pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_REED, INPUT_PULLUP);       /* Reed switch not working */
+  pinMode(SWITCH_GROUND, INPUT_PULLUP);
 
   /* Init de tous les modules */
   LedInit();
