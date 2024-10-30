@@ -77,9 +77,8 @@
  * wheel, so *2.
  */
 #define WHEELBASE_M           0.08395362226   /* Wheelbase of the pami [m] */
-#define FACTOR_ROTATION       1.0             /* Factor to adjust the top count */
 //#define RAD_TO_TOP            N_TOP_PER_WHEEL_TURN / (WHEEL_DIAMETER_M / WHEELBASE_M ) / PI
-#define RAD_TO_TOP            (2774.0706580917 * FACTOR_DISTANCE * FACTOR_ROTATION)
+#define RAD_TO_TOP            (2774.0706580917 * FACTOR_DISTANCE)
 
 #endif
 
