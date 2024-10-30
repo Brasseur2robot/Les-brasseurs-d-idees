@@ -2,12 +2,12 @@
 #define config_pins_h_
 
 /* Led pins */
-#define LED_NUMBER  5
-#define LED1_PIN    4
-#define LED2_PIN    5
-#define LED3_PIN    6
-#define LED4_PIN    7
-#define LED5_PIN    11
+#define LED_NUMBER            5
+#define LED1_PIN              4
+#define LED2_PIN              5
+#define LED3_PIN              6
+#define LED4_PIN              7
+#define LED5_PIN              11
 
 /* Switch pins */
 #define SWITCH_START_PIN      2
