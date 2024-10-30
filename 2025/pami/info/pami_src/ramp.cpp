@@ -7,6 +7,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include "config.h"
 #include "ramp.h"
 #include "odometry.h"
 
