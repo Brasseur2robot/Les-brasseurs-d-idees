@@ -14,8 +14,8 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define RAMP_NEW_DEBUG          false
-#define RAMP_UPDATE_DEBUG       false
+#define RAMP_NEW_DEBUG          true
+#define RAMP_UPDATE_DEBUG       true
 #define RAMP_EMERGENCY_DEBUG    false
 
 /******************************************************************************
@@ -29,7 +29,7 @@
 /******************************************************************************
    Global Variables Declarations
  ******************************************************************************/
-  int8_t direction_g_i8;
+int8_t direction_g_i8;
 
 /******************************************************************************
    Functions Definitions
@@ -46,7 +46,7 @@
 void RampInit(RampParametersSt * ramp_pst)
 {
   direction_g_i8 = 0;
-  
+
   ramp_pst->timeStartMs_u32 = 0;
   ramp_pst->timeCurrentMs_u32 = 0;
 
@@ -92,7 +92,9 @@ void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t 
   ramp_pst->distanceTotalTop_i32 = distanceTotalTop_i32;
   ramp_pst->distanceBrakeTop_i32 = 0;
 
-  //ramp_pst->speedCurrentTopPerS_i32 = ramp_pst->speedCurrentTopPerS_i32;
+  if ( speedTotalTopPerS_i32 == 0)  /* Should reset speed */
+    ramp_pst->speedCurrentTopPerS_i32 = 0;
+
   ramp_pst->speedTotalTopPerS_i32 = direction_g_i8 * speedTotalTopPerS_i32;
 
   /* If we start a move from scratch, acceleration should be accelerationMaxTopPerS_i32 */
@@ -197,6 +199,8 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
   else
   {
     ramp_pst->distanceCurrentTop_i32 = ramp_pst->distanceTotalTop_i32;
+    ramp_pst->speedCurrentTopPerS_i32 = 0;
+    ramp_pst->accelerationCurrentTopPerS_i32 = 0;
     ramp_pst->rampState_en = RAMP_STATE_FINISHED;
   }
 
