@@ -62,7 +62,7 @@ void setup() {
   LedAnimAllOff();
 
   //CustomTimerInit();
-  //PositionMgrGotoOrientationDegree(360.0);
+  //PositionMgrGotoDistanceMeter(1.0, true);
 }
 
 void loop() {

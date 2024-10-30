@@ -14,6 +14,8 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
+#define PID_DISTANCE_DEBUG      true
+#define PID_ORIENTATION_DEBUG   false
 #define POSITION_MGR_DEBUG      false
 
 /******************************************************************************
@@ -24,7 +26,7 @@ typedef enum
   MVT_TYPE_NONE = 0u,         /* No profile selected */
   MVT_TYPE_DISTANCE = 1u,     /* Ramp of triangular profil */
   MVT_TYPE_ORIENTATION = 2u,  /* Ramp of trapezoïdal profil */
-} PositionManagerMvtTypeEn;    /* Enumeration used to select the mvt type */
+} PositionManagerMvtTypeEn;   /* Enumeration used to select the mvt type */
 
 /******************************************************************************
    Static Functions Declarations
@@ -99,12 +101,11 @@ void PositionMgrInit()
 void PositionMgrUpdate()
 {
   uint32_t currentTime_u32 = 0;
-  static uint32_t lastExecutionTime_u32 = 0;
-
   static bool emergencyActivated_b = false;
 
   currentTime_u32 = millis();
-
+  static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution
+  
   /* Manages the update loop every pidGetDeltaTime() */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
   {
@@ -191,6 +192,56 @@ void PositionMgrUpdate()
 
     /* Saves last execution time, for precise loop control */
     lastExecutionTime_u32 = currentTime_u32;
+
+    if (PID_DISTANCE_DEBUG)
+    {
+      //Serial.print("PidDistance : ");
+      Serial.print(pidDistance_st_g.reference_d);
+      Serial.print(", ");
+      Serial.print(mesureDistance_d);
+      Serial.print(", ");
+      Serial.print(pidDistance_st_g.error_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidDistance_st_g.previousError_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidDistance_st_g.kp_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidDistance_st_g.ki_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidDistance_st_g.kd_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidDistance_st_g.integral_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidDistance_st_g.derivative_d);
+      Serial.print(", ");
+      Serial.print(pidDistance_st_g.output_d);
+      Serial.println();
+    }
+
+    if (PID_ORIENTATION_DEBUG)
+    {
+      //Serial.print("PidOrientation : ");
+      Serial.print(pidOrientation_st_g.reference_d);
+      Serial.print(", ");
+      Serial.print(mesureOrientation_d);
+      Serial.print(", ");
+      Serial.print(pidOrientation_st_g.error_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidOrientation_st_g.previousError_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidOrientation_st_g.kp_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidOrientation_st_g.ki_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidOrientation_st_g.kd_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidOrientation_st_g.integral_d);
+      //    Serial.print(", ");
+      //    Serial.print(pidOrientation_st_g.derivative_d);
+      Serial.print(", ");
+      Serial.print(pidOrientation_st_g.output_d);
+      Serial.println();
+    }
 
     if (POSITION_MGR_DEBUG)
     {

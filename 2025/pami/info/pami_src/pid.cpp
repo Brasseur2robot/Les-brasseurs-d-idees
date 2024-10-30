@@ -13,9 +13,6 @@
 #define PID_DISTANCE_OUPTUT_SATURATION      200.0
 #define PID_ORIENTATION_OUPTUT_SATURATION   200.0
 
-#define PID_DISTANCE_DEBUG                  false
-#define PID_ORIENTATION_DEBUG               false
-
 /******************************************************************************
   Types declarations
 ******************************************************************************/
@@ -186,31 +183,6 @@ double PidUpdate(PidControllerSt * pid_pst, double mesure_d, bool timeMeasure_b)
   if (pid_pst->output_d < -PID_DISTANCE_OUPTUT_SATURATION)
   {
     pid_pst->output_d = -PID_DISTANCE_OUPTUT_SATURATION;
-  }
-
-  if (PID_DISTANCE_DEBUG)
-  {
-    //Serial.print("Distance : ");
-    Serial.print(pid_pst->reference_d);
-    Serial.print(", ");
-    Serial.print(mesure_d);
-    Serial.print(", ");
-    Serial.print(pid_pst->error_d);
-    //    Serial.print(", ");
-    //    Serial.print(pid_pst->previousError_d);
-    //    Serial.print(", ");
-    //    Serial.print(pid_pst->kp_d);
-    //    Serial.print(", ");
-    //    Serial.print(pid_pst->ki_d);
-    //    Serial.print(", ");
-    //    Serial.print(pid_pst->kd_d);
-    //    Serial.print(", ");
-    //    Serial.print(pid_pst->integral_d);
-    //    Serial.print(", ");
-    //    Serial.print(pid_pst->derivative_d);
-    Serial.print(", ");
-    Serial.print(pid_pst->output_d);
-    Serial.println();
   }
 
   if (timeMeasure_b == true)
