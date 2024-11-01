@@ -56,7 +56,7 @@ void TrajectoryMgrInit()
    @result    none
 
 */
-void TrajectoryMgrUpdate()
+void TrajectoryMgrUpdate(bool timeMeasure_b)
 {
   uint32_t currentTime_u32 = millis();
   static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution */
@@ -68,7 +68,8 @@ void TrajectoryMgrUpdate()
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (TRAJECTORY_UPDATE_PERIOD_S * 1000.0) )
   {
-    if (DEBUG_TIME)
+    /* Measure execution time if needed */
+    if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
     /* Actual code */
@@ -79,7 +80,7 @@ void TrajectoryMgrUpdate()
     }
 
     /* Measure execution time if needed */
-    if (DEBUG_TIME)
+    if (timeMeasure_b)
     {
       durationMeasure_u32 = micros() - durationMeasureStart_u32;
       Serial.print("Trajectory loop lasted ");

@@ -19,13 +19,6 @@ typedef enum
   RAMP_STATE_FINISHED = 6u, /* Ramp */
 } RampStateEn; /* Enumeration used to select the ramp state */
 
-typedef enum
-{
-  RAMP_PROFIL_NONE = 0u, /* No profile selected */
-  RAMP_PROFIL_TRIANGLE = 1u, /* Ramp of triangular profil */
-  RAMP_PROFIL_TRAPEZE = 2u, /* Ramp of trapezoïdal profil */
-} RampProfilEn; /* Enumeration used to select the ramp profil */
-
 typedef struct
 {
   uint32_t timeStartMs_u32;

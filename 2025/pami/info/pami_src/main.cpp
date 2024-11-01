@@ -71,5 +71,5 @@ void setup() {
 void loop() {
   LedUpdate(false);
   PositionMgrUpdate();
-  TrajectoryMgrUpdate();
+  TrajectoryMgrUpdate(false);
 }

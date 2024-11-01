@@ -5,7 +5,7 @@
  * Function Declarations
  ******************************************************************************/
 void TrajectoryMgrInit();
-void TrajectoryMgrUpdate();
+void TrajectoryMgrUpdate(bool timeMeasure_b);
 
 void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d, bool direction_b);
 
