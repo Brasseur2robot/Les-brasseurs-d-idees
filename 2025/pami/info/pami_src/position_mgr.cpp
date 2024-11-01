@@ -35,10 +35,11 @@ typedef enum
 /******************************************************************************
    Global Variables Declarations
  ******************************************************************************/
-uint8_t positionMgrStatus_u8_g;
+//uint8_t positionMgrStatus_u8_g;
 int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
 PositionManagerMvtTypeEn positionMgrMvtType_en_g;
+PositionManagerStateEn positionMgrState_en_g;
 
 PidControllerSt pidDistance_st_g;
 PidControllerSt pidOrientation_st_g;
@@ -66,7 +67,8 @@ RampParametersSt rampOrientation_st_g;
 void PositionMgrInit()
 {
   positionMgrMvtType_en_g = MVT_TYPE_NONE;
-  positionMgrStatus_u8_g = 1;
+  //positionMgrStatus_u8_g = 1;
+  positionMgrState_en_g = POSITION_STATE_NONE;
 
   /* init pid submodule */
   PidInit(&pidDistance_st_g);
@@ -159,19 +161,19 @@ void PositionMgrUpdate()
         consigneOrientation_d = 0.0;
         break;
     }
-
+    Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
     ObstacleSensorSetThreshold( (uint16_t)(1.2 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
     if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
     {
       if (emergencyActivated_b == false )
-        positionMgrStatus_u8_g = 1;
+        positionMgrState_en_g = POSITION_STATE_STOPPED;
       else
-        positionMgrStatus_u8_g = 0;
+        positionMgrState_en_g = POSITION_STATE_EMERGENCY;
     }
     else
     {
-      positionMgrStatus_u8_g = 0;
+      positionMgrState_en_g = POSITION_STATE_MOVING;
     }
 
     /* Sets the new reference on the pids */
@@ -294,7 +296,7 @@ void PositionMgrUpdate()
 */
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 {
-  positionMgrStatus_u8_g = 0;
+  positionMgrState_en_g = POSITION_STATE_MOVING;
 }
 
 /**
@@ -308,7 +310,8 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 */
 void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 {
-  positionMgrStatus_u8_g = 0;
+  //positionMgrStatus_u8_g = 0;
+  positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
 
   startDistance_i32_g = OdometryGetDistanceTop();
@@ -332,7 +335,8 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 */
 void PositionMgrGotoOrientationDegree(double theta_deg)
 {
-  positionMgrStatus_u8_g = 0;
+  //positionMgrStatus_u8_g = 0;
+  positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_ORIENTATION;
 
   startDistance_i32_g = OdometryGetDistanceTop();
@@ -350,9 +354,10 @@ void PositionMgrGotoOrientationDegree(double theta_deg)
    @result    positionMgrStatus_u8_g
 
 */
-uint8_t PositionMgrGetStatus()
+PositionManagerStateEn PositionMgrGetState()
 {
-  return positionMgrStatus_u8_g;
+  //return positionMgrStatus_u8_g;
+  return positionMgrState_en_g;
 }
 
 /**

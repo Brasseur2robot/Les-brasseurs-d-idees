@@ -73,10 +73,21 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
     /* Actual code */
-    if (PositionMgrGetStatus() == 1)
+    switch (PositionMgrGetState())
     {
-      TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
-      trajectoryIndex_u8 ++;
+      case POSITION_STATE_MOVING:
+        /* Nothing to do */
+        break;
+      case POSITION_STATE_STOPPED:
+        /* Next move */
+        TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
+        trajectoryIndex_u8 ++;
+        break;
+      case POSITION_STATE_EMERGENCY:
+        /* What to do ?*/
+        break;
+      default:
+        break;
     }
 
     /* Measure execution time if needed */

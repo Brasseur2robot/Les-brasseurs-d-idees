@@ -13,7 +13,7 @@
    Constants and Macros
  ******************************************************************************/
 #define OBSTACLE_SENSOR_THRESHOLD_MM        250   // [mm]
-#define OBSTACLE_SENSOR_THRESHOLD_MINI_MM   40    // [mm]
+#define OBSTACLE_SENSOR_THRESHOLD_MINI_MM   100   // [mm]
 #define OBSTACLE_SENSOR_THRESHOLD_MAXI_MM   600   // [mm]
 #define DEBUG_OBSTACLE                      false
 
