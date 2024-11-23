@@ -25,6 +25,11 @@
    Global Variables Declarations
  ******************************************************************************/
 
+struct pythagoraResult {
+    double distance;
+    double angle;
+};
+
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
@@ -45,6 +50,77 @@
 void TrajectoryMgrInit()
 {
 
+}
+
+void Trajectory(uint8_t plan)
+{
+  static bool trajectoryFinished_b = false;
+
+  if (plan == 1)
+  {
+    /* Start in {(0,1750);(50,1850)} */
+    /* End at (950,1600) */
+
+    pythagoraResult pythagora = TrajectoryPythagora(25.0, 1800.0, 650.0, 1600.0);
+
+    PositionMgrGotoOrientationDegree(pythagora.angle);
+    PositionMgrGotoDistanceMeter(pythagora.distance);
+    PositionMgrGotoOrientationDegree(-pythagora.angle);
+
+    PositionMgrGotoDistanceMeter(0.3, true);
+  } 
+  
+  else if (plan == 2) {
+    /* Start in square {(0,1650);(50;1750)} */
+    /* End at (1150,1450) */
+
+    PositionMgrGotoDistanceMeter(0.1, true);
+
+    pythagoraResult pythagora = TrajectoryPythagora(125.0, 1700.0, 500.0, 1450.0);
+
+    PositionMgrGotoOrientationDegree(pythagora.angle);
+    PositionMgrGotoDistanceMeter(pythagora.distance, true);
+    PositionMgrGotoOrientationDegree(-pythagora.angle);
+
+    PositionMgrGotoDistanceMeter(0.65, true);
+  }
+
+  else {
+    /* Start in square {(0,1550);(50;1650)} */
+    /* End at  */
+
+    pythagoraResult pythagora = TrajectoryPythagora(25.0, 1600.0, 500.0, 1450.0);
+
+    PositionMgrGotoOrientationDegree(pythagora.degree);
+    PositionMgrGotoDistanceMeter(pythagora.distance, true);
+    PositionMgrGotoOrientationDegree(-pythagora.degree);
+
+    /* At (2000,1450)*/
+    pythagoraResult pythagora = TrajectoryPythagora(2000.0, 1450.0, 1600.0, 2150.0);
+
+    PositionMgrGotoOrientationDegree(pythagora.degree);
+    PositionMgrGotoDistanceMeter(pythagora.distance, true);
+  }
+}
+
+/**
+  @brief    This function calculate the distance and the angle to move on the hypothenuse
+
+  @param    none
+
+  @result   none
+ */
+void TrajectoryPythagora(double x1, double y1, double x2, double y2)
+{
+    double height = y1 - y2;
+    double length = x2 - x1;
+
+    /* Basic pythagora */
+    double hypothenuse = sqrt(height ** 2 + length ** 2);
+    double alpha = acos(length / hypothenuse);
+
+    /* Converting millimeter in meter */
+    return pythagoraResult {hypothenuse / 1000, alpha};
 }
 
 /**
@@ -80,11 +156,10 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
         break;
       case POSITION_STATE_STOPPED:
         /* Next move */
-        TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
-        trajectoryIndex_u8 ++;
+        Trajectory(1);
         break;
       case POSITION_STATE_EMERGENCY:
-        /* What to do ?*/
+        /* What to do ?*/q
         break;
       default:
         break;
