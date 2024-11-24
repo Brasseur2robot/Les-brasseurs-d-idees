@@ -69,6 +69,8 @@ void setup() {
 }
 
 void loop() {
+  //MotorTest();
+  //OdometryEncoderTest();
   LedUpdate(false);
   PositionMgrUpdate();
   TrajectoryMgrUpdate(false);

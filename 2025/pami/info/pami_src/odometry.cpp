@@ -177,7 +177,7 @@ void OdometryUpdate(bool timeMeasure_b)
     Serial.print(", orientMoyRad = ");
     Serial.print(orient_moy_radian);
   }
-  
+
   if (timeMeasure_b == true)
   {
     durationMeasure_u32 = micros() - durationMeasureStart_u32;
@@ -185,6 +185,17 @@ void OdometryUpdate(bool timeMeasure_b)
     Serial.print(durationMeasure_u32);
     Serial.print(" us, ");
   }
+}
+
+void OdometryEncoderTest()
+{
+  int32_t distanceLeft = encoderLeft.read();
+  int32_t distanceRight = encoderRight.read();
+  Serial.print("Encoder Left : ");
+  Serial.print(distanceLeft);
+  Serial.print(", Encoder Right : ");
+  Serial.print(distanceRight);
+  Serial.println();
 }
 
 double MeterToTop(double meter)

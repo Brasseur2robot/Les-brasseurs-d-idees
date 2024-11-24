@@ -13,6 +13,7 @@ double OdometryGetXMeter();
 double OdometryGetYMeter();
 double OdometryGetThetaRad();
 void OdometryUpdate(bool timeMeasure_b);
+void OdometryEncoderTest();
 
 double MeterToTop(double meter);
 double TopToMeter(double top);
