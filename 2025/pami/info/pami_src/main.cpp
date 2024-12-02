@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "config.h"
 //#include "customTimer.h"
+#include "ihm.h"
 #include "led.h"
 #include "motor.h"
 #include "obstacle_sensor.h"
@@ -48,6 +49,7 @@ void setup() {
   pinMode(SWITCH_GROUND, INPUT_PULLUP);
 
   /* Init de tous les modules */
+  IhmInit();
   LedInit();
   MotorInit();
   ObstacleSensorInit();
@@ -71,6 +73,7 @@ void setup() {
 void loop() {
   //MotorTest();
   //OdometryEncoderTest();
+  IhmUpdate(false);
   LedUpdate(false);
   PositionMgrUpdate();
   TrajectoryMgrUpdate(false);
