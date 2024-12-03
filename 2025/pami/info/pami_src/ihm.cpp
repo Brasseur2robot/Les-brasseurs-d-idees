@@ -7,6 +7,8 @@
 #include <Adafruit_SSD1306.h>
 #include "config.h"
 #include "ihm.h"
+#include "match_mgr.h"
+#include "motor.h"
 #include "obstacle_sensor.h"
 #include "odometry.h"
 #include "position_mgr.h"
@@ -16,16 +18,16 @@
  ******************************************************************************/
 #define SCREEN_WIDTH          128   /* OLED display width, in pixels */
 #define SCREEN_HEIGHT         64    /* OLED display height, in pixels */
-#define OLED_RESET            -1    /* Reset pin # (or -1 if sharing Arduino reset pin) */
 #define SCREEN_ADDRESS        0x3C  /* See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32 */
-#define IHM_UPDATE_PERIOD_S   0.1
+#define OLED_RESET            -1    /* Reset pin # (or -1 if sharing Arduino reset pin) */
+#define IHM_UPDATE_PERIOD_S   0.1   /* Refresh rate of the display 1/0.1 = 10fps */
 
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
-IhmColorEn robotColor_en;
-IhmDisplayScreenEn ihmDisplayScreen_en;
+IhmColorEn robotColor_en_g;
+IhmDisplayScreenEn ihmDisplayScreen_en_g;
 
 /******************************************************************************
    Functions Definitions
@@ -35,21 +37,20 @@ void IhmInit()
   attachInterrupt(digitalPinToInterrupt(SWITCH_MODE_PIN), IhmMode, FALLING);
   attachInterrupt(digitalPinToInterrupt(SWITCH_START_PIN), IhmColor, FALLING);
 
-  robotColor_en = IHM_COLOR_NONE;
-  ihmDisplayScreen_en = IHM_DISPLAY_SCREEN_MATCH;
+  robotColor_en_g = IHM_COLOR_NONE;
+  ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_MATCH;
 
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
     Serial.println("SSD1306 allocation failed");
     for (;;); /* Don't proceed, loop forever */
   }
-  /* Clear the buffer */
-  display.clearDisplay();
-  display.setRotation(2);
+  display.clearDisplay(); /* Clear the buffer */
+  display.setRotation(2); /* Rotate the screen 180° */
 }
 
 void IhmSetColor(IhmColorEn color_en)
 {
-  robotColor_en = color_en;
+  robotColor_en_g = color_en;
 }
 
 void IhmUpdate(bool timeMeasure_b)
@@ -72,21 +73,31 @@ void IhmUpdate(bool timeMeasure_b)
     display.clearDisplay();
 
     /* Select which screen to draw */
-    switch (ihmDisplayScreen_en)
+    switch (ihmDisplayScreen_en_g)
     {
       case IHM_DISPLAY_SCREEN_NONE:
         /*Draw none */
+        IhmDrawScreenNone();
         break;
 
       case IHM_DISPLAY_SCREEN_MATCH:
         IhmDrawScreenMatch();
         break;
 
-      case IHM_DISPLAY_SCREEN_DEBUG:
-        IhmDrawScreenDebug();
+      case IHM_DISPLAY_SCREEN_SENSOR_DEBUG:
+        IhmDrawScreenSensorDebug();
+        break;
+
+      case IHM_DISPLAY_SCREEN_MOTOR_DEBUG:
+        IhmDrawScreenMotorDebug();
+        break;
+
+      case IHM_DISPLAY_SCREEN_CONTROL_DEBUG:
+        IhmDrawScreenControlDebug();
         break;
 
       default:
+        IhmDrawScreenNone();
         break;
     }
 
@@ -115,10 +126,10 @@ void IhmDrawScreenMatch()
   display.println();
 
   display.setTextColor(SSD1306_WHITE);  /* Draw white text */
-  switch (robotColor_en)
+  switch (robotColor_en_g)
   {
     case IHM_COLOR_NONE:
-      display.print(F("No color"));
+      display.print(F("Color?"));
       break;
 
     case IHM_COLOR_BLUE:
@@ -130,13 +141,17 @@ void IhmDrawScreenMatch()
       break;
 
     default:
+      display.print(F("No Color"));
       break;
   }
   display.println();
 
   display.setTextSize(1);               /* Normal 1:1 pixel scale */
   display.setTextColor(SSD1306_WHITE);  /* Draw white text */
+  
   display.print(F("Chrono : "));
+  display.print(MatchMgrGetElapsedTimeS());
+  display.print(F(" s"));
   display.println();
 
   display.print(F("Pos: "));
@@ -183,24 +198,24 @@ void IhmDrawScreenMatch()
   display.println();
 }
 
-void IhmDrawScreenDebug()
+void IhmDrawScreenSensorDebug()
 {
   display.setCursor(0, 0);              /* Start at top-left corner */
 
   display.setTextSize(2);
   display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  /* Draw inverted text */
-  display.print(F(" - Debug -"));
+  display.print(F("Dbg*Sensor"));
   display.println();
 
   display.setTextSize(1);               /* Normal 1:1 pixel scale */
   display.setTextColor(SSD1306_WHITE);  /* Draw white text */
 
   display.print(F("Reed switch :   "));
-  display.print(digitalRead(SWITCH_REED));
+  display.print(digitalRead(SWITCH_REED_PIN));
   display.println();
 
   display.print(F("Ground switch : "));
-  display.print(digitalRead(SWITCH_GROUND));
+  display.print(digitalRead(SWITCH_GROUND_PIN));
   display.println();
 
   display.print(F("Start switch :  "));
@@ -212,26 +227,115 @@ void IhmDrawScreenDebug()
   display.println();
 }
 
+void IhmDrawScreenMotorDebug()
+{
+  display.setCursor(0, 0);              /* Start at top-left corner */
+
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  /* Draw inverted text */
+  display.print(F("Dbg*Motor "));
+  display.println();
+
+  display.setTextSize(1);               /* Normal 1:1 pixel scale */
+  display.setTextColor(SSD1306_WHITE);  /* Draw white text */
+
+  display.print(F("Left motor : "));
+  display.print(motorLeftGetSpeed());
+  display.println();
+
+  display.print(F("Right motor : "));
+  display.print(motorRightGetSpeed());
+  display.println();
+
+  display.print(F("Left Encoder : "));
+  display.print(OdometryGetLeftDistanceTop());
+  display.println();
+
+  display.print(F("Right Encoder : "));
+  display.print(OdometryGetRightDistanceTop());
+  display.println();
+}
+
+void IhmDrawScreenControlDebug()
+{
+  display.setCursor(0, 0);              /* Start at top-left corner */
+
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  /* Draw inverted text */
+  display.print(F("Dbg*Cntrl "));
+  display.println();
+
+  display.setTextSize(1);               /* Normal 1:1 pixel scale */
+  display.setTextColor(SSD1306_WHITE);  /* Draw white text */
+
+  display.print(F("Left pid :  "));
+  display.print("NA");
+  display.println();
+
+  display.print(F("Right pid : "));
+  display.print("NA");
+  display.println();
+}
+
+void IhmDrawScreenNone()
+{
+  display.setCursor(0, 0);              /* Start at top-left corner */
+
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  /* Draw inverted text */
+  display.print(F(" -  404  -"));
+  display.println();
+  
+  display.setTextSize(1);               /* Normal 1:1 pixel scale */
+  display.setTextColor(SSD1306_WHITE);  /* Draw white text */
+  display.print(F("No screen attached"));
+}
+
 void IhmMode()
 {
-  if (ihmDisplayScreen_en == IHM_DISPLAY_SCREEN_MATCH)
+  static uint8_t index_u8 = 1;
+
+  index_u8 += 1;
+  if (index_u8 > IHM_DISPLAY_SCREEN_NUMBER)
   {
-    ihmDisplayScreen_en = IHM_DISPLAY_SCREEN_DEBUG;
+    index_u8 = 1;
   }
-  else
+
+  switch (index_u8)
   {
-    ihmDisplayScreen_en = IHM_DISPLAY_SCREEN_MATCH;
+    case 1:
+      ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_MATCH;
+      break;
+
+    case 2:
+      ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_SENSOR_DEBUG;
+      break;
+
+    case 3:
+      ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_MOTOR_DEBUG;
+      break;
+
+    case 4:
+      ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_CONTROL_DEBUG;
+      break;
+      
+    default:
+        break;
   }
 }
 
 void IhmColor()
 {
-  if (robotColor_en == IHM_COLOR_BLUE)
+  /* Change color only if match not started */
+  if (MatchMgrIsOn() == false)
   {
-    robotColor_en = IHM_COLOR_YELLOW;
-  }
-  else
-  {
-    robotColor_en = IHM_COLOR_BLUE;
+    if (robotColor_en_g == IHM_COLOR_BLUE)
+    {
+      robotColor_en_g = IHM_COLOR_YELLOW;
+    }
+    else
+    {
+      robotColor_en_g = IHM_COLOR_BLUE;
+    }
   }
 }

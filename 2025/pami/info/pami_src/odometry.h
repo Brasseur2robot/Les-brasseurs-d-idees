@@ -5,6 +5,8 @@
  * Function Declarations
  ******************************************************************************/
 void OdometryInit();
+int32_t OdometryGetLeftDistanceTop();
+int32_t OdometryGetRightDistanceTop();
 int32_t OdometryGetXTop();
 int32_t OdometryGetYTop();
 int32_t OdometryGetDistanceTop();

@@ -33,6 +33,8 @@
 Encoder encoderLeft(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
 Encoder encoderRight(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
 
+int32_t distanceLeft_i32_g;
+int32_t distanceRight_i32_g;
 /* Pose of the robot in meter and radians*/
 int32_t odometryX_i32_g;
 int32_t odometryY_i32_g;
@@ -64,6 +66,16 @@ void OdometryInit()
   odometryDistanceTop_i32_g = 0L;
   odometryOrientationTop_i32_g = 0L;
   odometryThetaRad_d_g = 0.0;
+}
+
+int32_t OdometryGetLeftDistanceTop()
+{
+  return distanceLeft_i32_g;
+}
+
+int32_t OdometryGetRightDistanceTop()
+{
+  return distanceRight_i32_g;
 }
 
 int32_t OdometryGetDistanceTop()
@@ -129,11 +141,11 @@ void OdometryUpdate(bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   // Récupérons les mesures des codeurs
-  int32_t distanceLeft = encoderLeft.read() * FACTOR_WHEEL_LEFT;
-  int32_t distanceRight = encoderRight.read() * FACTOR_WHEEL_RIGHT;
+  distanceLeft_i32_g = encoderLeft.read() * FACTOR_WHEEL_LEFT;
+  distanceRight_i32_g = encoderRight.read() * FACTOR_WHEEL_RIGHT;
 
-  odometryDistanceTop_i32_g = ( distanceRight + distanceLeft ) / 2; // distance en pas parcourue à tn
-  int32_t orient = orient_init + (distanceRight - distanceLeft); //correspond à qn mais en pas
+  odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
+  int32_t orient = orient_init + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
   delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient - orient_precedente; // correspond à Dqn mais en pas
 
@@ -163,9 +175,9 @@ void OdometryUpdate(bool timeMeasure_b)
   if (ODOMETRY_DEBUG)
   {
     Serial.print("d gauche = ");
-    Serial.print(distanceLeft);
+    Serial.print(distanceLeft_i32_g);
     Serial.print(", d droite = ");
-    Serial.print(distanceRight);
+    Serial.print(distanceRight_i32_g);
     Serial.print(", orientation = ");
     Serial.print(orient);
     Serial.print(", Delta orient = ");

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "config.h"
 #include "led.h"
+#include "match_mgr.h"
 #include "position_mgr.h"
 #include "trajectory_mgr.h"
 
@@ -73,21 +74,24 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
     /* Actual code */
-    switch (PositionMgrGetState())
+    if (MatchMgrIsOn() == true)
     {
-      case POSITION_STATE_MOVING:
-        /* Nothing to do */
-        break;
-      case POSITION_STATE_STOPPED:
-        /* Next move */
-        TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
-        trajectoryIndex_u8 ++;
-        break;
-      case POSITION_STATE_EMERGENCY:
-        /* What to do ?*/
-        break;
-      default:
-        break;
+      switch (PositionMgrGetState())
+      {
+        case POSITION_STATE_MOVING:
+          /* Nothing to do */
+          break;
+        case POSITION_STATE_STOPPED:
+          /* Next move */
+          TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
+          trajectoryIndex_u8 ++;
+          break;
+        case POSITION_STATE_EMERGENCY:
+          /* What to do ?*/
+          break;
+        default:
+          break;
+      }
     }
 
     /* Measure execution time if needed */

@@ -9,8 +9,10 @@ void MotorStop();
 void MotorTest();
 void MotorLeftBrake();
 void MotorRightBrake();
-void MotorLeftSetSpeed(double motorSpeed_u8);
-void MotorRightSetSpeed(double motorSpeed_8);
+void MotorLeftSetSpeed(double motorSpeed_d);
+void MotorRightSetSpeed(double motorSpeed_d);
+int16_t motorLeftGetSpeed();
+int16_t motorRightGetSpeed();
 
 //void setPwmFrequency(int pin, int divisor);
 

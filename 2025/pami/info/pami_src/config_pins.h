@@ -10,8 +10,8 @@
 #define LED5_PIN              11
 
 /* Switch pins */
-#define SWITCH_REED           A6
-#define SWITCH_GROUND         A7
+#define SWITCH_REED_PIN       A6
+#define SWITCH_GROUND_PIN     A7
 #define SWITCH_START_PIN      2
 #define SWITCH_MODE_PIN       3
 

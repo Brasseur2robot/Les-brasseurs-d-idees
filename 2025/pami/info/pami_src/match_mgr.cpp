@@ -3,18 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
-//#include "customTimer.h"
-#include "ihm.h"
-#include "led.h"
-#include "motor.h"
 #include "match_mgr.h"
-#include "obstacle_sensor.h"
-#include "odometry.h"
-#include "pid.h"
-#include "position_mgr.h"
-#include "ramp.h"
-#include "trajectory_mgr.h"
-#include "Wire.h"
 
 /******************************************************************************
    Constants and Macros
@@ -35,49 +24,54 @@
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
+uint32_t matchStartTimeMs_u32;
+uint32_t matchElapsedTimeMs_u32;
+bool matchStarted_b;
 
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
-void setup() {
-  Serial.begin(SERIAL_SPEED);
-  Wire.begin();
-  Wire.setClock(400000UL);
+void MatchMgrInit()
+{
+  matchStartTimeMs_u32 = 0;
+  matchElapsedTimeMs_u32 = 0;
 
-  pinMode(SWITCH_START_PIN, INPUT_PULLUP);
-  pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
-  pinMode(SWITCH_REED_PIN, INPUT_PULLUP);
-  pinMode(SWITCH_GROUND_PIN, INPUT_PULLUP);
-
-  /* Init de tous les modules */
-  IhmInit();
-  LedInit();
-  MatchMgrInit();
-  MotorInit();
-  ObstacleSensorInit();
-  OdometryInit();
-  PositionMgrInit();
-  TrajectoryMgrInit();
-
-  /* On attend le bouton le top départ */
-  /*while (digitalRead(SWITCH_REED_PIN) == 0)
-  {
-    LedAnimK2000();
-  }
-  LedAnimAllOff();
-  
-  LedAnimStart(); // Blocking 5s before start
-  LedAnimAllOff();*/
-
-  //CustomTimerInit();
+  /* Set up the interrupt on the reed switch to start the match */
+  attachInterrupt(digitalPinToInterrupt(SWITCH_REED_PIN), MatchMgrStartMatch, RISING);
 }
 
-void loop() {
-  //MotorTest();
-  //OdometryEncoderTest();
-  IhmUpdate(false);
-  LedUpdate(false);
-  MatchMgrUpdate();
-  PositionMgrUpdate();
-  TrajectoryMgrUpdate(false);
+void MatchMgrUpdate()
+{
+  if (matchStarted_b == true)
+  {
+    /* Compute elapsed time */
+    matchElapsedTimeMs_u32 = millis() - matchStartTimeMs_u32;
+
+    /* Test if it is time to end */
+    if (matchElapsedTimeMs_u32 >= DUREE_MATCH_MS)
+    {
+      /* Proceed to end */
+      //Serial.println("Match end");
+      matchStarted_b = false;
+    }
+  }
+}
+
+void MatchMgrStartMatch()
+{
+  /* Log the start time */
+  matchStartTimeMs_u32 = millis();
+  /* Record the state */
+  matchStarted_b = true;
+  //Serial.println("Match Start");
+}
+
+double MatchMgrGetElapsedTimeS()
+{
+  return ((double)matchElapsedTimeMs_u32 / 1000.0);
+}
+
+bool MatchMgrIsOn()
+{
+  return matchStarted_b;
 }
