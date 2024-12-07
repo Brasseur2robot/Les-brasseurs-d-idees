@@ -96,6 +96,10 @@ void IhmUpdate(bool timeMeasure_b)
         IhmDrawScreenControlDebug();
         break;
 
+      case IHM_DISPLAY_SCREEN_LOGO:
+        IhmDrawScreenInit();
+        break;
+
       default:
         IhmDrawScreenNone();
         break;
@@ -148,7 +152,7 @@ void IhmDrawScreenMatch()
 
   display.setTextSize(1);               /* Normal 1:1 pixel scale */
   display.setTextColor(SSD1306_WHITE);  /* Draw white text */
-  
+
   display.print(F("Chrono : "));
   display.print(MatchMgrGetElapsedTimeS());
   display.print(F(" s"));
@@ -277,6 +281,18 @@ void IhmDrawScreenControlDebug()
   display.println();
 }
 
+void IhmDrawScreenInit()
+{
+  display.setCursor(0, 0);              /* Start at top-left corner */
+
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  /* Draw inverted text */
+  display.print(F(" Init... "));
+  display.println();
+
+  IhmDrawLogo();
+}
+
 void IhmDrawScreenNone()
 {
   display.setCursor(0, 0);              /* Start at top-left corner */
@@ -285,7 +301,7 @@ void IhmDrawScreenNone()
   display.setTextColor(SSD1306_BLACK, SSD1306_WHITE);  /* Draw inverted text */
   display.print(F(" -  404  -"));
   display.println();
-  
+
   display.setTextSize(1);               /* Normal 1:1 pixel scale */
   display.setTextColor(SSD1306_WHITE);  /* Draw white text */
   display.print(F("No screen attached"));
@@ -318,9 +334,13 @@ void IhmMode()
     case 4:
       ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_CONTROL_DEBUG;
       break;
-      
+
+    case 5:
+      ihmDisplayScreen_en_g = IHM_DISPLAY_SCREEN_LOGO;
+      break;
+
     default:
-        break;
+      break;
   }
 }
 
@@ -338,4 +358,11 @@ void IhmColor()
       robotColor_en_g = IHM_COLOR_BLUE;
     }
   }
+}
+
+void IhmDrawLogo()
+{
+  display.drawBitmap( (display.width()  - LOGO_WIDTH ) / 2,
+                      (display.height() - LOGO_HEIGHT) / 2,
+                      logo_bmp, LOGO_WIDTH, LOGO_HEIGHT, 1);
 }

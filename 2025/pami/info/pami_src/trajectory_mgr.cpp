@@ -78,16 +78,23 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
     {
       switch (PositionMgrGetState())
       {
+        case POSITION_STATE_NONE:
+          /* No state */
+          Serial.println("No state");
+          break;
         case POSITION_STATE_MOVING:
           /* Nothing to do */
+          Serial.println("Moving");
           break;
         case POSITION_STATE_STOPPED:
           /* Next move */
+          Serial.println("Next move");
           TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
           trajectoryIndex_u8 ++;
           break;
         case POSITION_STATE_EMERGENCY:
           /* What to do ?*/
+          Serial.println("Emergency");
           break;
         default:
           break;
