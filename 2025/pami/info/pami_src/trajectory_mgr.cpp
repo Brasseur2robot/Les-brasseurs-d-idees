@@ -52,54 +52,130 @@ void TrajectoryMgrInit()
 
 }
 
-void Trajectory(uint8_t plan)
+/**
+   @brief     This function define the differents trajectory
+
+
+   @param     plan, side (0 -> yellow, 1 -> blue)
+
+   @result    none
+
+*/
+void Trajectory(uint8_t plan, uint8_t side, uint8_t trajectoryIndex_u8)
 {
+  /*All the robots are side by side*/
   static bool trajectoryFinished_b = false;
 
   if (plan == 1)
   {
     /* Start in {(0,1750);(50,1850)} */
-    /* End at (950,1600) */
+    /* End at (950,1500) */
 
-    pythagoraResult pythagora = TrajectoryPythagora(25.0, 1800.0, 650.0, 1600.0);
+    pythagoraResult pythagora = TrajectoryPythagora(25.0, 1800.0, 650.0, 1500.0);
 
-    PositionMgrGotoOrientationDegree(pythagora.angle);
-    PositionMgrGotoDistanceMeter(pythagora.distance);
-    PositionMgrGotoOrientationDegree(-pythagora.angle);
+    switch (trajectoryIndex_u8) {
 
-    PositionMgrGotoDistanceMeter(0.3, true);
+      case 0:
+        PositionMgrGotoOrientationDegree(pythagora.angle);
+        break;
+
+      case 1:
+        PositionMgrGotoDistanceMeter(pythagora.distance);
+        break;
+
+      case 2:
+        PositionMgrGotoOrientationDegree(-pythagora.angle);
+        break;
+
+      case 3:
+        PositionMgrGotoDistanceMeter(0.3, true);
+        break;
+
+      case 4:
+        break;
+    }
   } 
   
   else if (plan == 2) {
     /* Start in square {(0,1650);(50;1750)} */
     /* End at (1150,1450) */
 
-    PositionMgrGotoDistanceMeter(0.1, true);
-
     pythagoraResult pythagora = TrajectoryPythagora(125.0, 1700.0, 500.0, 1450.0);
 
-    PositionMgrGotoOrientationDegree(pythagora.angle);
-    PositionMgrGotoDistanceMeter(pythagora.distance, true);
-    PositionMgrGotoOrientationDegree(-pythagora.angle);
+    switch (trajectoryIndex_u8) {
 
-    PositionMgrGotoDistanceMeter(0.65, true);
+      case 0: 
+        PositionMgrGotoDistanceMeter(0.1, true);
+        break;
+
+      case 1:
+        PositionMgrGotoOrientationDegree(pythagora.angle);
+        break;
+
+      case 2:
+        PositionMgrGotoDistanceMeter(pythagora.distance, true);
+        break;
+      
+      case 3:
+        PositionMgrGotoOrientationDegree(-pythagora.angle);
+        break;
+
+      case 4:
+        PositionMgrGotoDistanceMeter(0.65, true);
+        break;
+    }
   }
 
-  else {
+  else if (plan == 3) {
     /* Start in square {(0,1550);(50;1650)} */
-    /* End at  */
+    /* End at (2050,1450)*/
 
     pythagoraResult pythagora = TrajectoryPythagora(25.0, 1600.0, 500.0, 1450.0);
 
-    PositionMgrGotoOrientationDegree(pythagora.degree);
-    PositionMgrGotoDistanceMeter(pythagora.distance, true);
-    PositionMgrGotoOrientationDegree(-pythagora.degree);
+    switch (trajectoryIndex_u8) {
 
-    /* At (2000,1450)*/
-    pythagoraResult pythagora = TrajectoryPythagora(2000.0, 1450.0, 1600.0, 2150.0);
+      case 0: 
+        PositionMgrGotoOrientationDegree(pythagora.degree);
+        break;
+      
+      case 1:
+        PositionMgrGotoDistanceMeter(pythagora.distance, true);
+        break;
 
-    PositionMgrGotoOrientationDegree(pythagora.degree);
-    PositionMgrGotoDistanceMeter(pythagora.distance, true);
+      case 2:
+        PositionMgrGotoOrientationDegree(-pythagora.degree);
+        break;
+      
+      case 3:
+        PositionMgrGotoDistanceMeter(1.55, true);
+        break;
+
+      case 4:
+        break;
+    }
+  }
+
+  else {
+    /* Start in square {(0,1850);(50,1950)}*/
+    /* End at (1250,1575)*/
+
+    switch (trajectoryIndex_u8) {
+
+      case 0:
+        PositionMgrGotoDistanceMeter(1.25, true);
+        break;
+
+      case 1:
+        PositionMgrGotoOrientationDegree(90.0);
+        break;
+      
+      case 2:
+        PositionMgrGotoDistanceMeter(0.325, true);
+        break;
+      
+      case 3,4:
+        break;
+    }
   }
 }
 
@@ -156,10 +232,11 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
         break;
       case POSITION_STATE_STOPPED:
         /* Next move */
-        Trajectory(1);
+        Trajectory(1, 0, trajectoryIndex_u8);
+        trajectoryIndex_u8++;
         break;
       case POSITION_STATE_EMERGENCY:
-        /* What to do ?*/q
+        /* What to do ?*/
         break;
       default:
         break;
