@@ -124,7 +124,7 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   {
     Serial.print("Left Motor Command : ");
     if (motorSpeed_d > 0)
-      Serial.print(int16_t(255 - motorSpeed_d));
+      Serial.print(int16_t(motorSpeed_d));
     else
       Serial.print(int16_t(-motorSpeed_d));
     Serial.println();
@@ -179,7 +179,7 @@ void MotorRightSetSpeed(double motorSpeed_d)
   {
     Serial.print("Right Motor Command : ");
     if (motorSpeed_d > 0)
-      Serial.print(int16_t(255 - motorSpeed_d));
+      Serial.print(int16_t(motorSpeed_d));
     else
       Serial.print(int16_t(-motorSpeed_d));
     Serial.println();

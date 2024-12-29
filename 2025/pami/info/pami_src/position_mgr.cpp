@@ -161,8 +161,8 @@ void PositionMgrUpdate()
         consigneOrientation_d = 0.0;
         break;
     }
-    Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
-    ObstacleSensorSetThreshold( (uint16_t)(1.2 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
+    // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
+    ObstacleSensorSetThreshold( (uint16_t)(1.7 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
     if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
     {
@@ -336,6 +336,7 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 void PositionMgrGotoOrientationDegree(double theta_deg)
 {
   //positionMgrStatus_u8_g = 0;
+  Serial.println(theta_deg);
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_ORIENTATION;
 

@@ -7,7 +7,7 @@
 #include "position_mgr.h"
 #include "trajectory_mgr.h"
 
-/******************************************************************************
+/********************************************************************Encoder**********
    Constants and Macros
  ******************************************************************************/
 #define TRAJECTORY_DEBUG            false
@@ -24,11 +24,6 @@
 /******************************************************************************
    Global Variables Declarations
  ******************************************************************************/
-
-struct pythagoraResult {
-    double distance;
-    double angle;
-};
 
 /******************************************************************************
    Module Global Variables
@@ -49,21 +44,21 @@ struct pythagoraResult {
 */
 void TrajectoryMgrInit()
 {
-
 }
 
 /**
    @brief     This function define the differents trajectory
 
 
-   @param     plan, side (0 -> yellow, 1 -> blue)
+   @param     plan, colorSide (1.0 -> yellow, -1.0 -> blue)
 
    @result    none
 
 */
-void Trajectory(uint8_t plan, uint8_t side, uint8_t trajectoryIndex_u8)
+void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
 {
   /*All the robots are side by side*/
+  static int8_t trajectoryIndexLast_i8 = -1;
   static bool trajectoryFinished_b = false;
 
   if (plan == 1)
@@ -71,110 +66,160 @@ void Trajectory(uint8_t plan, uint8_t side, uint8_t trajectoryIndex_u8)
     /* Start in {(0,1750);(50,1850)} */
     /* End at (950,1500) */
 
-    pythagoraResult pythagora = TrajectoryPythagora(25.0, 1800.0, 650.0, 1500.0);
+    pythagoraResult pythagora = {};
+    TrajectoryPythagora(25.0, 1800.0, 800.0, 1550.0, pythagora);
 
-    switch (trajectoryIndex_u8) {
+    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) ) 
+    {
+      if (TRAJECTORY_DEBUG == true)
+      {
+        Serial.println("Index : ");
+        Serial.println(trajectoryIndex_u8);
 
-      case 0:
-        PositionMgrGotoOrientationDegree(pythagora.angle);
-        break;
+        Serial.println("Angle rotation:");
+        Serial.println(pythagora.angle);
 
-      case 1:
-        PositionMgrGotoDistanceMeter(pythagora.distance);
-        break;
+        Serial.println("Distance déplacement:");
+        Serial.println(pythagora.distance);
+      }
 
-      case 2:
-        PositionMgrGotoOrientationDegree(-pythagora.angle);
-        break;
+      switch (trajectoryIndex_u8) 
+      {
+        case 0:
+          /* Serial.println("Première rotation"); */
+          PositionMgrGotoOrientationDegree(colorSide * -pythagora.angle);
+          break;
 
-      case 3:
-        PositionMgrGotoDistanceMeter(0.3, true);
-        break;
+        case 1:
+          /* Serial.println("Déplacement n°1"); */
+          PositionMgrGotoDistanceMeter(pythagora.distance, true);
+          break;
 
-      case 4:
-        break;
+        case 2:
+          trajectoryFinished_b = true;
+          break;
+
+        default:
+          break;
+      }
     }
   } 
   
-  else if (plan == 2) {
+  else if (plan == 2)
+  {
     /* Start in square {(0,1650);(50;1750)} */
-    /* End at (1150,1450) */
+    /* End at (1300,1300) */
 
-    pythagoraResult pythagora = TrajectoryPythagora(125.0, 1700.0, 500.0, 1450.0);
+    pythagoraResult pythagora = {};
+    TrajectoryPythagora(125.0, 1700.0, 1250.0, 1300.0, pythagora);
 
-    switch (trajectoryIndex_u8) {
+    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
+    {
+      switch (trajectoryIndex_u8) 
+      {
+        case 0: 
+          PositionMgrGotoDistanceMeter(0.1, true);
+          break;
 
-      case 0: 
-        PositionMgrGotoDistanceMeter(0.1, true);
-        break;
+        case 1:
+          PositionMgrGotoOrientationDegree(colorSide * -pythagora.angle);
+          break;
 
-      case 1:
-        PositionMgrGotoOrientationDegree(pythagora.angle);
-        break;
+        case 2:
+          PositionMgrGotoDistanceMeter(pythagora.distance, true);
+          break;
 
-      case 2:
-        PositionMgrGotoDistanceMeter(pythagora.distance, true);
-        break;
+        case 4:
+          trajectoryFinished_b = true;
+          break;
       
-      case 3:
-        PositionMgrGotoOrientationDegree(-pythagora.angle);
-        break;
-
-      case 4:
-        PositionMgrGotoDistanceMeter(0.65, true);
-        break;
+        default:
+          break;
+      }
     }
   }
 
-  else if (plan == 3) {
+  else if (plan == 3) 
+  {
     /* Start in square {(0,1550);(50;1650)} */
     /* End at (2050,1450)*/
 
-    pythagoraResult pythagora = TrajectoryPythagora(25.0, 1600.0, 500.0, 1450.0);
+    pythagoraResult pythagora = {};
+    TrajectoryPythagora(25.0, 1600.0, 1550.0, 1000.0, pythagora);
 
-    switch (trajectoryIndex_u8) {
+    pythagoraResult pythagora2 = {};
+    TrajectoryPythagora(1550.0, 1000.0, 1825.0, 1325.0, pythagora2);
 
-      case 0: 
-        PositionMgrGotoOrientationDegree(pythagora.degree);
-        break;
+    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) ) 
+    {
+      switch (trajectoryIndex_u8)
+      {
+          case 0: 
+          PositionMgrGotoOrientationDegree(colorSide * -pythagora.angle);
+          break;
       
-      case 1:
-        PositionMgrGotoDistanceMeter(pythagora.distance, true);
-        break;
+        case 1:
+          PositionMgrGotoDistanceMeter(pythagora.distance, true);
+          break;
 
-      case 2:
-        PositionMgrGotoOrientationDegree(-pythagora.degree);
-        break;
-      
-      case 3:
-        PositionMgrGotoDistanceMeter(1.55, true);
-        break;
+        case 2:
+          PositionMgrGotoOrientationDegree((colorSide * pythagora.angle) + (-1.0 * colorSide * pythagora2.angle));
+          break;
 
-      case 4:
-        break;
+        case 3:
+          PositionMgrGotoDistanceMeter(pythagora2.distance, true);
+          break;
+
+        case 4:
+          trajectoryFinished_b = true;
+          break;
+
+        default:
+          break;
+        /* case 0:
+          Serial.print("asser 0");
+          PositionMgrGotoDistanceMeter(2.0, true);
+          break;
+
+        default:
+          trajectoryFinished_b = true;
+          break; */
+      }
     }
   }
 
-  else {
+  else
+  {
     /* Start in square {(0,1850);(50,1950)}*/
     /* End at (1250,1575)*/
 
-    switch (trajectoryIndex_u8) {
+    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) ) 
+    {
+      switch (trajectoryIndex_u8) 
+      {
+        case 0:
+          PositionMgrGotoDistanceMeter(1.25, true);
+          break;
 
-      case 0:
-        PositionMgrGotoDistanceMeter(1.25, true);
-        break;
+        case 1:
+          PositionMgrGotoOrientationDegree(colorSide * -90.0);
+          break;
+      
+        case 2:
+          PositionMgrGotoDistanceMeter(-0.20, true);
+          break;
+      
+        case 3:
+          PositionMgrGotoDistanceMeter(0.375, true);
+          break;
+        
+        case 4:
+          trajectoryFinished_b = true;
+          break;
 
-      case 1:
-        PositionMgrGotoOrientationDegree(90.0);
-        break;
-      
-      case 2:
-        PositionMgrGotoDistanceMeter(0.325, true);
-        break;
-      
-      case 3,4:
-        break;
+        default:
+          break;
+      }
     }
   }
 }
@@ -186,17 +231,17 @@ void Trajectory(uint8_t plan, uint8_t side, uint8_t trajectoryIndex_u8)
 
   @result   none
  */
-void TrajectoryPythagora(double x1, double y1, double x2, double y2)
+void TrajectoryPythagora(double x1, double y1, double x2, double y2, pythagoraResult &pythagora)
 {
-    double height = y1 - y2;
-    double length = x2 - x1;
+    double height = (y1 - y2) / 1000.0;
+    double length = (x2 - x1) / 1000.0;
 
     /* Basic pythagora */
-    double hypothenuse = sqrt(height ** 2 + length ** 2);
-    double alpha = acos(length / hypothenuse);
+    pythagora.distance = sqrt(pow(height, 2) + pow(length, 2)); // equivalent of the hypothenuse
+    pythagora.angle = atan(height / length) * 57296 / 1000;
 
     /* Converting millimeter in meter */
-    return pythagoraResult {hypothenuse / 1000, alpha};
+    return;
 }
 
 /**
@@ -232,7 +277,8 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
         break;
       case POSITION_STATE_STOPPED:
         /* Next move */
-        Trajectory(1, 0, trajectoryIndex_u8);
+        /* TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, false); */
+        Trajectory(1, 1.0, trajectoryIndex_u8);
         trajectoryIndex_u8++;
         break;
       case POSITION_STATE_EMERGENCY:

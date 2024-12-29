@@ -18,7 +18,7 @@
 #define DELTA_TIME_MS         DELTA_TIME_S * 1000.0   /* Sampling Period [ms] */
 
 /* Match Parameters */
-#define DUREE_ATTENTE_S       3                       /* Wait time before start [s], should be 85 seconds */
+#define DUREE_ATTENTE_S       0.5                       /* Wait time before start [s], should be 85 seconds */
 #define DUREE_ATTENTE_MS      DUREE_ATTENTE_S * 1000  /* Wait time before start [ms] */
 
 #define DUREE_MATCH_S         100                     /* Match duration [s] */
