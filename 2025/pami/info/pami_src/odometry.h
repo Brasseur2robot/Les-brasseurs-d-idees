@@ -14,6 +14,10 @@ int32_t OdometryGetOrientationTop();
 double OdometryGetXMeter();
 double OdometryGetYMeter();
 double OdometryGetThetaRad();
+void OdometrySetXMeter(double xM_d);
+void OdometrySetYMeter(double xM_d);
+void OdometrySetThetaDeg(double thetaDeg_d);
+
 void OdometryUpdate(bool timeMeasure_b);
 void OdometryEncoderTest();
 

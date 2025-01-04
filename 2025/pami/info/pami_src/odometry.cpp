@@ -102,6 +102,7 @@ double OdometryGetXMeter()
 {
   return TopToMeter((double)odometryX_i32_g);
 }
+
 double OdometryGetYMeter()
 {
   return TopToMeter((double)odometryY_i32_g);
@@ -110,6 +111,21 @@ double OdometryGetYMeter()
 double OdometryGetThetaRad()
 {
   return odometryThetaRad_d_g;
+}
+
+void OdometrySetXMeter(double xM_d)
+{
+  odometryX_i32_g = (int32_t)MeterToTop(xM_d);
+}
+
+void OdometrySetYMeter(double yM_d)
+{
+  odometryY_i32_g = (int32_t)MeterToTop(yM_d);
+}
+
+void OdometrySetThetaDeg(double thetaDeg_d)
+{
+  odometryThetaRad_d_g = thetaDeg_d * PI / 180.0;
 }
 
 /*

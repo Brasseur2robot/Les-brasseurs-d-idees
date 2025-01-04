@@ -44,9 +44,9 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000UL);
 
-  pinMode(SWITCH_START_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_COLOR_PIN, INPUT_PULLUP);
   pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
-  pinMode(SWITCH_REED_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_REED_START_PIN, INPUT_PULLUP);
   pinMode(SWITCH_GROUND_PIN, INPUT_PULLUP);
 
   /* Init de tous les modules */
@@ -58,26 +58,15 @@ void setup() {
   OdometryInit();
   PositionMgrInit();
   TrajectoryMgrInit();
-
-  /* On attend le bouton le top départ */
-  /*while (digitalRead(SWITCH_REED_PIN) == 0)
-  {
-    LedAnimK2000();
-  }
-  LedAnimAllOff();
-  
-  LedAnimStart(); // Blocking 5s before start
-  LedAnimAllOff();*/
-
   //CustomTimerInit();
 }
 
 void loop() {
   //MotorTest();
   //OdometryEncoderTest();
-  IhmUpdate(false);
-  LedUpdate(false);
-  MatchMgrUpdate();
-  PositionMgrUpdate();
-  TrajectoryMgrUpdate(false);
+  //IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
+  LedUpdate(DEBUG_TIME);
+  MatchMgrUpdate(DEBUG_TIME);
+  PositionMgrUpdate(DEBUG_TIME);
+  TrajectoryMgrUpdate(DEBUG_TIME);
 }

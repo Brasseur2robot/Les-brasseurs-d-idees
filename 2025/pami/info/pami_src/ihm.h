@@ -23,13 +23,6 @@ static const unsigned char PROGMEM logo_bmp[] = {
  ******************************************************************************/
 typedef enum
 {
-  IHM_COLOR_NONE = 0u,    /* No color selected */
-  IHM_COLOR_BLUE = 1u,    /* Color blue */
-  IHM_COLOR_YELLOW = 2u,  /* Color yellow */
-} IhmColorEn; /* Enumeration used to select the color */
-
-typedef enum
-{
   IHM_DISPLAY_SCREEN_NONE = 0u,                   /* No color selected */
   IHM_DISPLAY_SCREEN_MATCH = 1u,                  /* Match screen */
   IHM_DISPLAY_SCREEN_SENSOR_DEBUG = 2u,           /* Sensor debug screen */
@@ -44,7 +37,6 @@ typedef enum
 void IhmInit();
 void IhmUpdate(bool timeMeasure_b);
 
-void IhmSetColor(IhmColorEn color_en);
 void IhmDrawScreenMatch();
 void IhmDrawScreenSensorDebug();
 void IhmDrawScreenMotorDebug();
@@ -52,7 +44,6 @@ void IhmDrawScreenControlDebug();
 void IhmDrawScreenInit();
 void IhmDrawScreenNone();
 void IhmMode();
-void IhmColor();
 void IhmDrawLogo();
 
 #endif

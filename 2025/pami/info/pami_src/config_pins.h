@@ -10,9 +10,9 @@
 #define LED5_PIN              11
 
 /* Switch pins */
-#define SWITCH_REED_PIN       A6
+#define SWITCH_REED_START_PIN A6
 #define SWITCH_GROUND_PIN     A7
-#define SWITCH_START_PIN      2
+#define SWITCH_COLOR_PIN      2
 #define SWITCH_MODE_PIN       3
 
 /* Motor pins */
