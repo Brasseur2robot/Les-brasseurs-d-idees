@@ -67,6 +67,12 @@ void PidStop(PidControllerSt * pid_pst)
 {
   /* Takes care of stopping a Pid */
   pid_pst->enable_b = false;
+  pid_pst->reference_d = 0.0;
+  pid_pst->error_d = 0.0;
+  pid_pst->previousError_d = 0.0;
+  pid_pst->integral_d = 0.0;
+  pid_pst->derivative_d = 0.0;
+  pid_pst->output_d = 0.0;
 }
 
 void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b)

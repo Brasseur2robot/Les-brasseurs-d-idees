@@ -49,9 +49,9 @@
 #define MOTOR_DEADZONE        20.0
 
 /*
- * The Pami motor has a reduction ratio of 150:1 and a maximum speed of 100 rpm.
+ * The Pami motor has a reduction ratio of 30:1 and a maximum speed of 220 rpm.
  * The encoder has 7 tops per revolution. Read in quadrature, this makes 7x4=28 
- * tops per motor revolution. With the reduction ratio this makes 28x150 = 4200
+ * tops per motor revolution. With the reduction ratio this makes 28x30 = 840
  * tops per wheel rotation.
  */
 #define N_TOP_PER_WHEEL_TURN  840.0    /* Encoder top number per wheel turn [-] */
@@ -64,7 +64,7 @@
  * it requires 4200.0 / (PI*0.04) tops for 1m.
  */
 #define WHEEL_DIAMETER_M      0.038     /* Wheel diameter [m] */
-//#define METER_TO_TOP          N_TOP_PER_WHEEL_TURN * DISTANCE_CORRECTION / (WHEEL_DIAMETER_M * PI);
+//#define METER_TO_TOP          N_TOP_PER_WHEEL_TURN * FACTOR_DISTANCE / (WHEEL_DIAMETER_M * PI);
 #define METER_TO_TOP          (6868.0527 * FACTOR_DISTANCE)
 
 /*

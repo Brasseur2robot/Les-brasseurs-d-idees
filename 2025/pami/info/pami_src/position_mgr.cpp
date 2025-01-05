@@ -100,7 +100,7 @@ void PositionMgrInit()
    @result    none
 
 */
-void PositionMgrUpdate()
+void PositionMgrUpdate(bool timeMeasure_b)
 {
   uint32_t currentTime_u32 = 0;
   static bool emergencyActivated_b = false;
@@ -123,18 +123,22 @@ void PositionMgrUpdate()
     double consigneDistance_d = 0.0;
     double consigneOrientation_d = 0.0;
 
-    if (DEBUG_TIME)
+    if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
     ObstacleSensorUpdate(DEBUG_TIME);
 
-    if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b == false) )
+    /* Looks for obstacle detection, only if currently moving */
+    if (positionMgrState_en_g == POSITION_STATE_MOVING)
     {
-      emergencyActivated_b = true;
-      RampEmergencyStop(&rampDistance_st_g);
-      RampEmergencyStop(&rampOrientation_st_g);
-      LedSetAnim(LED3_ID, ANIM_STATE_BLINK);
-      LedSetBlinkNb(LED3_ID, 2);
+      if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b == false) )
+      {
+        emergencyActivated_b = true;
+        RampEmergencyStop(&rampDistance_st_g);
+        RampEmergencyStop(&rampOrientation_st_g);
+        LedSetAnim(LED3_ID, ANIM_STATE_BLINK);
+        LedSetBlinkNb(LED3_ID, 2);
+      }
     }
 
     OdometryUpdate(DEBUG_TIME);
@@ -164,16 +168,20 @@ void PositionMgrUpdate()
     // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
     ObstacleSensorSetThreshold( (uint16_t)(1.7 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
-    if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
+    if (emergencyActivated_b == false )
     {
-      if (emergencyActivated_b == false )
+      if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
+      {
         positionMgrState_en_g = POSITION_STATE_STOPPED;
+      }
       else
-        positionMgrState_en_g = POSITION_STATE_EMERGENCY;
+      {
+        positionMgrState_en_g = POSITION_STATE_MOVING;
+      }
     }
     else
     {
-      positionMgrState_en_g = POSITION_STATE_MOVING;
+      positionMgrState_en_g = POSITION_STATE_EMERGENCY;
     }
 
     /* Sets the new reference on the pids */
@@ -274,13 +282,12 @@ void PositionMgrUpdate()
       Serial.println();
     }
 
-    if (DEBUG_TIME)
+    if (timeMeasure_b)
     {
       durationMeasure_u32 = micros() - durationMeasureStart_u32;
       Serial.print("Position loop lasted ");
       Serial.print(durationMeasure_u32);
-      Serial.print(" us");
-      Serial.println();
+      Serial.print(" us, ");
     }
   }
 }
@@ -373,6 +380,40 @@ PositionManagerStateEn PositionMgrGetState()
 void PositionMgrGetPosition()
 {
 
+}
+
+void PositionMgrSetDistanceControl(bool state_b)
+{
+  if (state_b == true)
+  {
+    PidStart(&pidDistance_st_g);
+  }
+  else
+  {
+    PidStop(&pidDistance_st_g);
+  }
+}
+
+void PositionMgrSetOrientationControl(bool state_b)
+{
+  if (state_b == true)
+  {
+    PidStart(&pidOrientation_st_g);
+  }
+  else
+  {
+    PidStop(&pidOrientation_st_g);
+  }
+}
+
+bool PositionMgrGetDistanceControl()
+{
+  return PidGetEnable(&pidDistance_st_g);
+}
+
+bool PositionMgrGetOrientationControl()
+{
+  return PidGetEnable(&pidOrientation_st_g);
 }
 
 /******************************************************************************

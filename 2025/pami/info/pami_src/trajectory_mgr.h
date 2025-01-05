@@ -16,6 +16,9 @@ void TrajectoryMgrInit();
 void Trajectory(uint8_t plan);
 void TrajectoryPythagora(double x1, double y1, double x2, double y2, pythagoraResult &pythagora);
 void TrajectoryMgrUpdate(bool timeMeasure_b);
+void TrajectoryMgrCalibTrajectory();
+void TrajectoryMgrMainTrajectory();
 void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d, bool direction_b);
+void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8);
 
 #endif

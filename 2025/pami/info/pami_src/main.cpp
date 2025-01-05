@@ -4,8 +4,10 @@
 #include <Arduino.h>
 #include "config.h"
 //#include "customTimer.h"
+#include "ihm.h"
 #include "led.h"
 #include "motor.h"
+#include "match_mgr.h"
 #include "obstacle_sensor.h"
 #include "odometry.h"
 #include "pid.h"
@@ -42,34 +44,29 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000UL);
 
-  pinMode(SWITCH_START_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_COLOR_PIN, INPUT_PULLUP);
   pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
-  pinMode(SWITCH_REED, INPUT_PULLUP);       /* Reed switch not working */
-  pinMode(SWITCH_GROUND, INPUT_PULLUP);
+  pinMode(SWITCH_REED_START_PIN, INPUT_PULLUP);
+  pinMode(SWITCH_GROUND_PIN, INPUT_PULLUP);
 
   /* Init de tous les modules */
+  IhmInit();
   LedInit();
+  MatchMgrInit();
   MotorInit();
   ObstacleSensorInit();
   OdometryInit();
   PositionMgrInit();
   TrajectoryMgrInit();
-
-  /* On attend le bouton le top départ */
-  while (digitalRead(SWITCH_START_PIN) == 1)
-  {
-    LedAnimK2000();
-  }
-  LedAnimAllOff();
-  
-  LedAnimStart(); // Blocking 5s before start
-  LedAnimAllOff();
-
   //CustomTimerInit();
 }
 
 void loop() {
-  LedUpdate(false);
-  PositionMgrUpdate();
-  TrajectoryMgrUpdate(false);
+  //MotorTest();
+  //OdometryEncoderTest();
+  //IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
+  LedUpdate(DEBUG_TIME);
+  MatchMgrUpdate(DEBUG_TIME);
+  PositionMgrUpdate(DEBUG_TIME);
+  TrajectoryMgrUpdate(DEBUG_TIME);
 }

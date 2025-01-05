@@ -33,6 +33,7 @@
    Module Global Variables
  ******************************************************************************/
 VL53L0X_mod sensor;
+bool obstacleSensorEnable_b;
 bool obstacleSensorDetected_b;
 uint16_t obstacleSensorThreshold_u16;
 
@@ -60,6 +61,16 @@ void ObstacleSensorInit()
   obstacleSensorThreshold_u16 = OBSTACLE_SENSOR_THRESHOLD_MM;
 }
 
+void ObstacleSensorStart()
+{
+  obstacleSensorEnable_b = true;
+}
+
+void ObstacleSensorStop()
+{
+  obstacleSensorEnable_b = false;
+}
+
 /**
    @brief     This function ipdates the obstacle sensor module.
 
@@ -84,9 +95,12 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
 
   }
 
-  if ((distance_u16 > 0 ) && (distance_u16 < obstacleSensorThreshold_u16) )
+  if (obstacleSensorEnable_b == true)
   {
-    obstacleSensorDetected_b = true;
+    if ((distance_u16 > 0 ) && (distance_u16 < obstacleSensorThreshold_u16) )
+    {
+      obstacleSensorDetected_b = true;
+    }
   }
   else
   {

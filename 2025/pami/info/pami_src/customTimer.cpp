@@ -24,7 +24,7 @@ void CustomTimerCheckTime()
   // On lit le temps actuel
   unsigned long tempsCourantMs = millis();
   // On le compare avec le temps au début du match
-  if ((tempsCourantMs - tempsDepartMs) > DUREE_MATCH_MS)
+  if ((tempsCourantMs - tempsDepartMs) > MATCH_DURATION_MS)
   {
     Serial.print("Il est : ");
     Serial.println(tempsCourantMs);

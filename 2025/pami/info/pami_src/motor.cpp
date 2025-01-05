@@ -24,6 +24,8 @@
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
+int16_t motorLeftSpeed_i16;
+int16_t motorRightSpeed_i16;
 
 /******************************************************************************
    Functions Definitions
@@ -108,25 +110,27 @@ void MotorLeftSetSpeed(double motorSpeed_d)
     motorSpeed_d = -255;
   }
 
+  motorLeftSpeed_i16 = int16_t(motorSpeed_d);
+
   /* Write speed on the outputs */
-  if (motorSpeed_d > 0)
+  if (motorLeftSpeed_i16 > 0)
   {
     digitalWrite(MOTOR_LEFT_PIN_INA1, HIGH);
-    analogWrite(MOTOR_LEFT_PIN_INA2, int16_t(255 - motorSpeed_d));
+    analogWrite(MOTOR_LEFT_PIN_INA2, 255 - motorLeftSpeed_i16);
   }
   else
   {
     digitalWrite(MOTOR_LEFT_PIN_INA1, LOW);
-    analogWrite(MOTOR_LEFT_PIN_INA2, int16_t(-motorSpeed_d));
+    analogWrite(MOTOR_LEFT_PIN_INA2, -motorLeftSpeed_i16);
   }
 
   if (DEBUG_MOTOR)
   {
     Serial.print("Left Motor Command : ");
     if (motorSpeed_d > 0)
-      Serial.print(int16_t(motorSpeed_d));
+      Serial.print(motorLeftSpeed_i16);
     else
-      Serial.print(int16_t(-motorSpeed_d));
+      Serial.print(motorLeftSpeed_i16);
     Serial.println();
   }
 }
@@ -162,30 +166,61 @@ void MotorRightSetSpeed(double motorSpeed_d)
   {
     motorSpeed_d = -255;
   }
+  
+  motorRightSpeed_i16 = int16_t(motorSpeed_d);
 
   /* Write speed on the outputs */
   if (motorSpeed_d > 0)
   {
     digitalWrite(MOTOR_RIGHT_PIN_INA1, HIGH); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, int16_t(255 - motorSpeed_d));
+    analogWrite(MOTOR_RIGHT_PIN_INA2, 255 - motorRightSpeed_i16);
   }
   else
   {
     digitalWrite(MOTOR_RIGHT_PIN_INA1, LOW); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, int16_t(-motorSpeed_d));
+    analogWrite(MOTOR_RIGHT_PIN_INA2, -motorRightSpeed_i16);
   }
 
   if (DEBUG_MOTOR)
   {
     Serial.print("Right Motor Command : ");
     if (motorSpeed_d > 0)
-      Serial.print(int16_t(motorSpeed_d));
+      Serial.print(motorRightSpeed_i16);
     else
-      Serial.print(int16_t(-motorSpeed_d));
+      Serial.print(-motorRightSpeed_i16);
     Serial.println();
   }
 }
 
+void MotorTest()
+{
+  Serial.println("Left : 255, Right : 255");
+  MotorLeftSetSpeed(255);
+  MotorRightSetSpeed(255);
+  delay(1000);
+  Serial.println("Left : 0, Right : 0");
+  MotorLeftSetSpeed(0);
+  MotorRightSetSpeed(0);
+  delay(1000);
+  Serial.println("Left : -255, Right : -255");
+  MotorLeftSetSpeed(-255);
+  MotorRightSetSpeed(-255);
+  delay(1000);
+  Serial.println("Left : 0, Right : 0");
+  MotorLeftSetSpeed(0);
+  MotorRightSetSpeed(0);
+  delay(1000);
+}
+
+int16_t motorLeftGetSpeed()
+{
+  return motorLeftSpeed_i16;
+}
+
+int16_t motorRightGetSpeed()
+{
+  return motorRightSpeed_i16;
+}
 
 /**
   Divides a given PWM pin frequency by a divisor.
