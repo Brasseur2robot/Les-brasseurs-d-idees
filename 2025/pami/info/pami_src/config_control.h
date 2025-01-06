@@ -2,6 +2,12 @@
 #define config_control_h_
 
 /******************************************************************************
+   Common parameters of the control loop
+ ******************************************************************************/
+#define DELTA_TIME_S          0.010                     /* Sampling Period [s] */
+#define DELTA_TIME_MS         DELTA_TIME_S * 1000.0     /* Sampling Period [ms] */
+
+/******************************************************************************
    This is the control configuration of Zophon's Sumo robot
  ******************************************************************************/
 #ifdef SUMO_ZOPHON
@@ -20,7 +26,6 @@
 #define ACCELERATION_MAX    0.6   /* [m.s-2] */
 
 #endif
-
 
 /******************************************************************************
    This is the mechanical configuration of the PAMI 1
