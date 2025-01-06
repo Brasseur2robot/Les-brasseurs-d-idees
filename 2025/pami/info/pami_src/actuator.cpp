@@ -69,10 +69,18 @@ void ActuatorUpdate(bool timeMeasure_b)
 
 void ActuatorServoStart()
 {
+  if (ACTUATOR_DEBUG)
+  {
+    Serial.println("Servo start");
+  }
   servoHead.write(180);
 }
 
 void ActuatorServoStop()
 {
+  if (ACTUATOR_DEBUG)
+  {
+    Serial.println("Servo stop");
+  }
   servoHead.write(ACTUATOR_SERVO_SPEED_NULL);
 }
