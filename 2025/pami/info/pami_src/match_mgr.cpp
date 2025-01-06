@@ -2,6 +2,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include "actuator.h"
 #include "config.h"
 #include "led.h"
 #include "match_mgr.h"
@@ -108,9 +109,9 @@ void MatchMgrUpdate(bool timeMeasure_b)
       case MATCH_STATE_END:
         /* End of match */
         //Serial.println("End");
-        PositionMgrSetDistanceControl(false);
+        PositionMgrSetDistanceControl(false);     /* Sets the PAMI free of control loop */
         PositionMgrSetOrientationControl(false);
-        // TODO : For Pami, set servo motion
+        ActuatorServoStart();                     /* Headbang start! */
         break;
 
       default:
