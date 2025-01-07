@@ -8,10 +8,12 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define ACTUATOR_DEBUG            false
-#define ACTUATOR_UPDATE_PERIOD_S  0.1     /* Refresh rate of the display 1/0.1 = 10fps */
+#define ACTUATOR_DEBUG                false
+#define ACTUATOR_UPDATE_PERIOD_S      0.1     /* Refresh rate of the display 1/0.1 = 10fps */
 
-#define ACTUATOR_SERVO_SPEED_NULL 90
+#define ACTUATOR_SERVO_SPEED_NULL     90
+#define ACTUATOR_SERVO_SPEED_FULL_CW  180
+#define ACTUATOR_SERVO_SPEED_FULL_CCW 0
 
 /******************************************************************************
   Types declarations
@@ -73,7 +75,7 @@ void ActuatorServoStart()
   {
     Serial.println("Servo start");
   }
-  servoHead.write(180);
+  servoHead.write(ACTUATOR_SERVO_SPEED_FULL_CW);
 }
 
 void ActuatorServoStop()
