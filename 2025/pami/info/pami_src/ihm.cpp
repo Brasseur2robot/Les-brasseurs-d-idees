@@ -247,16 +247,16 @@ void IhmDrawScreenSensorDebug()
   display.print(digitalRead(SWITCH_REED_START_PIN));
   display.println();
 
-  display.print(F("Ground switch : "));
-  display.print(digitalRead(SWITCH_GROUND_PIN));
-  display.println();
-
   display.print(F("Start switch :  "));
   display.print(digitalRead(SWITCH_COLOR_PIN));
   display.println();
 
   display.print(F("Mode switch :   "));
   display.print(digitalRead(SWITCH_MODE_PIN));
+  display.println();
+
+  display.print(F("Vbatt :   "));
+  display.print(analogRead(SENSOR_VBATT_PIN));
   display.println();
 }
 

@@ -136,8 +136,8 @@ void PositionMgrUpdate(bool timeMeasure_b)
         emergencyActivated_b = true;
         RampEmergencyStop(&rampDistance_st_g);
         RampEmergencyStop(&rampOrientation_st_g);
-        LedSetAnim(LED3_ID, ANIM_STATE_BLINK);
-        LedSetBlinkNb(LED3_ID, 2);
+        LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
+        LedSetBlinkNb(LED4_ID, 2);
       }
     }
 

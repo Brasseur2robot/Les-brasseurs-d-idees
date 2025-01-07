@@ -7,6 +7,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include <VL53L0X_mod.h>
+#include "led.h"
 #include "Wire.h"
 
 /******************************************************************************
@@ -56,6 +57,10 @@ void ObstacleSensorInit()
     Serial.println("Failed to detect and initialize sensor!");
     while (1) {}
   }
+  else
+  {
+    LedSetAnim(LED4_ID, ANIM_STATE_ON);
+  }
 
   obstacleSensorDetected_b = false;
   obstacleSensorThreshold_u16 = OBSTACLE_SENSOR_THRESHOLD_MM;
@@ -64,11 +69,16 @@ void ObstacleSensorInit()
 void ObstacleSensorStart()
 {
   obstacleSensorEnable_b = true;
+  /* Blinking once Led 4 to indicate sensor enabled */
+  LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
+  LedSetBlinkNb(LED4_ID, 1);
 }
 
 void ObstacleSensorStop()
 {
   obstacleSensorEnable_b = false;
+  /* Led full on to indicate sensor off */
+  LedSetAnim(LED4_ID, ANIM_STATE_ON);
 }
 
 /**
