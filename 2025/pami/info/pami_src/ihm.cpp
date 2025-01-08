@@ -57,6 +57,9 @@ void IhmUpdate(bool timeMeasure_b)
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (IHM_UPDATE_PERIOD_S * 1000.0) )
   {
+    /* Store the last execution time */
+    lastExecutionTime_u32 = currentTime_u32;
+    
     /* Measure execution time if needed */
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();

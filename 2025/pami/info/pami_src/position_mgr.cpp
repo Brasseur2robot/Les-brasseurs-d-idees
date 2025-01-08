@@ -111,6 +111,9 @@ void PositionMgrUpdate(bool timeMeasure_b)
   /* Manages the update loop every pidGetDeltaTime() */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
   {
+    /* Store the last execution time */
+    lastExecutionTime_u32 = currentTime_u32;
+    
     /* issue a warning if more than a 50% increase in loop time */
     //    if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (PidGetDeltaTime() * 1000.0 * 1.5) )
     //    {
@@ -199,9 +202,6 @@ void PositionMgrUpdate(bool timeMeasure_b)
     /* Sends the pids outputs to the motors */
     MotorLeftSetSpeed(commandeDistance_d - commandeOrientation_d);
     MotorRightSetSpeed(commandeDistance_d + commandeOrientation_d);
-
-    /* Saves last execution time, for precise loop control */
-    lastExecutionTime_u32 = currentTime_u32;
 
     if (PID_DISTANCE_DEBUG)
     {
