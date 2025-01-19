@@ -2,8 +2,10 @@
     Led 4,5,6,7,11
     5 and 6 are pwm capable
 
-    6 or LED_ID_3 is used as "slandby" indicator when no more trajectory orders are to be done
-    7 or LED_ID_4 is used as an obstacle indicator.
+    4 and 11 are used as color indicator
+    5 or LED_ID_2 is used as a battery level indicator (ON full Vbatt, BLINK ONCE low, BLINK TWICE critical).
+    6 or LED_ID_3 is used as state decriptor of the robot (BREATHING is standby).
+    7 or LED_ID_4 is used as an obstacle indicator (ON sensor is initialised, BLINK TWICE emergency stop).
 
     LedAnimK200 and LedAnimStart are not working with the update function but are blocking. Should be fixed!
 */

@@ -2,6 +2,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include "actuator.h"
 #include "config.h"
 #include "led.h"
 #include "match_mgr.h"
@@ -66,6 +67,9 @@ void MatchMgrUpdate(bool timeMeasure_b)
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (MATCH_MGR_UPDATE_PERIOD_S * 1000.0) )
   {
+    /* Store the last execution time */
+    lastExecutionTime_u32 = currentTime_u32;
+
     /* Measure execution time if needed */
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
@@ -108,9 +112,9 @@ void MatchMgrUpdate(bool timeMeasure_b)
       case MATCH_STATE_END:
         /* End of match */
         //Serial.println("End");
-        PositionMgrSetDistanceControl(false);
+        PositionMgrSetDistanceControl(false);     /* Sets the PAMI free of control loop */
         PositionMgrSetOrientationControl(false);
-        // TODO : For Pami, set servo motion
+        ActuatorServoStart();                     /* Headbang start! */
         break;
 
       default:

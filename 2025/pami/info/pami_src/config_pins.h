@@ -11,7 +11,6 @@
 
 /* Switch pins */
 #define SWITCH_REED_START_PIN A6
-#define SWITCH_GROUND_PIN     A7
 #define SWITCH_COLOR_PIN      2
 #define SWITCH_MODE_PIN       3
 
@@ -29,5 +28,8 @@
 
 /* Servo pins */
 #define SERVO_PIN             13
+
+/* Sensors */
+#define SENSOR_VBATT_PIN      21
 
 #endif

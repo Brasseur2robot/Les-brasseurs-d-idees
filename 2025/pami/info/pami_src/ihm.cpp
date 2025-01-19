@@ -57,6 +57,9 @@ void IhmUpdate(bool timeMeasure_b)
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (IHM_UPDATE_PERIOD_S * 1000.0) )
   {
+    /* Store the last execution time */
+    lastExecutionTime_u32 = currentTime_u32;
+    
     /* Measure execution time if needed */
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
@@ -247,16 +250,16 @@ void IhmDrawScreenSensorDebug()
   display.print(digitalRead(SWITCH_REED_START_PIN));
   display.println();
 
-  display.print(F("Ground switch : "));
-  display.print(digitalRead(SWITCH_GROUND_PIN));
-  display.println();
-
   display.print(F("Start switch :  "));
   display.print(digitalRead(SWITCH_COLOR_PIN));
   display.println();
 
   display.print(F("Mode switch :   "));
   display.print(digitalRead(SWITCH_MODE_PIN));
+  display.println();
+
+  display.print(F("Vbatt :   "));
+  display.print(analogRead(SENSOR_VBATT_PIN));
   display.println();
 }
 

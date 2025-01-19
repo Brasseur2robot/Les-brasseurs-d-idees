@@ -149,8 +149,6 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
   uint32_t startTimeMeasure = 0;
   uint32_t durationMeasure = 0;
 
-  static uint32_t timeLastMs_u32 = 0;
-
   if (timeMeasure_b == true)
     startTimeMeasure = micros();
 
@@ -203,8 +201,6 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
     ramp_pst->accelerationCurrentTopPerS_i32 = 0;
     ramp_pst->rampState_en = RAMP_STATE_FINISHED;
   }
-
-  timeLastMs_u32 = ramp_pst->timeCurrentMs_u32;
 
   if (RAMP_UPDATE_DEBUG)
   {

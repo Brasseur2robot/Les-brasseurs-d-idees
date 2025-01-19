@@ -2,6 +2,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include "actuator.h"
 #include "config.h"
 //#include "customTimer.h"
 #include "ihm.h"
@@ -13,6 +14,7 @@
 #include "pid.h"
 #include "position_mgr.h"
 #include "ramp.h"
+#include "sensor.h"
 #include "trajectory_mgr.h"
 #include "Wire.h"
 
@@ -47,9 +49,9 @@ void setup() {
   pinMode(SWITCH_COLOR_PIN, INPUT_PULLUP);
   pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
   pinMode(SWITCH_REED_START_PIN, INPUT_PULLUP);
-  pinMode(SWITCH_GROUND_PIN, INPUT_PULLUP);
 
   /* Init de tous les modules */
+  ActuatorInit();
   IhmInit();
   LedInit();
   MatchMgrInit();
@@ -57,16 +59,19 @@ void setup() {
   ObstacleSensorInit();
   OdometryInit();
   PositionMgrInit();
+  SensorInit();
   TrajectoryMgrInit();
   //CustomTimerInit();
 }
 
 void loop() {
-  //MotorTest();
-  //OdometryEncoderTest();
+//  MotorTest();
+//  OdometryEncoderTest();
+  ActuatorUpdate(DEBUG_TIME);
   //IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
   LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);
+  SensorUpdate(DEBUG_TIME);
   TrajectoryMgrUpdate(DEBUG_TIME);
 }
