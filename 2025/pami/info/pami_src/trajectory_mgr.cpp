@@ -458,9 +458,12 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
   if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
   {
     ObstacleSensorStop();
-    //Serial.print("Index : ");
-    //Serial.print(trajectoryIndex_u8);
-
+    if (TRAJECTORY_DEBUG == true)
+    {
+      Serial.print("Index : ");
+      Serial.print(trajectoryIndex_u8);
+    }
+    
     switch (trajectoryIndex_u8)
     {
       case 0:

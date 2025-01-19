@@ -9,7 +9,7 @@
    Constants and Macros
  ******************************************************************************/
 #define SENSOR_UPDATE_PERIOD_S    1.0   /* Update rate of the sensors */
-#define SENSOR_DEBUG              true
+#define SENSOR_DEBUG              false
 #define SENSOR_VREF               5.0
 #define SENSOR_ANALOG_RES         256.0
 #define SENSOR_VBATT_MULT         2.0

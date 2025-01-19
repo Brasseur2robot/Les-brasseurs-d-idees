@@ -110,10 +110,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
 
   /* Manages the update loop every pidGetDeltaTime() */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
-  {
-    /* Store the last execution time */
-    lastExecutionTime_u32 = currentTime_u32;
-    
+  {    
     /* issue a warning if more than a 50% increase in loop time */
     //    if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (PidGetDeltaTime() * 1000.0 * 1.5) )
     //    {
@@ -203,6 +200,9 @@ void PositionMgrUpdate(bool timeMeasure_b)
     MotorLeftSetSpeed(commandeDistance_d - commandeOrientation_d);
     MotorRightSetSpeed(commandeDistance_d + commandeOrientation_d);
 
+    /* Store the last execution time */
+    lastExecutionTime_u32 = currentTime_u32;
+    
     if (PID_DISTANCE_DEBUG)
     {
       //Serial.print("PidDistance : ");
@@ -343,7 +343,7 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 void PositionMgrGotoOrientationDegree(double theta_deg)
 {
   //positionMgrStatus_u8_g = 0;
-  Serial.println(theta_deg);
+  //Serial.println(theta_deg);
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_ORIENTATION;
 
