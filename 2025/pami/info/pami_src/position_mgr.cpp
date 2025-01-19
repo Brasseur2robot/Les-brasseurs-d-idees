@@ -181,7 +181,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
     }
     else
     {
-      positionMgrState_en_g = POSITION_STATE_EMERGENCY;
+      positionMgrState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
     }
 
     /* Sets the new reference on the pids */

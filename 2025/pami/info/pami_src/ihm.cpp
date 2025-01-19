@@ -213,7 +213,11 @@ void IhmDrawScreenMatch()
       display.print(F("stopped"));
       break;
 
-    case POSITION_STATE_EMERGENCY:
+    case POSITION_STATE_EMERGENCY_STOPPED:
+      display.print(F("emergency"));
+      break;
+
+    case POSITION_STATE_EMERGENCY_MOVING:
       display.print(F("emergency"));
       break;
 

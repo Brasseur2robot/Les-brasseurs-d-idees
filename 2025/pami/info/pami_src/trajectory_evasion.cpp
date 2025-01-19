@@ -39,19 +39,13 @@ void EvasionMgr(double colorSide)
       /* No state */
       //Serial.println("No state");
       break;
-    case POSITION_STATE_MOVING:
+    case POSITION_STATE_EMERGENCY_MOVING:
       /* Nothing to do */
       //Serial.println("Moving");
+      break;
+    case POSITION_STATE_EMERGENCY_STOPPED:
       Evasion(colorSide, evasionIndex_u8);
-      evasionIndex_u8 ++;
-      break;
-    case POSITION_STATE_STOPPED:
-      /* Next move */
-      //Serial.println("Next move");
-      break;
-    case POSITION_STATE_EMERGENCY:
-      /* What to do ?*/
-      //Serial.println("Emergency");
+      evasionIndex_u8 ++
       break;
     default:
       break;
@@ -91,7 +85,7 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8) {
         break;
 
       case 6:
-        PositionMgrGotoOrientationDegree(colorSide * 90.0);
+        PositionMgrGotoOrientationDegree(colorSide * -90.0);
         break;
 
       case 7:
