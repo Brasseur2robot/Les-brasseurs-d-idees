@@ -133,7 +133,7 @@ void IhmDrawScreenMatch()
       display.print(F(" - Calib -"));
       break;
 
-    case MATCH_SATE_READY:
+    case MATCH_STATE_READY:
       /* Ready, waiting to start */
       display.print(F(" - Ready -"));
       break;

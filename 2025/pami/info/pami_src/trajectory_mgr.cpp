@@ -9,11 +9,13 @@
 #include "odometry.h"
 #include "position_mgr.h"
 #include "trajectory_mgr.h"
+#include "trajectory_evasion.h"
 
 /********************************************************************Encoder**********
    Constants and Macros
  ******************************************************************************/
 #define TRAJECTORY_DEBUG            false
+#define COLOR_DEBUG                 true
 #define TRAJECTORY_UPDATE_PERIOD_S  0.1
 
 /******************************************************************************
@@ -337,6 +339,37 @@ void TrajectoryMgrMainTrajectory()
 {
   static uint8_t trajectoryIndex_u8 = 0;
 
+  double colorSide;
+
+switch (MatchMgrGetColor())
+  {
+    case MATCH_COLOR_NONE:
+      if (COLOR_DEBUG) {
+        Serial.println("Erreur de couleur");
+      }
+      break;
+
+    case MATCH_COLOR_BLUE:
+      colorSide = -1.0;
+      if (COLOR_DEBUG) {
+        Serial.println(colorSide);
+      }
+      break;
+
+    case MATCH_COLOR_YELLOW:
+      colorSide = 1.0;
+      if (COLOR_DEBUG) {
+        Serial.println(colorSide);
+      }
+      break;
+
+    default:
+        if (COLOR_DEBUG) {
+        Serial.println("Pas de couleur");
+        }
+      break;
+  }
+
   switch (PositionMgrGetState())
   {
     case POSITION_STATE_NONE:
@@ -350,11 +383,12 @@ void TrajectoryMgrMainTrajectory()
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      Trajectory(1, -1.0, trajectoryIndex_u8);
+      Trajectory(1, colorSide, trajectoryIndex_u8);
       trajectoryIndex_u8 ++;
       break;
     case POSITION_STATE_EMERGENCY:
       /* What to do ?*/
+      EvasionMgr(colorSide);
       //Serial.println("Emergency");
       break;
     default:
@@ -521,7 +555,7 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         }
         trajectoryFinished_b = true;
         ObstacleSensorStart();
-        MatchMgrSetState(MATCH_SATE_READY);
+        MatchMgrSetState(MATCH_STATE_READY);
         break;
 
       default:

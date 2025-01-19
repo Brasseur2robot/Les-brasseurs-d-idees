@@ -86,7 +86,7 @@ void MatchMgrUpdate(bool timeMeasure_b)
         //Serial.println("Border calibration");
         break;
 
-      case MATCH_SATE_READY:
+      case MATCH_STATE_READY:
         /* Ready, waiting to start */
         //Serial.println("Ready to start");
         LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
@@ -134,7 +134,7 @@ void MatchMgrSwitchState()
   {
     /* Reed switch is not there */
     /* if preparation is done, this is the signal to start, if not, nothing to do */
-    if (matchMgrState_en_g == MATCH_SATE_READY)
+    if (matchMgrState_en_g == MATCH_STATE_READY)
     {
       MatchMgrStartMatch();
     }
