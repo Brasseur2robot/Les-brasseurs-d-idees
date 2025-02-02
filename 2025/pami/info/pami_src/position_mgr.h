@@ -9,8 +9,16 @@ typedef enum
   POSITION_STATE_NONE = 0u,         /* No state */
   POSITION_STATE_MOVING = 1u,       /* Position manager is moving */
   POSITION_STATE_STOPPED = 2u,      /* Position manager finished his move, ready for antother one */
-  POSITION_STATE_EMERGENCY = 3u,    /* Position manager stopped due to emergency */
+  POSITION_STATE_EMERGENCY_STOPPED = 3u, /* Position manager is stopped in emergency */
+  POSITION_STATE_EMERGENCY_MOVING = 4u, /* Position manager is moving in emergency */
 } PositionManagerStateEn;           /* Enumeration used to select the position manager state */
+
+typedef struct PoseStruct {
+    // Member definitions
+    double x;
+    double y;
+    double theta;
+} pose_t;
 
 /******************************************************************************
  * Function Declarations
@@ -18,6 +26,7 @@ typedef enum
 void PositionMgrInit();
 void PositionMgrUpdate(bool timeMeasure_b);
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg);
+void PositionMgrGotoPose(pose_t pose);
 void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b);
 void PositionMgrGotoOrientationDegree(double theta_deg);
 PositionManagerStateEn PositionMgrGetState();

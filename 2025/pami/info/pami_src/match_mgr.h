@@ -13,7 +13,7 @@ typedef enum
   MATCH_STATE_NONE = 0u,            /* No state selected */
   MATCH_STATE_COLOR_SELECTION = 1u, /* Waiting for color selection */
   MATCH_STATE_BORDER_ADJUST = 2u,   /* Adjusting to border and go to starting pose */
-  MATCH_SATE_READY = 3u,            /* Ready, waiting for the start signal */
+  MATCH_STATE_READY = 3u,            /* Ready, waiting for the start signal */
   MATCH_STATE_ON_WAITING = 4u,      /* In match, waiting period */
   MATCH_STATE_ON_MOVING = 5u,       /* In match, doing moves */
   MATCH_STATE_END = 6u,             /* End of match */

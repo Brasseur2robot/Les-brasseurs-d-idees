@@ -1,1 +1,1 @@
-# Github de l'équipe Légendes Robotiques
+# Bienvenue sur le github de l'équipe Les brasseurs d'idées
