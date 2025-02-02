@@ -329,7 +329,7 @@ void TrajectoryMgrCalibTrajectory()
       TrajectoryCalibrateBorder(trajectoryIndex_u8);
       trajectoryIndex_u8 ++;
       break;
-    case POSITION_STATE_EMERGENCY:
+    case POSITION_STATE_EMERGENCY_STOPPED:
       /* What to do ?*/
       //Serial.println("Emergency");
       break;
@@ -389,7 +389,7 @@ switch (MatchMgrGetColor())
       Trajectory(1, colorSide, trajectoryIndex_u8);
       trajectoryIndex_u8 ++;
       break;
-    case POSITION_STATE_EMERGENCY:
+    case POSITION_STATE_EMERGENCY_STOPPED:
       /* What to do ?*/
       EvasionMgr(colorSide);
       //Serial.println("Emergency");
