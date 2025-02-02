@@ -45,7 +45,7 @@ void EvasionMgr(double colorSide)
       break;
     case POSITION_STATE_EMERGENCY_STOPPED:
       Evasion(colorSide, evasionIndex_u8);
-      evasionIndex_u8 ++
+      evasionIndex_u8 ++;
       break;
     default:
       break;
