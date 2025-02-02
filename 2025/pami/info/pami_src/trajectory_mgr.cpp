@@ -66,13 +66,22 @@ void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
   static int8_t trajectoryIndexLast_i8 = -1;
   static bool trajectoryFinished_b = false;
 
+  double targetX1;
+  double targetY1;
+  double targetX2;
+  double targetY2;
+
   if (plan == 1)
   {
     /* Start in {(0,1750);(50,1850)} */
     /* End at (950,1500) */
 
+    targetX1 = 850.0;
+    targetY1 = 1500.0;
+
     pythagoraResult pythagora = {};
-    TrajectoryPythagora(25.0, 1800.0, 800.0, 1550.0, pythagora);
+    TrajectoryPythagora(25.0, 1800.0, targetX1, targetY1, pythagora);
+    Serial.println(targetX1);
 
     if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
     {
@@ -115,8 +124,11 @@ void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
     /* Start in square {(0,1650);(50;1750)} */
     /* End at (1300,1300) */
 
+    targetX1 = 1250.0;
+    targetY1 = 1300.0;
+
     pythagoraResult pythagora = {};
-    TrajectoryPythagora(125.0, 1700.0, 1250.0, 1300.0, pythagora);
+    TrajectoryPythagora(125.0, 1700.0, targetX1, targetY1, pythagora);
 
     if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
     {
@@ -149,11 +161,16 @@ void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
     /* Start in square {(0,1550);(50;1650)} */
     /* End at (2050,1450)*/
 
+    targetX1 = 1550.0;
+    targetY1 = 1000.0;
+    targetX2 = 1825.0;
+    targetY2 = 1325.0;
+
     pythagoraResult pythagora = {};
-    TrajectoryPythagora(25.0, 1600.0, 1550.0, 1000.0, pythagora);
+    TrajectoryPythagora(25.0, 1600.0, targetX1, targetY1, pythagora);
 
     pythagoraResult pythagora2 = {};
-    TrajectoryPythagora(1550.0, 1000.0, 1825.0, 1325.0, pythagora2);
+    TrajectoryPythagora(1550.0, 1000.0, targetX2, targetY2, pythagora2);
 
     if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
     {
