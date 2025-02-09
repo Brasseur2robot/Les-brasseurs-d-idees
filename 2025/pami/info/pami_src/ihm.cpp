@@ -27,6 +27,7 @@
  ******************************************************************************/
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 IhmDisplayScreenEn ihmDisplayScreen_en_g;
+bool IhmEnable_b = false;
 
 /******************************************************************************
    Functions Definitions
@@ -43,73 +44,88 @@ void IhmInit()
   }
   display.clearDisplay(); /* Clear the buffer */
   display.setRotation(2); /* Rotate the screen 180° */
+
+  IhmStart();
+}
+
+void IhmStart()
+{
+  IhmEnable_b = true;
+}
+
+void IhmStop()
+{
+  IhmEnable_b = false;
 }
 
 void IhmUpdate(bool timeMeasure_b)
 {
-  uint32_t currentTime_u32 = millis();
-  static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution */
-  static uint8_t trajectoryIndex_u8 = 0;
-
-  uint32_t durationMeasureStart_u32 = 0;
-  uint32_t durationMeasure_u32 = 0;
-
-  /* Manages the update loop every update period */
-  if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (IHM_UPDATE_PERIOD_S * 1000.0) )
+  if (IhmEnable_b == true)
   {
-    /* Store the last execution time */
-    lastExecutionTime_u32 = currentTime_u32;
-    
-    /* Measure execution time if needed */
-    if (timeMeasure_b)
-      durationMeasureStart_u32 = micros();
+    uint32_t currentTime_u32 = millis();
+    static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution */
+    static uint8_t trajectoryIndex_u8 = 0;
 
-    /* Actual code */
-    display.clearDisplay();
+    uint32_t durationMeasureStart_u32 = 0;
+    uint32_t durationMeasure_u32 = 0;
 
-    /* Select which screen to draw */
-    switch (ihmDisplayScreen_en_g)
+    /* Manages the update loop every update period */
+    if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (IHM_UPDATE_PERIOD_S * 1000.0) )
     {
-      case IHM_DISPLAY_SCREEN_NONE:
-        /*Draw none */
-        IhmDrawScreenNone();
-        break;
+      /* Store the last execution time */
+      lastExecutionTime_u32 = currentTime_u32;
+      
+      /* Measure execution time if needed */
+      if (timeMeasure_b)
+        durationMeasureStart_u32 = micros();
 
-      case IHM_DISPLAY_SCREEN_MATCH:
-        IhmDrawScreenMatch();
-        break;
+      /* Actual code */
+      display.clearDisplay();
 
-      case IHM_DISPLAY_SCREEN_SENSOR_DEBUG:
-        IhmDrawScreenSensorDebug();
-        break;
+      /* Select which screen to draw */
+      switch (ihmDisplayScreen_en_g)
+      {
+        case IHM_DISPLAY_SCREEN_NONE:
+          /*Draw none */
+          IhmDrawScreenNone();
+          break;
 
-      case IHM_DISPLAY_SCREEN_MOTOR_DEBUG:
-        IhmDrawScreenMotorDebug();
-        break;
+        case IHM_DISPLAY_SCREEN_MATCH:
+          IhmDrawScreenMatch();
+          break;
 
-      case IHM_DISPLAY_SCREEN_CONTROL_DEBUG:
-        IhmDrawScreenControlDebug();
-        break;
+        case IHM_DISPLAY_SCREEN_SENSOR_DEBUG:
+          IhmDrawScreenSensorDebug();
+          break;
 
-      case IHM_DISPLAY_SCREEN_LOGO:
-        IhmDrawScreenInit();
-        break;
+        case IHM_DISPLAY_SCREEN_MOTOR_DEBUG:
+          IhmDrawScreenMotorDebug();
+          break;
 
-      default:
-        IhmDrawScreenNone();
-        break;
-    }
+        case IHM_DISPLAY_SCREEN_CONTROL_DEBUG:
+          IhmDrawScreenControlDebug();
+          break;
 
-    /* Show the display buffer on the screen. */
-    display.display();
+        case IHM_DISPLAY_SCREEN_LOGO:
+          IhmDrawScreenInit();
+          break;
 
-    /* Measure execution time if needed */
-    if (timeMeasure_b)
-    {
-      durationMeasure_u32 = micros() - durationMeasureStart_u32;
-      Serial.print("Ihm loop lasted ");
-      Serial.print(durationMeasure_u32);
-      Serial.print(" us, ");
+        default:
+          IhmDrawScreenNone();
+          break;
+      }
+
+      /* Show the display buffer on the screen. */
+      display.display();
+
+      /* Measure execution time if needed */
+      if (timeMeasure_b)
+      {
+        durationMeasure_u32 = micros() - durationMeasureStart_u32;
+        Serial.print("Ihm loop lasted ");
+        Serial.print(durationMeasure_u32);
+        Serial.print(" us, ");
+      }
     }
   }
 }

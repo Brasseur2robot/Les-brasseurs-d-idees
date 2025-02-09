@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
+#include "ihm.h"
 #include "led.h"
 #include "motor.h"
 #include "obstacle_sensor.h"
@@ -173,6 +174,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
       if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
       {
         positionMgrState_en_g = POSITION_STATE_STOPPED;
+        IhmStart();
       }
       else
       {
@@ -182,6 +184,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
     else
     {
       positionMgrState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
+      IhmStart();
     }
 
     /* Sets the new reference on the pids */
@@ -303,6 +306,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
 */
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 {
+  IhmStop();
   positionMgrState_en_g = POSITION_STATE_MOVING;
 }
 
@@ -317,6 +321,7 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 */
 void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 {
+  IhmStop();
   //positionMgrStatus_u8_g = 0;
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
@@ -342,6 +347,7 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 */
 void PositionMgrGotoOrientationDegree(double theta_deg)
 {
+  IhmStop();
   //positionMgrStatus_u8_g = 0;
   //Serial.println(theta_deg);
   positionMgrState_en_g = POSITION_STATE_MOVING;

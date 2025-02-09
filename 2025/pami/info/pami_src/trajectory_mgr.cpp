@@ -10,12 +10,15 @@
 #include "position_mgr.h"
 #include "trajectory_mgr.h"
 #include "trajectory_evasion.h"
+#include "config_match.h"
+#include "config.h"
+#include "trajectory_pythagora.h"
 
 /********************************************************************Encoder**********
    Constants and Macros
  ******************************************************************************/
 #define TRAJECTORY_DEBUG            false
-#define COLOR_DEBUG                 true
+#define COLOR_DEBUG                 false
 #define TRAJECTORY_UPDATE_PERIOD_S  0.1
 
 /******************************************************************************
@@ -55,79 +58,75 @@ void TrajectoryMgrInit()
    @brief     This function define the differents trajectory
 
 
-   @param     plan, colorSide (1.0 -> yellow, -1.0 -> blue)
+   @param     colorSide (1.0 -> yellow, -1.0 -> blue)
 
    @result    none
 
 */
-void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
+void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
 {
-  /*All the robots are side by side*/
-  static int8_t trajectoryIndexLast_i8 = -1;
   static bool trajectoryFinished_b = false;
 
-  double targetX1;
-  double targetY1;
-  double targetX2;
-  double targetY2;
 
-  if (plan == 1)
-  {
-    /* Start in {(0,1750);(50,1850)} */
-    /* End at (950,1500) */
+  #if defined(PAMI_1) || defined(PAMI_2) || defined(PAMI_3)
 
-    targetX1 = 850.0;
-    targetY1 = 1500.0;
+    if (TRAJECTORY_DEBUG) {
 
-    pythagoraResult pythagora = {};
-    TrajectoryPythagora(25.0, 1800.0, targetX1, targetY1, pythagora);
-    Serial.println(targetX1);
+      Serial.print("Index : ");
+      Serial.print(trajectoryIndex_u8);
 
-    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
-    {
-      if (TRAJECTORY_DEBUG == true)
-      {
-        Serial.println("Index : ");
-        Serial.println(trajectoryIndex_u8);
-
-        Serial.println("Angle rotation:");
-        Serial.println(pythagora.angle);
-
-        Serial.println("Distance déplacement:");
-        Serial.println(pythagora.distance);
+      Serial.print("Trajectory Index : ");
+      Serial.println(trajectoryIndex_u8);
+      Serial.print("Nombre movement : ");
+      Serial.println(nbMovement);
+      Serial.print("Trajectoire finis ? : ");
+      Serial.println(trajectoryFinished_b);
+      /* Serial.println(trajectoryPoseArray[trajectoryIndex_u8].theta);
+      Serial.println(trajectoryPoseArray[2].theta);
+      Serial.println(trajectoryPoseArray[trajectoryIndex_u8+1].theta); */
       }
 
-      switch (trajectoryIndex_u8)
+    if (trajectoryIndex_u8 >= nbMovement) 
+    {
+        trajectoryFinished_b = true;
+    }
+
+    else if (trajectoryFinished_b == false)
+    {
+      if (trajectoryPoseArray[trajectoryIndex_u8].theta != trajectoryPoseArray[trajectoryIndex_u8+1].theta) 
+      { 
+        Serial.println("Rotation");
+        Serial.println(colorSide * trajectoryPoseArray[trajectoryIndex_u8+1].theta);
+        PositionMgrGotoOrientationDegree(colorSide * trajectoryPoseArray[trajectoryIndex_u8+1].theta);  
+      }
+
+      else 
       {
-        case 0:
-          /* Serial.println("Première rotation"); */
-          PositionMgrGotoOrientationDegree(colorSide * -pythagora.angle);
-          break;
+        if ((trajectoryPoseArray[trajectoryIndex_u8].x != trajectoryPoseArray[trajectoryIndex_u8+1].x) && (trajectoryPoseArray[trajectoryIndex_u8].y != trajectoryPoseArray[trajectoryIndex_u8+1].y)) 
+        {
+          if (TRAJECTORY_DEBUG) 
+          {
+            Serial.println("Translation");
+          }
 
-        case 1:
-          /* Serial.println("Déplacement n°1"); */
-          PositionMgrGotoDistanceMeter(pythagora.distance, true);
-          break;
-
-        case 2:
-          trajectoryFinished_b = true;
-          break;
-
-        default:
-          break;
+          double hypothenuseLength = pythagoraCalculation(trajectoryPoseArray[trajectoryIndex_u8].x, trajectoryPoseArray[trajectoryIndex_u8].y, trajectoryPoseArray[trajectoryIndex_u8+1].x, trajectoryPoseArray[trajectoryIndex_u8+1].y, true);
+          PositionMgrGotoDistanceMeter(hypothenuseLength, true);
+        }
+        
       }
     }
-  }
+  
+  #endif
 
-  else if (plan == 2)
-  {
-    /* Start in square {(0,1650);(50;1750)} */
-    /* End at (1300,1300) */
+  /* #ifdef PAMI_2
+
+    Start in square {(0,1650);(50;1750)}
+    End at (1300,1300)
 
     targetX1 = 1250.0;
     targetY1 = 1300.0;
 
-    pythagoraResult pythagora = {};
+    /*pythagoraResult pythagora = {};
     TrajectoryPythagora(125.0, 1700.0, targetX1, targetY1, pythagora);
 
     if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
@@ -154,12 +153,13 @@ void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
           break;
       }
     }
-  }
 
-  else if (plan == 3)
-  {
-    /* Start in square {(0,1550);(50;1650)} */
-    /* End at (2050,1450)*/
+  #endif
+
+  #ifdef PAMI_3
+  
+    Start in square {(0,1550);(50;1650)}
+    End at (2050,1450)
 
     targetX1 = 1550.0;
     targetY1 = 1000.0;
@@ -205,15 +205,16 @@ void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
 
             default:
             trajectoryFinished_b = true;
-            break; */
+            break;
       }
     }
-  }
+  
+  #endif
 
-  else
-  {
-    /* Start in square {(0,1850);(50,1950)}*/
-    /* End at (1250,1575)*/
+  #ifdef PAMI_4
+
+    Start in square {(0,1850);(50,1950)}
+    End at (1250,1575)
 
     if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
     {
@@ -243,27 +244,8 @@ void Trajectory(uint8_t plan, double colorSide, uint8_t trajectoryIndex_u8)
           break;
       }
     }
-  }
-}
-
-/**
-  @brief    This function calculate the distance and the angle to move on the hypothenuse
-
-  @param    none
-
-  @result   none
-*/
-void TrajectoryPythagora(double x1, double y1, double x2, double y2, pythagoraResult &pythagora)
-{
-  double height = (y1 - y2) / 1000.0;
-  double length = (x2 - x1) / 1000.0;
-
-  /* Basic pythagora */
-  pythagora.distance = sqrt(pow(height, 2) + pow(length, 2)); // equivalent of the hypothenuse
-  pythagora.angle = atan(height / length) * 57296 / 1000;
-
-  /* Converting millimeter in meter */
-  return;
+    
+  #endif */
 }
 
 /**
@@ -361,7 +343,7 @@ void TrajectoryMgrMainTrajectory()
 
   double colorSide;
 
-switch (MatchMgrGetColor())
+  switch (MatchMgrGetColor())
   {
     case MATCH_COLOR_NONE:
       if (COLOR_DEBUG) {
@@ -370,15 +352,17 @@ switch (MatchMgrGetColor())
       break;
 
     case MATCH_COLOR_BLUE:
-      colorSide = -1.0;
+      colorSide = 1.0;
       if (COLOR_DEBUG) {
+        Serial.println("Facteur de couleur bleue:");
         Serial.println(colorSide);
       }
       break;
 
     case MATCH_COLOR_YELLOW:
-      colorSide = 1.0;
+      colorSide = -1.0;
       if (COLOR_DEBUG) {
+        Serial.println("Facteur de couleur jaune:");
         Serial.println(colorSide);
       }
       break;
@@ -403,7 +387,7 @@ switch (MatchMgrGetColor())
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      Trajectory(1, colorSide, trajectoryIndex_u8);
+      Trajectory(colorSide, trajectoryIndex_u8);
       trajectoryIndex_u8 ++;
       break;
     case POSITION_STATE_EMERGENCY_STOPPED:
@@ -512,7 +496,7 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
     if (TRAJECTORY_DEBUG == true)
     {
       Serial.print("Index : ");
-      Serial.print(trajectoryIndex_u8);
+      Serial.println(trajectoryIndex_u8);
     }
     
     switch (trajectoryIndex_u8)
