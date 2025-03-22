@@ -18,6 +18,7 @@ typedef struct PoseStruct {
     double x;
     double y;
     double theta;
+    double direction;
 } pose_t;
 
 /******************************************************************************

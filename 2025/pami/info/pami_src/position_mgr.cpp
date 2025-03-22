@@ -167,7 +167,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
         break;
     }
     // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
-    ObstacleSensorSetThreshold( (uint16_t)(1.7 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
+    ObstacleSensorSetThreshold( (uint16_t)(TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
     if (emergencyActivated_b == false )
     {

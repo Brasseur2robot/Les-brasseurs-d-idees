@@ -68,7 +68,7 @@ void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
   static bool trajectoryFinished_b = false;
 
 
-  #if defined(PAMI_1) || defined(PAMI_2) || defined(PAMI_3)
+  #if defined(PAMI_1) || defined(PAMI_2) || defined(PAMI_3) || defined(PAMI_4)
 
     if (TRAJECTORY_DEBUG) {
 
@@ -102,150 +102,90 @@ void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
 
       else 
       {
+        if (TRAJECTORY_DEBUG) 
+          {
+            Serial.println("Déplacement");
+          }
+
         if ((trajectoryPoseArray[trajectoryIndex_u8].x != trajectoryPoseArray[trajectoryIndex_u8+1].x) && (trajectoryPoseArray[trajectoryIndex_u8].y != trajectoryPoseArray[trajectoryIndex_u8+1].y)) 
         {
           if (TRAJECTORY_DEBUG) 
           {
-            Serial.println("Translation");
+            Serial.println("Translation hypothénuse");
           }
 
           double hypothenuseLength = pythagoraCalculation(trajectoryPoseArray[trajectoryIndex_u8].x, trajectoryPoseArray[trajectoryIndex_u8].y, trajectoryPoseArray[trajectoryIndex_u8+1].x, trajectoryPoseArray[trajectoryIndex_u8+1].y, true);
           PositionMgrGotoDistanceMeter(hypothenuseLength, true);
         }
         
+        else if (trajectoryPoseArray[trajectoryIndex_u8].x != trajectoryPoseArray[trajectoryIndex_u8+1].x) 
+        {
+
+          if (trajectoryPoseArray[trajectoryIndex_u8+1].x < 0) 
+          {
+
+            double odometryXValue_d = abs(trajectoryPoseArray[trajectoryIndex_u8+1].x) / 1000;
+
+            if (TRAJECTORY_DEBUG)
+            {
+              Serial.println("Reset de la position du robot à la valeur x de : " + String(odometryXValue_d) + " mètre(s)");
+            }
+
+            OdometrySetYMeter(odometryXValue_d);
+          }
+
+          else 
+          {
+
+            double translationXValue_d = trajectoryPoseArray[trajectoryIndex_u8+1].direction * abs(trajectoryPoseArray[trajectoryIndex_u8+1].x - abs(trajectoryPoseArray[trajectoryIndex_u8].x)) / 1000.0;
+
+            if (TRAJECTORY_DEBUG) 
+            {
+              // Serial.println("Valeur de x : " + String(trajectoryPoseArray[trajectoryIndex_u8].x));
+              // Serial.println("Valeur de x + 1: " + String(trajectoryPoseArray[trajectoryIndex_u8+1].x));
+              Serial.println("Translation en x de : " + String(translationXValue_d));
+            }
+
+            PositionMgrGotoDistanceMeter(translationXValue_d, true);
+          }
+
+        }
+
+        else if (trajectoryPoseArray[trajectoryIndex_u8].y != trajectoryPoseArray[trajectoryIndex_u8+1].y) 
+        {
+          
+
+          if (trajectoryPoseArray[trajectoryIndex_u8+1].y < 0) 
+          {
+
+            double odometryYValue_d = abs(trajectoryPoseArray[trajectoryIndex_u8+1].y) / 1000;
+
+            if (TRAJECTORY_DEBUG)
+            {
+              Serial.println("Reset de la position du robot à la valeur y de : " + String(odometryYValue_d) + " mètre(s)");
+            }
+
+            OdometrySetYMeter(odometryYValue_d);
+          }
+
+          else 
+          {
+
+            double translationYValue_d = trajectoryPoseArray[trajectoryIndex_u8+1].direction * abs(trajectoryPoseArray[trajectoryIndex_u8+1].y - abs(trajectoryPoseArray[trajectoryIndex_u8].y)) / 1000.0;
+
+            if (TRAJECTORY_DEBUG) 
+            {
+              // Serial.println("Valeur de y : " + String(trajectoryPoseArray[trajectoryIndex_u8].y));
+              // Serial.println("Valeur de y + 1: " + String(trajectoryPoseArray[trajectoryIndex_u8+1].y));
+              Serial.println("Translation en y de : " + String(translationYValue_d));
+            }
+
+            PositionMgrGotoDistanceMeter(translationYValue_d, true);
+          }
+        }
       }
     }
-  
   #endif
-
-  /* #ifdef PAMI_2
-
-    Start in square {(0,1650);(50;1750)}
-    End at (1300,1300)
-
-    targetX1 = 1250.0;
-    targetY1 = 1300.0;
-
-    /*pythagoraResult pythagora = {};
-    TrajectoryPythagora(125.0, 1700.0, targetX1, targetY1, pythagora);
-
-    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
-    {
-      switch (trajectoryIndex_u8)
-      {
-        case 0:
-          PositionMgrGotoDistanceMeter(0.1, true);
-          break;
-
-        case 1:
-          PositionMgrGotoOrientationDegree(colorSide * -pythagora.angle);
-          break;
-
-        case 2:
-          PositionMgrGotoDistanceMeter(pythagora.distance, true);
-          break;
-
-        case 4:
-          trajectoryFinished_b = true;
-          break;
-
-        default:
-          break;
-      }
-    }
-
-  #endif
-
-  #ifdef PAMI_3
-  
-    Start in square {(0,1550);(50;1650)}
-    End at (2050,1450)
-
-    targetX1 = 1550.0;
-    targetY1 = 1000.0;
-    targetX2 = 1825.0;
-    targetY2 = 1325.0;
-
-    pythagoraResult pythagora = {};
-    TrajectoryPythagora(25.0, 1600.0, targetX1, targetY1, pythagora);
-
-    pythagoraResult pythagora2 = {};
-    TrajectoryPythagora(1550.0, 1000.0, targetX2, targetY2, pythagora2);
-
-    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
-    {
-      switch (trajectoryIndex_u8)
-      {
-        case 0:
-          PositionMgrGotoOrientationDegree(colorSide * -pythagora.angle);
-          break;
-
-        case 1:
-          PositionMgrGotoDistanceMeter(pythagora.distance, true);
-          break;
-
-        case 2:
-          PositionMgrGotoOrientationDegree((colorSide * pythagora.angle) + (-1.0 * colorSide * pythagora2.angle));
-          break;
-
-        case 3:
-          PositionMgrGotoDistanceMeter(pythagora2.distance, true);
-          break;
-
-        case 4:
-          trajectoryFinished_b = true;
-          break;
-
-        default:
-          break;
-          /* case 0:
-            Serial.print("asser 0");
-            PositionMgrGotoDistanceMeter(2.0, true);
-            break;
-
-            default:
-            trajectoryFinished_b = true;
-            break;
-      }
-    }
-  
-  #endif
-
-  #ifdef PAMI_4
-
-    Start in square {(0,1850);(50,1950)}
-    End at (1250,1575)
-
-    if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
-    {
-      switch (trajectoryIndex_u8)
-      {
-        case 0:
-          PositionMgrGotoDistanceMeter(1.25, true);
-          break;
-
-        case 1:
-          PositionMgrGotoOrientationDegree(colorSide * -90.0);
-          break;
-
-        case 2:
-          PositionMgrGotoDistanceMeter(-0.20, true);
-          break;
-
-        case 3:
-          PositionMgrGotoDistanceMeter(0.375, true);
-          break;
-
-        case 4:
-          trajectoryFinished_b = true;
-          break;
-
-        default:
-          break;
-      }
-    }
-    
-  #endif */
 }
 
 /**
@@ -392,7 +332,7 @@ void TrajectoryMgrMainTrajectory()
       break;
     case POSITION_STATE_EMERGENCY_STOPPED:
       /* What to do ?*/
-      EvasionMgr(colorSide);
+      EvasionMgr(colorSide, trajectoryIndex_u8);
       //Serial.println("Emergency");
       break;
     default:

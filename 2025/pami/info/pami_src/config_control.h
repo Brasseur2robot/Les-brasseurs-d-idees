@@ -30,21 +30,21 @@
 /******************************************************************************
    This is the mechanical configuration of the PAMI 1
  ******************************************************************************/
-#ifdef PAMI_1
+#ifdef PAMI_4
 
-#define KP_DISTANCE         0.6
+#define KP_DISTANCE         1.0
 #define KI_DISTANCE         0.0
 #define KD_DISTANCE         0.0 // 0.0005
-
+ 
 #define KP_ORIENTATION      1.0
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
-
-#define VITESSE_SLOW        0.4   /* [m.s-1] */
-#define ACCELERATION_SLOW   0.4   /* [m.s-2] */
-#define VITESSE_MAX         0.3   /* [m.s-1] */
-#define ACCELERATION_MAX    0.4   /* [m.s-2] */
-
+ 
+#define VITESSE_SLOW        0.7  /* [m.s-1] */
+#define ACCELERATION_SLOW   0.6   /* [m.s-2] */
+#define VITESSE_MAX         1.0   /* [m.s-1] */
+#define ACCELERATION_MAX    0.9   /* [m.s-2] */
+ 
 #endif
 
 /******************************************************************************
@@ -60,9 +60,9 @@
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 
-#define VITESSE_SLOW        0.4  /* [m.s-1] */
+#define VITESSE_SLOW        1.0  /* [m.s-1] */
 #define ACCELERATION_SLOW   0.4   /* [m.s-2] */
-#define VITESSE_MAX         0.3   /* [m.s-1] */
+#define VITESSE_MAX         1.0   /* [m.s-1] */
 #define ACCELERATION_MAX    0.4   /* [m.s-2] */
 
 #endif
@@ -100,7 +100,7 @@
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 
-#define VITESSE_SLOW        0.4  /* [m.s-1] */
+#define VITESSE_SLOW        0.4   /* [m.s-1] */
 #define ACCELERATION_SLOW   0.4   /* [m.s-2] */
 #define VITESSE_MAX         0.3   /* [m.s-1] */
 #define ACCELERATION_MAX    0.4   /* [m.s-2] */
