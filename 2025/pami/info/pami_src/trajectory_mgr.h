@@ -11,5 +11,7 @@ void TrajectoryMgrCalibTrajectory();
 void TrajectoryMgrMainTrajectory();
 void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d, bool direction_b);
 void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8);
+void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8);
+
 
 #endif

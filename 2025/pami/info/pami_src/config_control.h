@@ -30,7 +30,7 @@
 /******************************************************************************
    This is the mechanical configuration of the PAMI 1
  ******************************************************************************/
-#ifdef PAMI_4
+#ifdef PAMI_1
 
 #define KP_DISTANCE         1.0
 #define KI_DISTANCE         0.0

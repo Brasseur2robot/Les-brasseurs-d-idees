@@ -65,7 +65,7 @@ void setup() {
 }
 
 void loop() {
-//  MotorTest();
+//  MotorTest(MOTOR_DEADZONE);
 //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
   //IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */

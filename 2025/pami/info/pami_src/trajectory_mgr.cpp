@@ -265,7 +265,13 @@ void TrajectoryMgrCalibTrajectory()
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      TrajectoryCalibrateBorder(trajectoryIndex_u8);
+      //TrajectoryCalibrateBorder2(trajectoryIndex_u8);
+      if (trajectoryIndex_u8 == 0) 
+      {
+        //PositionMgrGotoDistanceMeter(2.0, true);
+        PositionMgrGotoOrientationDegree(3600);
+      }
+      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, false);
       trajectoryIndex_u8 ++;
       break;
     case POSITION_STATE_EMERGENCY_STOPPED:
@@ -327,7 +333,8 @@ void TrajectoryMgrMainTrajectory()
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      Trajectory(colorSide, trajectoryIndex_u8);
+      //Trajectory(colorSide, trajectoryIndex_u8);
+      TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
       trajectoryIndex_u8 ++;
       break;
     case POSITION_STATE_EMERGENCY_STOPPED:
@@ -450,17 +457,17 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Reset the x coordinate, and the theta orientation */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          OdometrySetXMeter(0.032);
+          OdometrySetXMeter(BACK_LENGTH);
           OdometrySetThetaDeg(0.0);
         }
         else
         {
-          OdometrySetXMeter(3.0 - 0.032);
+          OdometrySetXMeter(3.0 - BACK_LENGTH);
           OdometrySetThetaDeg(180.0);
         }
         /* Move forward X cm, X should be greater than the half width of the robot */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X, true);
+        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X - BACK_LENGTH, true);
         break;
 
       case 2:
@@ -483,11 +490,11 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
 
       case 4:
         /* Reset the y coordinate */
-        OdometrySetYMeter(2.0 - 0.032);
+        OdometrySetYMeter(2.0 - BACK_LENGTH);
         OdometrySetThetaDeg(-90.0);
         /* Move forward 0.075m */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_Y, true);
+        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_Y - BACK_LENGTH, true);
         break;
 
       case 5:
@@ -498,8 +505,85 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         }
         else
         {
-          PositionMgrGotoOrientationDegree(MATCH_START_POSITION_THETA - 90.0);
+          PositionMgrGotoOrientationDegree(-MATCH_START_POSITION_THETA - 90.0);
         }
+        trajectoryFinished_b = true;
+        ObstacleSensorStart();
+        MatchMgrSetState(MATCH_STATE_READY);
+        break;
+
+      default:
+        break;
+    }
+  }
+}
+
+void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8)
+{
+  static int8_t trajectoryIndexLast_i8 = -1;
+  static bool trajectoryFinished_b = false;
+
+
+  if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
+  {
+    ObstacleSensorStop();
+    if (TRAJECTORY_DEBUG == true)
+    {
+      Serial.print("Index : ");
+      Serial.println(trajectoryIndex_u8);
+    }
+    
+    switch (trajectoryIndex_u8)
+    {
+      case 0:
+        /* Move backwards until border, with no pids */
+        PositionMgrSetOrientationControl(false);
+        PositionMgrGotoDistanceMeter(-0.15, true);
+        break;
+      case 1:
+        /* Reset the Y coordinate, and the theta orientation */
+        OdometrySetYMeter(2.0 - BACK_LENGTH);
+        OdometrySetThetaDeg(0.0);
+        
+        /* Move forward Y cm */
+        PositionMgrSetOrientationControl(true);
+        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_Y - BACK_LENGTH, true);
+        break;
+
+      case 2:
+        /* Rotate Ccw or Cw ? */
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          PositionMgrGotoOrientationDegree(90.0);
+        }
+        else
+        {
+          PositionMgrGotoOrientationDegree(-90.0);
+        }
+        break;
+
+      case 3:
+        /* Move backwards until border */
+        PositionMgrSetOrientationControl(false);
+        PositionMgrGotoDistanceMeter(-0.20, true);
+        break;
+
+      case 4:
+        /* Reset the X coordinate */
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          OdometrySetXMeter(BACK_LENGTH);
+          OdometrySetThetaDeg(0.0);
+        }
+        else
+        {
+          OdometrySetXMeter(3.0 - BACK_LENGTH);
+          OdometrySetThetaDeg(180.0);
+        }
+        /* Move forward X cm */
+        PositionMgrSetOrientationControl(true);
+        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X - BACK_LENGTH, true);
+        
         trajectoryFinished_b = true;
         ObstacleSensorStart();
         MatchMgrSetState(MATCH_STATE_READY);
