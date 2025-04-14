@@ -17,7 +17,7 @@
 /********************************************************************Encoder**********
    Constants and Macros
  ******************************************************************************/
-#define TRAJECTORY_DEBUG            false
+#define TRAJECTORY_DEBUG            true
 #define COLOR_DEBUG                 false
 #define TRAJECTORY_UPDATE_PERIOD_S  0.1
 
@@ -265,16 +265,16 @@ void TrajectoryMgrCalibTrajectory()
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      //TrajectoryCalibrateBorder2(trajectoryIndex_u8);
-      if (trajectoryIndex_u8 == 0) 
+      TrajectoryCalibrateBorder2(trajectoryIndex_u8);
+      /*if (trajectoryIndex_u8 == 0) 
       {
         //PositionMgrGotoDistanceMeter(2.0, true);
-        PositionMgrGotoOrientationDegree(3600);
-      }
-      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, false);
+      } */
+      //TrajectoryCalibrateRotation(3600.0);
+      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0);
       trajectoryIndex_u8 ++;
       break;
-    case POSITION_STATE_EMERGENCY_STOPPED:
+    case POSITION_STATE_EMERGENCY_ACTIVATED:
       /* What to do ?*/
       //Serial.println("Emergency");
       break;
@@ -333,14 +333,13 @@ void TrajectoryMgrMainTrajectory()
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      //Trajectory(colorSide, trajectoryIndex_u8);
-      TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0, true);
+      Trajectory(colorSide, trajectoryIndex_u8);
       trajectoryIndex_u8 ++;
       break;
-    case POSITION_STATE_EMERGENCY_STOPPED:
+    case POSITION_STATE_EMERGENCY_ACTIVATED:
       /* What to do ?*/
+      //Serial.println("Emergency in trajectory_mgr");
       EvasionMgr(colorSide, trajectoryIndex_u8);
-      //Serial.println("Emergency");
       break;
     default:
       break;
@@ -360,16 +359,21 @@ void TrajectoryMgrMainTrajectory()
    @result    none
 
 */
-void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d, bool direction_b)
+void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d)
 {
   static int8_t trajectoryIndexLast_i8 = -1;
   static bool trajectoryFinished_b = false;
 
   double angleDeg_d = 0;
-  if (direction_b == true)
+
+  if (MatchMgrGetColor() == MATCH_COLOR_BLUE)
+  {
     angleDeg_d = 90.0;
+  }
   else
+  {
     angleDeg_d = -90.0;
+  }
 
   if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
   {
@@ -592,6 +596,27 @@ void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8)
       default:
         break;
     }
+  }
+}
+
+void TrajectoryCalibrateRotation(double angle_d)
+{
+  static bool trajectoryFinished_b = false;
+  double angleMult_d = 0;
+
+  if (MatchMgrGetColor() == MATCH_COLOR_BLUE)
+  {
+    angleMult_d = 1.0;
+  }
+  else
+  {
+    angleMult_d = -1.0;
+  }
+
+  if (trajectoryFinished_b == false)
+  {
+    PositionMgrGotoOrientationDegree(angleMult_d * angle_d);
+    trajectoryFinished_b = true;
   }
 }
 

@@ -60,9 +60,9 @@
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 
-#define VITESSE_SLOW        1.0  /* [m.s-1] */
+#define VITESSE_SLOW        0.4 //1.0  /* [m.s-1] */
 #define ACCELERATION_SLOW   0.4   /* [m.s-2] */
-#define VITESSE_MAX         1.0   /* [m.s-1] */
+#define VITESSE_MAX         0.4 //1.0   /* [m.s-1] */
 #define ACCELERATION_MAX    0.4   /* [m.s-2] */
 
 #endif

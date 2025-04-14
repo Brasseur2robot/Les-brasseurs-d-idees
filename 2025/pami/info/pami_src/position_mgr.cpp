@@ -41,6 +41,7 @@ int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
 PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 PositionManagerStateEn positionMgrState_en_g;
+PositionManagerStateEmergencyEn positionMgrEmergencyState_en_g;
 
 PidControllerSt pidDistance_st_g;
 PidControllerSt pidOrientation_st_g;
@@ -139,6 +140,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
         RampEmergencyStop(&rampOrientation_st_g);
         LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
         LedSetBlinkNb(LED4_ID, 2);
+        Serial.println("Emergency");
       }
     }
 
@@ -167,9 +169,11 @@ void PositionMgrUpdate(bool timeMeasure_b)
         break;
     }
     // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
-    ObstacleSensorSetThreshold( (uint16_t)(TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
+    ObstacleSensorSetThreshold( (uint16_t)(2.0 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
-    if (emergencyActivated_b == false )
+    //Serial.println(ObstacleSensorDetected());
+
+    if (emergencyActivated_b == false)
     {
       if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
       {
@@ -183,8 +187,25 @@ void PositionMgrUpdate(bool timeMeasure_b)
     }
     else
     {
-      positionMgrState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
-      IhmStart();
+      positionMgrState_en_g = POSITION_STATE_EMERGENCY_ACTIVATED;
+      if (positionMgrEmergencyState_en_g == POSITION_STATE_EMERGENCY_END) 
+      {
+        //Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
+        positionMgrState_en_g = POSITION_STATE_STOPPED;
+        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_NONE;
+        emergencyActivated_b = false;
+        Serial.println(emergencyActivated_b);
+      }
+      else if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_RAMPDOWN)) )
+      {
+        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
+        //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_STOPPED");
+      }
+      else
+      {
+        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_MOVING;
+        //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_MOVING");
+      }
     }
 
     /* Sets the new reference on the pids */
@@ -372,6 +393,17 @@ PositionManagerStateEn PositionMgrGetState()
 {
   //return positionMgrStatus_u8_g;
   return positionMgrState_en_g;
+}
+
+PositionManagerStateEmergencyEn PositionMgrGetEmergencyState()
+{
+  return positionMgrEmergencyState_en_g;
+}
+
+void PositionMgrSetEmergencyState(PositionManagerStateEmergencyEn state)
+{
+  //return positionMgrStatus_u8_g;
+  positionMgrEmergencyState_en_g = state;
 }
 
 /**
