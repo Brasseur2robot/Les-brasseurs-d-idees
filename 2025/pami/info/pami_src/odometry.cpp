@@ -35,6 +35,7 @@ Encoder encoderRight(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
 
 int32_t distanceLeft_i32_g;
 int32_t distanceRight_i32_g;
+int32_t orient_init_i32_g = 0.0;
 /* Pose of the robot in meter and radians*/
 int32_t odometryX_i32_g;
 int32_t odometryY_i32_g;
@@ -126,6 +127,10 @@ void OdometrySetYMeter(double yM_d)
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
   odometryThetaRad_d_g = thetaDeg_d * PI / 180.0;
+  
+  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
+  double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
+  orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
 }
 
 /*
@@ -141,7 +146,6 @@ void OdometryUpdate(bool timeMeasure_b)
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
 
-  static int32_t orient_init = 0.0;
   static int32_t distance_precedente, orient_precedente;
 
   int32_t delta_d;
@@ -161,7 +165,7 @@ void OdometryUpdate(bool timeMeasure_b)
   distanceRight_i32_g = encoderRight.read() * FACTOR_WHEEL_RIGHT;
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
-  int32_t orient = orient_init + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
+  int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
   delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient - orient_precedente; // correspond à Dqn mais en pas
 
