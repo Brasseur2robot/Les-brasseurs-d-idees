@@ -15,5 +15,4 @@ void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8);
 void TrajectoryCalibrateRotation(double angle_d);
 
 
-
 #endif

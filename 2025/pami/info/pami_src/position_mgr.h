@@ -26,6 +26,8 @@ typedef struct PoseStruct {
     double y;
     double theta;
     double direction;
+    double resetTheta;
+    double obstacleSensorEnable;
 } pose_t;
 
 /******************************************************************************

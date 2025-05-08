@@ -175,6 +175,9 @@ void PositionMgrUpdate(bool timeMeasure_b)
 
     if (emergencyActivated_b == false)
     {
+      //Serial.println("X odometry : " + String(OdometryGetXMeter()));
+      //Serial.println("Y odometry : " + String(OdometryGetYMeter()));
+
       if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
       {
         positionMgrState_en_g = POSITION_STATE_STOPPED;
@@ -190,11 +193,11 @@ void PositionMgrUpdate(bool timeMeasure_b)
       positionMgrState_en_g = POSITION_STATE_EMERGENCY_ACTIVATED;
       if (positionMgrEmergencyState_en_g == POSITION_STATE_EMERGENCY_END) 
       {
-        //Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
+        Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
         positionMgrState_en_g = POSITION_STATE_STOPPED;
         positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_NONE;
         emergencyActivated_b = false;
-        Serial.println(emergencyActivated_b);
+        //Serial.println(emergencyActivated_b);
       }
       else if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_RAMPDOWN)) )
       {
@@ -287,22 +290,22 @@ void PositionMgrUpdate(bool timeMeasure_b)
       Serial.print(OdometryGetYMeter());
       Serial.print(", theta [rad] : ");
       Serial.print(OdometryGetThetaRad());
-      Serial.print(", ConsDistance [top] : ");
-      Serial.print(consigneDistance_d);
-      Serial.print(", distance [top] : ");
-      Serial.print(mesureDistance_d);
-      Serial.print(", ConsOrientation [top] : ");
-      Serial.print(consigneOrientation_d);
-      Serial.print(", orientation [top] : ");
-      Serial.print(mesureOrientation_d);
-      Serial.print(", commande Distance : ");
-      Serial.print(commandeDistance_d);
-      Serial.print(", commande Orientation : ");
-      Serial.print(commandeOrientation_d);
-      Serial.print(", commande gauche : ");
-      Serial.print(commandeDistance_d - commandeOrientation_d);
-      Serial.print(", commande droite : ");
-      Serial.print(commandeDistance_d + commandeOrientation_d);
+      //Serial.print(", ConsDistance [top] : ");
+      //Serial.print(consigneDistance_d);
+      //Serial.print(", distance [top] : ");
+      //Serial.print(mesureDistance_d);
+      //Serial.print(", ConsOrientation [top] : ");
+      //Serial.print(consigneOrientation_d);
+      //Serial.print(", orientation [top] : ");
+      //Serial.print(mesureOrientation_d);
+      //Serial.print(", commande Distance : ");
+      //Serial.print(commandeDistance_d);
+      //Serial.print(", commande Orientation : ");
+      //Serial.print(commandeOrientation_d);
+      //Serial.print(", commande gauche : ");
+      //Serial.print(commandeDistance_d - commandeOrientation_d);
+      //Serial.print(", commande droite : ");
+      //Serial.print(commandeDistance_d + commandeOrientation_d);
       Serial.println();
     }
 

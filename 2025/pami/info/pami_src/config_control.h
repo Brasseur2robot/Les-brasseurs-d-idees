@@ -72,11 +72,11 @@
  ******************************************************************************/
 #ifdef PAMI_3
 
-#define KP_DISTANCE         0.6
+#define KP_DISTANCE         1.0
 #define KI_DISTANCE         0.0
 #define KD_DISTANCE         0.0 // 0.0005
 
-#define KP_ORIENTATION      1.0
+#define KP_ORIENTATION      0.6
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 

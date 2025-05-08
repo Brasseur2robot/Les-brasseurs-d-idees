@@ -5,6 +5,9 @@
  #include "trajectory_evasion.h"
  #include "position_mgr.h"
  #include "config_match.h"
+ #include "trajectory_pythagora.h"
+ #include "odometry.h"
+
  
  /******************************************************************************
     Constants and Macros
@@ -90,57 +93,29 @@
          if (TRAJECTORY_EVASION_DEBUG) 
          { 
            Serial.println("Déplacement evasion n°1");
+           Serial.println("Translation à la distance 0.2");
            //Serial.println(PositionMgrGetState()); 
          }
-         PositionMgrGotoDistanceMeter(0.2, true);
+         //PositionMgrGotoDistanceMeter(0.2, true);
          break;
  
        case 2:
          if (TRAJECTORY_EVASION_DEBUG) 
          { 
-           Serial.println("Déplacement evasion n°2"); 
+           Serial.println("Déplacement evasion n°2");
+           Serial.println("Rotation avec l'angle " + String(colorSide * -90.0));
            //Serial.println(PositionMgrGetState());
          }
-         PositionMgrGotoOrientationDegree(colorSide * -90.0);
+         //PositionMgrGotoOrientationDegree(colorSide * -90.0);
          break;
- 
+
        case 3:
-         if (TRAJECTORY_EVASION_DEBUG) 
-         { 
-           Serial.println("Déplacement evasion n°3"); 
-           //Serial.println(PositionMgrGetState());  
-         }
-         PositionMgrGotoDistanceMeter(0.2, true);
+         Serial.println("X meter :" + String(OdometryGetXMeter()));
+         Serial.println("Y meter :" + String(OdometryGetYMeter()));
          break;
+
  
        case 4:
-         if (TRAJECTORY_EVASION_DEBUG) 
-         { 
-           Serial.println("Déplacement evasion n°4"); 
-           //Serial.println(PositionMgrGetState());  
-         }
-         PositionMgrGotoOrientationDegree(colorSide * -90.0);
-         break;
- 
-       case 5:
-         if (TRAJECTORY_EVASION_DEBUG) 
-         { 
-           Serial.println("Déplacement evasion n°5"); 
-           //Serial.println(PositionMgrGetState()); 
-         }
-         PositionMgrGotoDistanceMeter(0.2, true);
-         break;
- 
-       case 6:
-         if (TRAJECTORY_EVASION_DEBUG) 
-         {
-           Serial.println("Déplacement evasion n°6"); 
-           //Serial.println(PositionMgrGetState()); 
-         }
-         PositionMgrGotoOrientationDegree(colorSide * 90.0);
-         break;
- 
-       case 7:
          if (TRAJECTORY_EVASION_DEBUG) 
          {
            Serial.println("Fin d'évitement"); 
