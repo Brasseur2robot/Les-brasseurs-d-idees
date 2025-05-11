@@ -34,8 +34,8 @@
  #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
  
  #define MATCH_START_POSITION_X      0.09
- #define MATCH_START_POSITION_Y      0.105
- #define MATCH_START_POSITION_THETA  -5.0
+ #define MATCH_START_POSITION_Y      0.06
+ #define MATCH_START_POSITION_THETA  -3.0
  
  // Start in square {(0,1850);(50,1950)}
  // End at (1250,1575)
@@ -47,13 +47,14 @@
  #define Y3                          -2000.0
  #define Y4                          1637.0
  
- inline pose_t trajectoryPoseArray[6] = {
-   {X1, Y1, 0.0, 1.0},
-   {X2, Y1, 0.0, 1.0},
-   {X2, Y1, 90.0, 1.0},
-   {X2, Y2, 90.0, -1.0},
-   {X2, Y3, 90.0, 1.0},
-   {X2, Y4, 90.0, 1.0},  
+ inline pose_t trajectoryPoseArray[7] = {
+   {X1, Y1, 0.0, 1.0, -1.0, 0.0},
+   {X2, Y1, 0.0, 1.0, -1.0, 0.0},
+   {X2, Y1, 90.0, 1.0, -1.0, 0.0},
+   {X2, Y2, 90.0, -1.0, -1.0, 0.0},
+   {X2, Y3, 90.0, 1.0, -1.0, 0.0},
+   {X2, Y3, 90.0, 1.0, 0.0, 0.0},
+   {X2, Y4, 90.0, 1.0, -1.0, 0.0},  
  };
  #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
  
@@ -88,9 +89,9 @@
 #define ANGLE                       pythagoraCalculation(X1, Y1, X2, Y2, false)
 
 inline pose_t trajectoryPoseArray[3] = {
-  {X1, Y1, 0.0},
-  {X1, Y1, ANGLE},
-  {X2, Y2, ANGLE}
+  {X1, Y1, 0.0, -1.0, 1.0},
+  {X1, Y1, ANGLE, -1.0, 1.0},
+  {X2, Y2, ANGLE, -1.0, 1.0}
 };
 #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
 

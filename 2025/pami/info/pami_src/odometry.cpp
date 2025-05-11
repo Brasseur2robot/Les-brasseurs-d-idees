@@ -126,8 +126,6 @@ void OdometrySetYMeter(double yM_d)
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
-  odometryThetaRad_d_g = thetaDeg_d * PI / 180.0;
-  
   double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
   orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
@@ -189,25 +187,28 @@ void OdometryUpdate(bool timeMeasure_b)
   odometryX_i32_g = odometryX_i32_g + (int32_t)dx; // valeurs exprimées dans le système d’unité robot
   odometryY_i32_g = odometryY_i32_g + (int32_t)dy;
 
+  //Serial.println("Dx = " + String(odometryX_i32_g));
+  //Serial.println("Dy = " + String(odometryY_i32_g));
+
   orient_precedente = orient ; // actualisation de qn-1
   distance_precedente = odometryDistanceTop_i32_g ; //actualisation de Dn-1
 
   if (ODOMETRY_DEBUG)
   {
     Serial.print("d gauche = ");
-    Serial.print(distanceLeft_i32_g);
+    Serial.println(distanceLeft_i32_g);
     Serial.print(", d droite = ");
-    Serial.print(distanceRight_i32_g);
+    Serial.println(distanceRight_i32_g);
     Serial.print(", orientation = ");
-    Serial.print(orient);
+    Serial.println(orient);
     Serial.print(", Delta orient = ");
-    Serial.print(delta_orient);
+    Serial.println(delta_orient);
     Serial.print(", orientationMoyenne = ");
-    Serial.print(odometryOrientationTop_i32_g);
+    Serial.println(odometryOrientationTop_i32_g);
     Serial.print(", delta OrientRadian = ");
-    Serial.print(delta_orient_radian);
+    Serial.println(delta_orient_radian);
     Serial.print(", orientMoyRad = ");
-    Serial.print(orient_moy_radian);
+    Serial.println(orient_moy_radian);
   }
 
   if (timeMeasure_b == true)
