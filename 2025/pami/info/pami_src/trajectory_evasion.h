@@ -14,6 +14,6 @@
  ******************************************************************************/
 
 void EvasionMgr(double colorSide, uint8_t trajectoryIndex_u8);
-void Evasion(double colorSide, uint8_t evasionIndex_u8);
+void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_u8);
 
 #endif
