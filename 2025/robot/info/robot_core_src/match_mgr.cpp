@@ -81,39 +81,45 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_COLOR_SELECTION:
         /* Waiting for color selection */
-        //Serial.println("Waiting for color selection");
+//        if (MATCH_MGR_DEBUG)
+//          Serial.println("Waiting for color selection");
         break;
 
       case MATCH_STATE_BORDER_ADJUST:
         /* Adjusting to border */
-        //Serial.println("Border calibration");
+//        if (MATCH_MGR_DEBUG)
+//          Serial.println("Border calibration");
         break;
 
       case MATCH_STATE_READY:
         /* Ready, waiting to start */
-        //Serial.println("Ready to start");
+//        if (MATCH_MGR_DEBUG)
+//          Serial.println("Ready to start");
         //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
         break;
 
       case MATCH_STATE_ON_WAITING:
         /* In a wait timer */
-        //Serial.println("Waiting");
+//        if (MATCH_MGR_DEBUG)
+//          Serial.println("Waiting");
         MatchMgrUpdateEndTimer();
         MatchMgrUpdateWaitingTimer();
         break;
 
       case MATCH_STATE_ON_MOVING:
         /* Moving */
-        //Serial.println("Moving");
+//        if (MATCH_MGR_DEBUG)
+//          Serial.println("Moving");
         MatchMgrUpdateEndTimer();
         break;
 
       case MATCH_STATE_END:
         /* End of match */
-        //Serial.println("End");
-        PositionMgrSetDistanceControl(false);     /* Sets the PAMI free of control loop */
+//        if (MATCH_MGR_DEBUG)
+//          Serial.println("End");
+        PositionMgrSetDistanceControl(false);     /* Sets the robot free of control loop */
         PositionMgrSetOrientationControl(false);
-        //ActuatorServoStart();                     /* Headbang start! */
+        //ActuatorServoStart();                   /* Headbang start! */
         break;
 
       default:

@@ -22,12 +22,12 @@ typedef enum
 
 typedef struct PoseStruct {
     // Member definitions
-    double x;
-    double y;
-    double theta;
-    double direction;
-    double resetTheta;
-    double obstacleSensorEnable;
+    double x;                   // x [m]
+    double y;                   // y [m]
+    double theta;               // theta [°]
+    bool direction;             // if true, forward move else backwards
+    bool resetTheta;            // if theta is to be reset
+    bool obstacleSensorEnable;  // if obstacle sensor active or not
 } pose_t;
 
 /******************************************************************************

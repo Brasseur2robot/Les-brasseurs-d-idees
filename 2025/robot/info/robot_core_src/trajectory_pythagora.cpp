@@ -4,7 +4,7 @@
 double pythagoraCalculation(double x1, double y1, double x2, double y2, bool lengthChoice)
 {
   // Converting millimeter in meter
-  double height = (y1 - y2) / 1000.0;
+  double height = (y2 - y1) / 1000.0;
   double length = (x2 - x1) / 1000.0;
 
   double pythagoraResult;
@@ -15,7 +15,7 @@ double pythagoraCalculation(double x1, double y1, double x2, double y2, bool len
   }
   else {
     // Calculate the angle between base and hypothenuse if lengthChoice is false
-    pythagoraResult = atan(height / length) * 57296 / 1000;
+    pythagoraResult = atan2(height, length) * 57296 / 1000;
   }
 
   return pythagoraResult;

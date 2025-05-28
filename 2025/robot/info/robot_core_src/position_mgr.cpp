@@ -108,7 +108,8 @@ void PositionMgrUpdate(bool timeMeasure_b)
   static bool emergencyActivated_b = false;
 
   currentTime_u32 = millis();
-  static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution
+  static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution */
+  static uint8_t timeOutCount_u8 = 0;
 
   /* Manages the update loop every pidGetDeltaTime() */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
@@ -173,27 +174,67 @@ void PositionMgrUpdate(bool timeMeasure_b)
 
     //Serial.println(ObstacleSensorDetected());
 
+    /* If no emergency activation (no obstacle in sight) */
     if (emergencyActivated_b == false)
     {
-      //Serial.println("X odometry : " + String(OdometryGetXMeter()));
-      //Serial.println("Y odometry : " + String(OdometryGetYMeter()));
-
-      if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
+//      if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
+//      {
+//        positionMgrState_en_g = POSITION_STATE_STOPPED;
+//        //IhmStart();
+//      }
+//      else
+//      {
+//        positionMgrState_en_g = POSITION_STATE_MOVING;
+//      }
+      /* if Ramp init, then stopped */
+      if ( (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT) )
       {
         positionMgrState_en_g = POSITION_STATE_STOPPED;
-        //IhmStart();
+        //Serial.println("Ramp init, state stopped");
       }
       else
       {
-        positionMgrState_en_g = POSITION_STATE_MOVING;
-      }
+        /* if one of both ramp finished */
+        if ( ( (positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) )
+            || ( (positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) ) )
+        {
+          //Serial.println("Ramp finished");
+          /* count tiemout detection */
+          if (timeOutCount_u8 < 20)
+          {
+            timeOutCount_u8 += 1;
+            positionMgrState_en_g = POSITION_STATE_MOVING;
+            //Serial.println("Incrementing timeout");
+
+            /* if both pid error < acceptable range -> stopped */
+            if ( ( (consigneDistance_d - OdometryGetDistanceTop()) < 5 ) && ( (consigneOrientation_d - OdometryGetOrientationTop()) < 5 ) )
+            {
+              positionMgrState_en_g = POSITION_STATE_STOPPED;
+              //Serial.println("Position reached");
+            }
+          }
+          else
+          {
+            positionMgrState_en_g = POSITION_STATE_STOPPED;
+            timeOutCount_u8 = 0;
+            //Serial.println("Timeout reached");
+          }
+        }
+        else
+        {
+          //Serial.println("State Moving");
+          timeOutCount_u8 = 0;
+          /* else still moving */
+          positionMgrState_en_g = POSITION_STATE_MOVING;
+        }
+      }        
     }
-    else
+    else /* if obstacle detected */
     {
       positionMgrState_en_g = POSITION_STATE_EMERGENCY_ACTIVATED;
       if (positionMgrEmergencyState_en_g == POSITION_STATE_EMERGENCY_END)
       {
-        Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
+        //Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
         positionMgrState_en_g = POSITION_STATE_STOPPED;
         positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_NONE;
         emergencyActivated_b = false;

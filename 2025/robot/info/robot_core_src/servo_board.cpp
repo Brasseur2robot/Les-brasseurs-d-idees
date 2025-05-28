@@ -10,8 +10,8 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define SERVO_BOARD_DEBUG           true
-#define SERVO_BOARD_UPDATE_PERIOD   0.1   /* Refresh rate of the display 1/0.1 = 10fps */
+#define SERVO_BOARD_DEBUG                       false
+#define SERVO_BOARD_UPDATE_PERIOD               0.1   /* Refresh rate of the display 1/0.1 = 10fps */
 
 #define SERVO_BOARD_CENTER_LEFT_CATCH_ANGLE     30.0
 #define SERVO_BOARD_CENTER_LEFT_RELEASE_ANGLE   120.0
@@ -71,16 +71,16 @@ void ServoBoardInit()
   ServoBoardCenterRightRelease();
   ServoBoardExtLeftRelease();
   ServoBoardExtRightRelease();
-  delay(2000);
-  ServoBoardCenterLeftCatch();
-  ServoBoardCenterRightCatch();
-  ServoBoardExtLeftCatch();
-  ServoBoardExtRightCatch();
-  delay(2000);
-  ServoBoardCenterLeftRelease();
-  ServoBoardCenterRightRelease();
-  ServoBoardExtLeftRelease();
-  ServoBoardExtRightRelease();
+//  delay(2000);
+//  ServoBoardCenterLeftCatch();
+//  ServoBoardCenterRightCatch();
+//  ServoBoardExtLeftCatch();
+//  ServoBoardExtRightCatch();
+//  delay(2000);
+//  ServoBoardCenterLeftRelease();
+//  ServoBoardCenterRightRelease();
+//  ServoBoardExtLeftRelease();
+//  ServoBoardExtRightRelease();
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)

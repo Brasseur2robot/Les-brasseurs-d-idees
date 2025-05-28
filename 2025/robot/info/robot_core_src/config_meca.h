@@ -16,8 +16,8 @@
  */
 #define N_TOP_PER_WHEEL_TURN  2*500.0    /* Encoder top number per wheel turn [-] */
 #define FACTOR_DISTANCE       0.9308820107051 /* Factor to adjust the top count */
-#define FACTOR_WHEEL_LEFT     1.0 //0.99906059 * 1.001760657
-#define FACTOR_WHEEL_RIGHT    1.0 //1.00093941 * 0.998239343
+#define FACTOR_WHEEL_LEFT     1.0
+#define FACTOR_WHEEL_RIGHT    1.0
 /*
  * The Pami wheels are 4cm or 0.04m in diameter. The perimeter is PI*0.04=0.126m,
  * which is 1/(PI*0.04)= 8 wheel rotations to travel 1m. To convert in top number 
@@ -36,7 +36,7 @@
  * above to get A/2*Ntop*Wheelbase/Wheeldiameter/PI. This distance is needed on both
  * wheel, so *2.
  */
-#define WHEELBASE_M           0.250 * 1.00314877253   /* Wheelbase of the robot [m] */
+#define WHEELBASE_M           0.250 * 0.99802005834  /* Wheelbase of the robot [m] */
 //#define RAD_TO_TOP            N_TOP_PER_WHEEL_TURN / (WHEEL_DIAMETER_M / WHEELBASE_M ) / PI
 #define RAD_TO_TOP            (1989.4367886486 * FACTOR_DISTANCE)
 

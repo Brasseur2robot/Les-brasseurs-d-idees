@@ -68,7 +68,7 @@ void loop() {
 //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
 //  IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
-  //LedUpdate(DEBUG_TIME);
+  LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);
 //  SensorUpdate(DEBUG_TIME);
