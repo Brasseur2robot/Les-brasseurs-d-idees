@@ -35,6 +35,8 @@ typedef enum
  * Function Declarations
  ******************************************************************************/
 void IhmInit();
+void IhmStart();
+void IhmStop();
 void IhmUpdate(bool timeMeasure_b);
 
 void IhmDrawScreenMatch();

@@ -110,6 +110,10 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
     if ((distance_u16 > 0 ) && (distance_u16 < obstacleSensorThreshold_u16) )
     {
       obstacleSensorDetected_b = true;
+    } 
+    else 
+    {
+      obstacleSensorDetected_b = false;
     }
   }
   else

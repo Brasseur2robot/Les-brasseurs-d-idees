@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
+#include "ihm.h"
 #include "led.h"
 #include "motor.h"
 #include "obstacle_sensor.h"
@@ -40,6 +41,7 @@ int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
 PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 PositionManagerStateEn positionMgrState_en_g;
+PositionManagerStateEmergencyEn positionMgrEmergencyState_en_g;
 
 PidControllerSt pidDistance_st_g;
 PidControllerSt pidOrientation_st_g;
@@ -138,6 +140,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
         RampEmergencyStop(&rampOrientation_st_g);
         LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
         LedSetBlinkNb(LED4_ID, 2);
+        Serial.println("Emergency");
       }
     }
 
@@ -166,13 +169,19 @@ void PositionMgrUpdate(bool timeMeasure_b)
         break;
     }
     // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
-    ObstacleSensorSetThreshold( (uint16_t)(1.7 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
+    ObstacleSensorSetThreshold( (uint16_t)(2.0 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
 
-    if (emergencyActivated_b == false )
+    //Serial.println(ObstacleSensorDetected());
+
+    if (emergencyActivated_b == false)
     {
+      //Serial.println("X odometry : " + String(OdometryGetXMeter()));
+      //Serial.println("Y odometry : " + String(OdometryGetYMeter()));
+
       if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
       {
         positionMgrState_en_g = POSITION_STATE_STOPPED;
+        IhmStart();
       }
       else
       {
@@ -181,7 +190,25 @@ void PositionMgrUpdate(bool timeMeasure_b)
     }
     else
     {
-      positionMgrState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
+      positionMgrState_en_g = POSITION_STATE_EMERGENCY_ACTIVATED;
+      if (positionMgrEmergencyState_en_g == POSITION_STATE_EMERGENCY_END) 
+      {
+        Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
+        positionMgrState_en_g = POSITION_STATE_STOPPED;
+        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_NONE;
+        emergencyActivated_b = false;
+        //Serial.println(emergencyActivated_b);
+      }
+      else if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_RAMPDOWN)) )
+      {
+        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
+        //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_STOPPED");
+      }
+      else
+      {
+        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_MOVING;
+        //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_MOVING");
+      }
     }
 
     /* Sets the new reference on the pids */
@@ -263,22 +290,22 @@ void PositionMgrUpdate(bool timeMeasure_b)
       Serial.print(OdometryGetYMeter());
       Serial.print(", theta [rad] : ");
       Serial.print(OdometryGetThetaRad());
-      Serial.print(", ConsDistance [top] : ");
-      Serial.print(consigneDistance_d);
-      Serial.print(", distance [top] : ");
-      Serial.print(mesureDistance_d);
-      Serial.print(", ConsOrientation [top] : ");
-      Serial.print(consigneOrientation_d);
-      Serial.print(", orientation [top] : ");
-      Serial.print(mesureOrientation_d);
-      Serial.print(", commande Distance : ");
-      Serial.print(commandeDistance_d);
-      Serial.print(", commande Orientation : ");
-      Serial.print(commandeOrientation_d);
-      Serial.print(", commande gauche : ");
-      Serial.print(commandeDistance_d - commandeOrientation_d);
-      Serial.print(", commande droite : ");
-      Serial.print(commandeDistance_d + commandeOrientation_d);
+      //Serial.print(", ConsDistance [top] : ");
+      //Serial.print(consigneDistance_d);
+      //Serial.print(", distance [top] : ");
+      //Serial.print(mesureDistance_d);
+      //Serial.print(", ConsOrientation [top] : ");
+      //Serial.print(consigneOrientation_d);
+      //Serial.print(", orientation [top] : ");
+      //Serial.print(mesureOrientation_d);
+      //Serial.print(", commande Distance : ");
+      //Serial.print(commandeDistance_d);
+      //Serial.print(", commande Orientation : ");
+      //Serial.print(commandeOrientation_d);
+      //Serial.print(", commande gauche : ");
+      //Serial.print(commandeDistance_d - commandeOrientation_d);
+      //Serial.print(", commande droite : ");
+      //Serial.print(commandeDistance_d + commandeOrientation_d);
       Serial.println();
     }
 
@@ -303,6 +330,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
 */
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 {
+  IhmStop();
   positionMgrState_en_g = POSITION_STATE_MOVING;
 }
 
@@ -317,6 +345,7 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 */
 void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 {
+  IhmStop();
   //positionMgrStatus_u8_g = 0;
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
@@ -342,6 +371,7 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 */
 void PositionMgrGotoOrientationDegree(double theta_deg)
 {
+  IhmStop();
   //positionMgrStatus_u8_g = 0;
   //Serial.println(theta_deg);
   positionMgrState_en_g = POSITION_STATE_MOVING;
@@ -366,6 +396,17 @@ PositionManagerStateEn PositionMgrGetState()
 {
   //return positionMgrStatus_u8_g;
   return positionMgrState_en_g;
+}
+
+PositionManagerStateEmergencyEn PositionMgrGetEmergencyState()
+{
+  return positionMgrEmergencyState_en_g;
+}
+
+void PositionMgrSetEmergencyState(PositionManagerStateEmergencyEn state)
+{
+  //return positionMgrStatus_u8_g;
+  positionMgrEmergencyState_en_g = state;
 }
 
 /**

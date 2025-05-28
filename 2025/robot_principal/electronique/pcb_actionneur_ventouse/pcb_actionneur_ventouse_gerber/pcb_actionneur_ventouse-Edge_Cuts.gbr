@@ -1,0 +1,28 @@
+%TF.GenerationSoftware,KiCad,Pcbnew,8.0.7*%
+%TF.CreationDate,2024-12-12T10:30:31+01:00*%
+%TF.ProjectId,pcb_actionneur_ventouse,7063625f-6163-4746-996f-6e6e6575725f,rev?*%
+%TF.SameCoordinates,Original*%
+%TF.FileFunction,Profile,NP*%
+%FSLAX46Y46*%
+G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
+G04 Created by KiCad (PCBNEW 8.0.7) date 2024-12-12 10:30:31*
+%MOMM*%
+%LPD*%
+G01*
+G04 APERTURE LIST*
+%TA.AperFunction,Profile*%
+%ADD10C,0.050000*%
+%TD*%
+G04 APERTURE END LIST*
+D10*
+X163500000Y-50000000D02*
+G75*
+G02*
+X136500000Y-50000000I-13500000J0D01*
+G01*
+X136500000Y-50000000D02*
+G75*
+G02*
+X163500000Y-50000000I13500000J0D01*
+G01*
+M02*

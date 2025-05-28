@@ -192,19 +192,19 @@ void MotorRightSetSpeed(double motorSpeed_d)
   }
 }
 
-void MotorTest()
+void MotorTest(int8_t speed)
 {
   Serial.println("Left : 255, Right : 255");
-  MotorLeftSetSpeed(255);
-  MotorRightSetSpeed(255);
+  MotorLeftSetSpeed(speed);
+  MotorRightSetSpeed(speed);
   delay(1000);
   Serial.println("Left : 0, Right : 0");
   MotorLeftSetSpeed(0);
   MotorRightSetSpeed(0);
   delay(1000);
   Serial.println("Left : -255, Right : -255");
-  MotorLeftSetSpeed(-255);
-  MotorRightSetSpeed(-255);
+  MotorLeftSetSpeed(-speed);
+  MotorRightSetSpeed(-speed);
   delay(1000);
   Serial.println("Left : 0, Right : 0");
   MotorLeftSetSpeed(0);

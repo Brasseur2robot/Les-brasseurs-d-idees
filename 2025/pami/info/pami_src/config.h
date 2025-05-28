@@ -3,8 +3,10 @@
 
 /* Choose which robot is running the code */
 //#define SUMO_ZOPHON
-//#define PAMI_1
-#define PAMI_2
+#define PAMI_1
+//#define PAMI_2
+//#define PAMI_3
+//#define PAMI_4
 
 #include "config_control.h"
 #include "config_match.h"
