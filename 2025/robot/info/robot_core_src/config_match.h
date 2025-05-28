@@ -24,7 +24,8 @@
 #define ROBOT_WIDTH                 0.45
 #define ROBOT_BACKWIDTH             0.044
 
-#define MATCH_START_POSITION_X      (1.25) // + ROBOT_WIDTH / 2.0)
+#define MATCH_START_POSITION_X_YELLOW   (1.225)   // + ROBOT_WIDTH / 2.0)
+#define MATCH_START_POSITION_X_BLUE     (1.2)     // + ROBOT_WIDTH / 2.0)
 #define MATCH_START_POSITION_Y      (0.1 + ROBOT_BACKWIDTH)
 #define MATCH_START_POSITION_THETA  90.0
 
@@ -35,11 +36,11 @@
 /* côté jaune */
 inline pose_t trajectoryYellowPoseArray[6] = {
   /* Position de départ */
-  //{MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true},
+  //{MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true},
   /* Recule jusque poser la banière */
-  {MATCH_START_POSITION_X * 1000.0,  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true},
+  {MATCH_START_POSITION_X_YELLOW * 1000.0,  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true},
   /* Avance tout droit, pour pouvoir touner ensuite */
-  {MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true},
+  {MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true},
   /* Avance jusque les conserves du milieu */
   {1100.0,  700.0,  90.0,   MOVE_FORWARD,   false, true},
   /* Avance jusque après les conserves du milieu */
@@ -63,9 +64,9 @@ inline pose_t trajectoryBluePoseArray[6] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true},
   /* Recule jusque poser la banière */
-  {3000.0 - (MATCH_START_POSITION_X * 1000.0),  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true},
+  {3000.0 - (MATCH_START_POSITION_X_BLUE * 1000.0),  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true},
   /* Avance tout droit, pour pouvoir touner ensuite */
-  {3000.0 - MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true},
+  {3000.0 - MATCH_START_POSITION_X_BLUE * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true},
   /* Avance jusque les conserves du milieu */
   {3000.0 - 1100.0,  700.0,  90.0,   MOVE_FORWARD,   false, true},
   /* Avance jusque après les conserves du milieu */

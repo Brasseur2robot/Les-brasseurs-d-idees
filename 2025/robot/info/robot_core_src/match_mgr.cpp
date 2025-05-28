@@ -5,6 +5,7 @@
 #include "config.h"
 #include "led.h"
 #include "match_mgr.h"
+#include "obstacle_sensor.h"
 #include "position_mgr.h"
 
 /******************************************************************************
@@ -81,42 +82,42 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_COLOR_SELECTION:
         /* Waiting for color selection */
-//        if (MATCH_MGR_DEBUG)
-//          Serial.println("Waiting for color selection");
+        //        if (MATCH_MGR_DEBUG)
+        //          Serial.println("Waiting for color selection");
         break;
 
       case MATCH_STATE_BORDER_ADJUST:
         /* Adjusting to border */
-//        if (MATCH_MGR_DEBUG)
-//          Serial.println("Border calibration");
+        //        if (MATCH_MGR_DEBUG)
+        //          Serial.println("Border calibration");
         break;
 
       case MATCH_STATE_READY:
         /* Ready, waiting to start */
-//        if (MATCH_MGR_DEBUG)
-//          Serial.println("Ready to start");
+        //        if (MATCH_MGR_DEBUG)
+        //          Serial.println("Ready to start");
         //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
         break;
 
       case MATCH_STATE_ON_WAITING:
         /* In a wait timer */
-//        if (MATCH_MGR_DEBUG)
-//          Serial.println("Waiting");
+        //        if (MATCH_MGR_DEBUG)
+        //          Serial.println("Waiting");
         MatchMgrUpdateEndTimer();
         MatchMgrUpdateWaitingTimer();
         break;
 
       case MATCH_STATE_ON_MOVING:
         /* Moving */
-//        if (MATCH_MGR_DEBUG)
-//          Serial.println("Moving");
+        //        if (MATCH_MGR_DEBUG)
+        //          Serial.println("Moving");
         MatchMgrUpdateEndTimer();
         break;
 
       case MATCH_STATE_END:
         /* End of match */
-//        if (MATCH_MGR_DEBUG)
-//          Serial.println("End");
+        //        if (MATCH_MGR_DEBUG)
+        //          Serial.println("End");
         PositionMgrSetDistanceControl(false);     /* Sets the robot free of control loop */
         PositionMgrSetOrientationControl(false);
         //ActuatorServoStart();                   /* Headbang start! */
@@ -155,6 +156,7 @@ void MatchMgrSwitchState()
     if ((matchMgrColor_en_g != MATCH_COLOR_NONE) && (matchMgrState_en_g == MATCH_STATE_COLOR_SELECTION) )
     {
       matchMgrState_en_g = MATCH_STATE_BORDER_ADJUST;
+      ObstacleSensorStop();
     }
   }
 }
@@ -170,6 +172,8 @@ void MatchMgrStartMatch()
   matchMgrStartTimeMs_u32_g = millis();
   /* Set the start delay (use for a delayed Pami start) */
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
+  /* Start the obstacle sensor */
+  ObstacleSensorStart();
 
   if (MATCH_MGR_DEBUG)
   {

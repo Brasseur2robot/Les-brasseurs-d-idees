@@ -7,6 +7,7 @@
 #include "led.h"
 #include "motor.h"
 #include "match_mgr.h"
+#include "obstacle_sensor.h"
 #include "odometry.h"
 #include "pid.h"
 #include "position_mgr.h"
@@ -54,7 +55,7 @@ void setup() {
   LedInit();
   MatchMgrInit();
   MotorInit();
-//  ObstacleSensorInit();
+  ObstacleSensorInit();
   OdometryInit();
   PositionMgrInit();
 //  SensorInit();

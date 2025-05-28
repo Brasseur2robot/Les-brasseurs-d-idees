@@ -3,7 +3,9 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
+#include "led.h"
 #include "motor.h"
+#include "obstacle_sensor.h"
 #include "odometry.h"
 #include "pid.h"
 #include "position_mgr.h"
@@ -129,21 +131,21 @@ void PositionMgrUpdate(bool timeMeasure_b)
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
-    //ObstacleSensorUpdate(DEBUG_TIME);
+    ObstacleSensorUpdate(DEBUG_TIME);
 
-    //    /* Looks for obstacle detection, only if currently moving */
-    //    if (positionMgrState_en_g == POSITION_STATE_MOVING)
-    //    {
-    //      if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b == false) )
-    //      {
-    //        emergencyActivated_b = true;
-    //        RampEmergencyStop(&rampDistance_st_g);
-    //        RampEmergencyStop(&rampOrientation_st_g);
-    //        LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
-    //        LedSetBlinkNb(LED4_ID, 2);
-    //        Serial.println("Emergency");
-    //      }
-    //    }
+    /* Looks for obstacle detection, only if currently moving */
+    if (positionMgrState_en_g == POSITION_STATE_MOVING)
+    {
+      if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b == false) )
+      {
+        emergencyActivated_b = true;
+        RampEmergencyStop(&rampDistance_st_g);
+        RampEmergencyStop(&rampOrientation_st_g);
+        LedSetAnim(LED1_ID, ANIM_STATE_BLINK);
+        LedSetBlinkNb(LED1_ID, 2);
+        //Serial.println("Emergency");
+      }
+    }
 
     OdometryUpdate(DEBUG_TIME);
 
@@ -170,22 +172,12 @@ void PositionMgrUpdate(bool timeMeasure_b)
         break;
     }
     // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
-    //ObstacleSensorSetThreshold( (uint16_t)(2.0 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
-
+    ObstacleSensorSetThreshold( (uint16_t)(2.0 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
     //Serial.println(ObstacleSensorDetected());
 
     /* If no emergency activation (no obstacle in sight) */
     if (emergencyActivated_b == false)
     {
-//      if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
-//      {
-//        positionMgrState_en_g = POSITION_STATE_STOPPED;
-//        //IhmStart();
-//      }
-//      else
-//      {
-//        positionMgrState_en_g = POSITION_STATE_MOVING;
-//      }
       /* if Ramp init, then stopped */
       if ( (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT) )
       {
@@ -196,7 +188,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
       {
         /* if one of both ramp finished */
         if ( ( (positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) )
-            || ( (positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) ) )
+             || ( (positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) ) )
         {
           //Serial.println("Ramp finished");
           /* count tiemout detection */
@@ -227,7 +219,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
           /* else still moving */
           positionMgrState_en_g = POSITION_STATE_MOVING;
         }
-      }        
+      }
     }
     else /* if obstacle detected */
     {
@@ -577,10 +569,10 @@ void PositionMgrBlockingDetection(double distance_d, double orientation_d, doubl
   }
 
   if (POSITION_BLOCKING_DEBUG)
-{
-  Serial.println("");
+  {
+    Serial.println("");
   }
-  
+
   distanceLast_d = distance_d;
   orientationLast_d = orientation_d;
 }

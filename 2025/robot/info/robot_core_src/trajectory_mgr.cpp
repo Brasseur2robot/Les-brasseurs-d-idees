@@ -624,7 +624,6 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
 
   if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
   {
-    //ObstacleSensorStop();
     if (TRAJECTORY_DEBUG == true)
     {
       Serial.print("Before border Calib Index : ");
@@ -659,15 +658,18 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         {
           OdometrySetXMeter(ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(0.0);
+          PositionMgrSetOrientationControl(true);
+          PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true);
         }
         else
         {
           OdometrySetXMeter(3.0 - ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(180.0);
+          PositionMgrSetOrientationControl(true);
+          PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true);
         }
         /* Move forward X cm */
-        PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X - ROBOT_BACKWIDTH, true);
+
         break;
 
       case 2:
@@ -700,28 +702,27 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Great Hack */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          OdometrySetXMeter(MATCH_START_POSITION_X);
+          OdometrySetXMeter(MATCH_START_POSITION_X_YELLOW);
         }
         else
         {
-          OdometrySetXMeter(3.0 - MATCH_START_POSITION_X);
+          OdometrySetXMeter(3.0 - MATCH_START_POSITION_X_BLUE);
         }
         //OdometrySetYMeter(MATCH_START_POSITION_Y);
         OdometrySetThetaDeg(90.0);
 
         trajectoryFinished_b = true;
-        //ObstacleSensorStart();
         MatchMgrSetState(MATCH_STATE_READY);
         if (DEBUG_SIMULATION)
         {
           if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
           {
-            OdometrySetXMeter(MATCH_START_POSITION_X);
+            OdometrySetXMeter(MATCH_START_POSITION_X_YELLOW);
             OdometrySetYMeter(MATCH_START_POSITION_Y);
           }
           else
           {
-            OdometrySetXMeter(3.0 - MATCH_START_POSITION_X);
+            OdometrySetXMeter(3.0 - MATCH_START_POSITION_X_BLUE);
             OdometrySetYMeter(MATCH_START_POSITION_Y);
           }
           //OdometrySetThetaDeg(MATCH_START_POSITION_THETA);
