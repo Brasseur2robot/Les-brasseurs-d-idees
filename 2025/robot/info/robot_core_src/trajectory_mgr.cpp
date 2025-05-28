@@ -75,6 +75,7 @@ uint8_t Trajectory(double colorSide)
 {
   static uint8_t trajectoryIndex_u8 = 0;
   static bool trajectoryFinished_b = false;
+  uint8_t nbMovement = 0;
 
   static double xMeterActual = 0.0;
   static double yMeterActual = 0.0;
@@ -84,6 +85,7 @@ uint8_t Trajectory(double colorSide)
   static double thetaDegWaypoint = 0.0;
   static double distanceWaypoint = 0.0;
   static double orientationWaypoint = 0.0;
+  static bool   directionWaypoint_b = true;
 
   static double orientationToGo_d = 0.0;
   static double distanceToGo_d = 0.0;
@@ -120,6 +122,21 @@ uint8_t Trajectory(double colorSide)
     Serial.println();
   }
 
+  /* Hack : get the number of movement */
+  switch (MatchMgrGetColor())
+  {
+    case MATCH_COLOR_NONE:
+      break;
+
+    case MATCH_COLOR_BLUE:
+      nbMovement = nbMovementBlue;
+      break;
+
+    case MATCH_COLOR_YELLOW:
+      nbMovement = nbMovementYellow;
+      break;
+  }
+
   if (trajectoryIndex_u8 >= nbMovement)
   {
     trajectoryFinished_b = true;
@@ -136,30 +153,42 @@ uint8_t Trajectory(double colorSide)
 
       case TRAJECTORY_WAYPOINT_AIM:
         /* First align with target */
-        if (TRAJECTORY_DEBUG)
-        {
-          Serial.println("Aiming");
-        }
         /* Get the actual x y theta and computes the rotation and translation to do */
         xMeterActual = OdometryGetXMeter() * 1000.0;
         yMeterActual = OdometryGetYMeter() * 1000.0;
         thetaDegActual = OdometryGetThetaRad() * RAD_TO_DEG;
 
         /* Prepare trajectory towards next waypoint */
-        xMeterWaypoint = trajectoryPoseArray[trajectoryIndex_u8].x;
-        yMeterWaypoint = trajectoryPoseArray[trajectoryIndex_u8].y;
-        thetaDegWaypoint = trajectoryPoseArray[trajectoryIndex_u8].theta;
+        switch (MatchMgrGetColor())
+        {
+          case MATCH_COLOR_NONE:
+            break;
+
+          case MATCH_COLOR_YELLOW:
+            xMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].x;
+            yMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].y;
+            thetaDegWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].theta;
+            directionWaypoint_b = trajectoryYellowPoseArray[trajectoryIndex_u8].direction;
+            break;
+
+          case MATCH_COLOR_BLUE:
+            xMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].x;
+            yMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].y;
+            thetaDegWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].theta;
+            directionWaypoint_b = trajectoryBluePoseArray[trajectoryIndex_u8].direction;
+            break;
+        }
 
         /* Compute angle and distance */
         distanceWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, true);
         orientationWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, false);
 
         /* Forward move*/
-        if (trajectoryPoseArray[trajectoryIndex_u8].direction == true)
+        if (directionWaypoint_b == true)
         {
           orientationToGo_d = orientationWaypoint - thetaDegActual;
           distanceToGo_d = distanceWaypoint;
-          orientationFinalToGo_d = (thetaDegWaypoint - orientationWaypoint);
+          orientationFinalToGo_d = thetaDegWaypoint - orientationWaypoint; // necessary?
         }
         else /* Backward */
         {
@@ -205,13 +234,17 @@ uint8_t Trajectory(double colorSide)
           Serial.print(", theta=");
           Serial.println(thetaDegWaypoint);
           Serial.print("It is a ");
-          if (trajectoryPoseArray[trajectoryIndex_u8].direction == true)
-            Serial.println("forward move");
+          if (directionWaypoint_b == true)
+            Serial.print("forward move");
           else
-            Serial.println("backward move");
+            Serial.print("backward move");
+          if (thetaDegWaypoint == 361.0)
+            Serial.println(" No final alignement");
+          else
+            Serial.println();
           Serial.print("This means I need to rotate : ");
           Serial.print(orientationToGo_d);
-          Serial.print(", to go back : ");
+          Serial.print(", to move : ");
           Serial.print(distanceToGo_d);
           Serial.print(" and finally to rotate : ");
           Serial.print(orientationFinalToGo_d);
@@ -228,19 +261,28 @@ uint8_t Trajectory(double colorSide)
         /* Then go to waypoint */
         if (TRAJECTORY_DEBUG)
         {
-          Serial.println("Advance");
+          Serial.println("[Advance]");
         }
         /* Do the Go to */
         PositionMgrGotoDistanceMeter(distanceToGo_d, true);
-        /* Set the state to Rotation */
-        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ROTATION;
+        /* Set the state to Rotation, if alignement is required */
+        if (thetaDegWaypoint != 361.0)
+        {
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ROTATION;
+        }
+        else
+        {
+          /* Set the next waypoint in the trajectory */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+          trajectoryIndex_u8++;
+        }
         break;
 
       case TRAJECTORY_WAYPOINT_ROTATION:
         /* Then align with target orientation */
         if (TRAJECTORY_DEBUG)
         {
-          Serial.println("Final rotation");
+          Serial.println("[Final rotation]");
         }
         /* Do the Rotation */
         PositionMgrGotoOrientationDegree(orientationFinalToGo_d);
@@ -340,7 +382,7 @@ void TrajectoryMgrCalibTrajectory()
       break;
     case POSITION_STATE_MOVING:
       /* Nothing to do */
-      Serial.println("Traj loop : Moving");
+      //Serial.println("Traj loop : Moving");
       break;
     case POSITION_STATE_STOPPED:
       /* Next move */
@@ -427,8 +469,8 @@ void TrajectoryMgrMainTrajectory()
       break;
     case POSITION_STATE_EMERGENCY_ACTIVATED:
       /* What to do ?*/
-      //Serial.println("Emergency in trajectory_mgr");
-      EvasionMgr(colorSide, trajectoryIndex_u8);
+      Serial.println("Emergency in trajectory_mgr");
+      //EvasionMgr(colorSide, trajectoryIndex_u8);
       break;
     default:
       break;
@@ -600,6 +642,14 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
     {
       case 0:
         /* Move backwards until border, with no pids */
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          OdometrySetThetaDeg(0.0);
+        }
+        else
+        {
+          OdometrySetThetaDeg(180.0);
+        }
         PositionMgrSetOrientationControl(false);
         PositionMgrGotoDistanceMeter(-0.15, true);
         break;
@@ -648,17 +698,32 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Finished */
 
         /* Great Hack */
-        OdometrySetXMeter(MATCH_START_POSITION_X);
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          OdometrySetXMeter(MATCH_START_POSITION_X);
+        }
+        else
+        {
+          OdometrySetXMeter(3.0 - MATCH_START_POSITION_X);
+        }
         //OdometrySetYMeter(MATCH_START_POSITION_Y);
         OdometrySetThetaDeg(90.0);
-        
+
         trajectoryFinished_b = true;
         //ObstacleSensorStart();
         MatchMgrSetState(MATCH_STATE_READY);
         if (DEBUG_SIMULATION)
         {
-          OdometrySetXMeter(MATCH_START_POSITION_X);
-          OdometrySetYMeter(MATCH_START_POSITION_Y);
+          if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+          {
+            OdometrySetXMeter(MATCH_START_POSITION_X);
+            OdometrySetYMeter(MATCH_START_POSITION_Y);
+          }
+          else
+          {
+            OdometrySetXMeter(3.0 - MATCH_START_POSITION_X);
+            OdometrySetYMeter(MATCH_START_POSITION_Y);
+          }
           //OdometrySetThetaDeg(MATCH_START_POSITION_THETA);
         }
         break;

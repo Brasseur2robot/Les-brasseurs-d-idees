@@ -44,6 +44,9 @@ double odometryThetaRad_d_g;
 int32_t odometryDistanceTop_i32_g;
 int32_t odometryOrientationTop_i32_g;
 
+int32_t orient_precedente;
+int32_t orient;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -57,10 +60,10 @@ int32_t odometryOrientationTop_i32_g;
 */
 void OdometryInit()
 {
-//  pinMode(ENCODER_LEFT_PIN_A, INPUT);
-//  pinMode(ENCODER_LEFT_PIN_B, INPUT);
-//  pinMode(ENCODER_RIGHT_PIN_A, INPUT);
-//  pinMode(ENCODER_RIGHT_PIN_B, INPUT);
+  //  pinMode(ENCODER_LEFT_PIN_A, INPUT);
+  //  pinMode(ENCODER_LEFT_PIN_B, INPUT);
+  //  pinMode(ENCODER_RIGHT_PIN_A, INPUT);
+  //  pinMode(ENCODER_RIGHT_PIN_B, INPUT);
 
   // Enable the weak pull up resistors
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
@@ -68,7 +71,10 @@ void OdometryInit()
   encoderLeft.attachHalfQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
   // use pin 17 and 16 for the second encoder
   encoderRight.attachHalfQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
-  
+
+  encoderLeft.clearCount();
+  encoderRight.clearCount();
+
   odometryX_i32_g = 0L;
   odometryY_i32_g = 0L;
   odometryDistanceTop_i32_g = 0L;
@@ -135,7 +141,22 @@ void OdometrySetThetaDeg(double thetaDeg_d)
 {
   double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
+  Serial.print("[Odometry] Theta deg set to : ");
+  Serial.print(thetaDeg_d);
+  Serial.print(", Previous orient :  ");
+  Serial.print(double(odometryOrientationTop_i32_g) * 180.0 / PI);
+  Serial.print(", Error ");
+  Serial.print(thetaErrorTop_d * 180.0 / PI);
+  Serial.print(", Previous init : ");
+  Serial.print(double(orient_init_i32_g) * 180.0 / PI);
   orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
+  Serial.print(", Now : ");
+  Serial.print(double(orient_init_i32_g) * 180.0 / PI);
+  Serial.println();
+  orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
+  orient_precedente = orient;
+  
+  OdometryUpdate(false);
 }
 
 /*
@@ -151,7 +172,7 @@ void OdometryUpdate(bool timeMeasure_b)
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
 
-  static int32_t distance_precedente, orient_precedente;
+  static int32_t distance_precedente;
 
   int32_t delta_d;
   int32_t delta_orient;
@@ -168,6 +189,12 @@ void OdometryUpdate(bool timeMeasure_b)
   // Récupérons les mesures des codeurs
   distanceLeft_i32_g = encoderLeft.getCount() * FACTOR_WHEEL_LEFT;
   distanceRight_i32_g = encoderRight.getCount() * FACTOR_WHEEL_RIGHT;
+
+  if (DEBUG_SIMULATION)
+  {
+    distanceLeft_i32_g = 0;
+    distanceRight_i32_g = 0;
+  }
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
   int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
@@ -202,18 +229,19 @@ void OdometryUpdate(bool timeMeasure_b)
 
   if (ODOMETRY_DEBUG)
   {
+    Serial.print("[Odometry] ");
     Serial.print("d gauche = ");
-    Serial.println(distanceLeft_i32_g);
+    Serial.print(distanceLeft_i32_g);
     Serial.print(", d droite = ");
-    Serial.println(distanceRight_i32_g);
+    Serial.print(distanceRight_i32_g);
     Serial.print(", orientation = ");
-    Serial.println(orient);
+    Serial.print(orient);
     Serial.print(", Delta orient = ");
-    Serial.println(delta_orient);
+    Serial.print(delta_orient);
     Serial.print(", orientationMoyenne = ");
-    Serial.println(odometryOrientationTop_i32_g);
+    Serial.print(odometryOrientationTop_i32_g);
     Serial.print(", delta OrientRadian = ");
-    Serial.println(delta_orient_radian);
+    Serial.print(delta_orient_radian);
     Serial.print(", orientMoyRad = ");
     Serial.println(orient_moy_radian);
   }

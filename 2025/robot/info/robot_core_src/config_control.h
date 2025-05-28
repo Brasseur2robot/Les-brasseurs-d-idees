@@ -21,7 +21,7 @@
 #define KD_ORIENTATION      0.02
 
 #define VITESSE_SLOW        0.5   /* [m.s-1] */
-#define ACCELERATION_SLOW   0.3   /* [m.s-2] */
+#define ACCELERATION_SLOW   0.2   /* [m.s-2] */
 #define VITESSE_MAX         0.5   /* [m.s-1] */
 #define ACCELERATION_MAX    0.3   /* [m.s-2] */
 
