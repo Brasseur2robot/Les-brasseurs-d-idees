@@ -60,7 +60,7 @@ void EvasionMgr(double colorSide, uint8_t trajectoryIndex_u8)
       break;
 
     case POSITION_STATE_EMERGENCY_STOPPED:
-      Evasion(colorSide, evasionIndex_u8, trajectoryIndex_u8);
+      //Evasion(colorSide, evasionIndex_u8, trajectoryIndex_u8);
       //Serial.println("Stopped emergency");
       evasionIndex_u8++;
       break;

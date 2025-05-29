@@ -114,6 +114,11 @@ double OdometryGetThetaRad()
   return odometryThetaRad_d_g;
 }
 
+double OdometryGetThetaDeg()
+{
+  return odometryThetaRad_d_g * 180 / PI;
+}
+
 void OdometrySetXMeter(double xM_d)
 {
   odometryX_i32_g = (int32_t)MeterToTop(xM_d);
@@ -126,7 +131,7 @@ void OdometrySetYMeter(double yM_d)
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
-  odometryThetaRad_d_g = thetaDeg_d * PI / 180.0;
+  //odometryThetaRad_d_g = thetaDeg_d * PI / 180.0;
    
   double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
@@ -189,9 +194,9 @@ void OdometryUpdate(bool timeMeasure_b)
   odometryX_i32_g = odometryX_i32_g + (int32_t)dx; // valeurs exprimées dans le système d’unité robot
   odometryY_i32_g = odometryY_i32_g + (int32_t)dy;
 
-  Serial.println("Dx = " + String(odometryX_i32_g));
-  Serial.println("Dy = " + String(odometryY_i32_g));
-  Serial.println("delta_d" + String(odometryThetaRad_d_g));
+  //Serial.println("Dx = " + String(odometryX_i32_g));
+  //Serial.println("Dy = " + String(odometryY_i32_g));
+  //Serial.println("delta_d" + String(odometryThetaRad_d_g));
 
   orient_precedente = orient ; // actualisation de qn-1
   distance_precedente = odometryDistanceTop_i32_g ; //actualisation de Dn-1

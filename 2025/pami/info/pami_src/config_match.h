@@ -27,13 +27,13 @@
  #ifdef PAMI_1
 
  /* Match Parameters */
- #define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
+ #define DUREE_ATTENTE_S             87.0                       /* Wait time before start [s], should be 85 seconds */
  #define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
  
- #define MATCH_START_DELAY_S         2.0                       /* Pami delayed start time [s], should be 85 seconds */
+ #define MATCH_START_DELAY_S         87.0                       /* Pami delayed start time [s], should be 85 seconds */
  #define MATCH_START_DELAY_MS        MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
  
- #define MATCH_DURATION_S            98.0                     /* Match duration [s] */
+ #define MATCH_DURATION_S            99.0                     /* Match duration [s] */
  #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
  
  #define MATCH_START_POSITION_X      0.11
@@ -69,13 +69,13 @@
 #ifdef PAMI_2
 
 /* Match Parameter, -1.0, 1.0s */
-#define DUREE_ATTENTE_S             5.0                       /* Wait time before start [s], should be 85 seconds */
+#define DUREE_ATTENTE_S             91.0                       /* Wait time before start [s], should be 85 seconds */
 #define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
 
-#define MATCH_START_DELAY_S         5.0                       /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_S         91.0                       /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS        MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
-#define MATCH_DURATION_S            100.0                     /* Match duration [s] */
+#define MATCH_DURATION_S            99.0                     /* Match duration [s] */
 #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
 
 #define MATCH_START_POSITION_X      0.11
@@ -93,7 +93,7 @@
 
 inline pose_t trajectoryPoseArray[3] = {
   {X1, Y1, 0.0, 1.0, -1.0, DETECTION_ON},
-  {X1, Y1, ANGLE, 1.0, -1.0, DETECTION_OFF},
+  {X1, Y1, ANGLE, 1.0, -1.0, DETECTION_ON},
   {X2, Y2, ANGLE, 1.0, -1.0, DETECTION_ON}
 };
 #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
@@ -107,13 +107,13 @@ inline pose_t trajectoryPoseArray[3] = {
 #ifdef PAMI_3
 
 /* Match Parameters */
-#define DUREE_ATTENTE_S             4.0                       /* Wait time before start [s], should be 85 seconds */
+#define DUREE_ATTENTE_S             90.0                       /* Wait time before start [s], should be 85 seconds */
 #define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
 
-#define MATCH_START_DELAY_S         4.0                      /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_S         90.0                      /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS        MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
-#define MATCH_DURATION_S            100.0                     /* Match duration [s] */
+#define MATCH_DURATION_S            99.0                     /* Match duration [s] */
 #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
 
 #define MATCH_START_POSITION_X      0.11
@@ -131,7 +131,7 @@ inline pose_t trajectoryPoseArray[3] = {
 
 inline pose_t trajectoryPoseArray[3] = {
   {X1, Y1, 0.0, 1.0, -1.0, DETECTION_ON},
-  {X1, Y1, ANGLE, 1.0, -1.0, DETECTION_OFF},
+  {X1, Y1, ANGLE, 1.0, -1.0, DETECTION_ON},
   {X2, Y2, ANGLE, 1.0, -1.0, DETECTION_ON}
 };
 #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
@@ -144,13 +144,13 @@ inline pose_t trajectoryPoseArray[3] = {
  #ifdef PAMI_4
 
  /* Match Parameters */
- #define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
+ #define DUREE_ATTENTE_S             88.0                       /* Wait time before start [s], should be 85 seconds */
  #define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
  
- #define MATCH_START_DELAY_S         2.0                       /* Pami delayed start time [s], should be 85 seconds */
+ #define MATCH_START_DELAY_S         88.0                       /* Pami delayed start time [s], should be 85 seconds */
  #define MATCH_START_DELAY_MS        MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
  
- #define MATCH_DURATION_S            100.0                     /* Match duration [s] */
+ #define MATCH_DURATION_S            99.0                     /* Match duration [s] */
  #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
  
  #define MATCH_START_POSITION_X      0.11
@@ -166,12 +166,12 @@ inline pose_t trajectoryPoseArray[3] = {
  #define Y2                          1000.0
  #define ANGLE                       pythagoraCalculation(X1, Y1, X2, Y2, false)
  #define X3                          1900.0
- #define Y3                          1400.0
+ #define Y3                          1500.0
  #define ANGLE2                      pythagoraCalculation(X2, Y2, X3, Y3, false)
  
  inline pose_t trajectoryPoseArray[5] = {
-   {X1, Y1, 0.0, 1.0, -1.0, DETECTION_OFF},
-   {X1, Y1, ANGLE, 1.0, -1.0, DETECTION_OFF},
+   {X1, Y1, 0.0, 1.0, -1.0, DETECTION_ON},
+   {X1, Y1, ANGLE, 1.0, -1.0, DETECTION_ON},
    {X2, Y2, ANGLE, 1.0, -1.0, DETECTION_OFF},
    {X2, Y2, (-(ANGLE) + ANGLE2), 1.0, -1.0, DETECTION_OFF},
    {X3, Y3, (-(ANGLE) + ANGLE2), 1.0, -1.0, DETECTION_OFF}
