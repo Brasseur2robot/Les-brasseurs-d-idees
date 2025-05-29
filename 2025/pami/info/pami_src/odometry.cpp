@@ -131,8 +131,6 @@ void OdometrySetYMeter(double yM_d)
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
-  //odometryThetaRad_d_g = thetaDeg_d * PI / 180.0;
-   
   double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
   orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
@@ -171,7 +169,6 @@ void OdometryUpdate(bool timeMeasure_b)
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
   int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
-  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient - orient_precedente; // correspond à Dqn mais en pas
 
   odometryOrientationTop_i32_g = (orient + orient_precedente) / 2; // correspond à qmoy en pas
