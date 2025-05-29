@@ -15,10 +15,10 @@
 #define MATCH_DURATION_S            99.5                      /* Match duration [s] */
 #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
 
-#define MATCH_GOTO_WAIT_S           75.0                      /* Match time to go to waiting area */
-#define MATCH_GOTO_WAIT_MS          MATCH_GOTO_WAIT_S * 1000.0
+#define MATCH_GOTO_WAITFOREND_S     75.0                      /* Match time to go to waiting area */
+#define MATCH_GOTO_WAITFOREND_MS    MATCH_GOTO_WAITFOREND_S * 1000.0
 
-#define MATCH_GOTO_ENDZONE_S        95.0                      /* Match time to go to end zone */
+#define MATCH_GOTO_ENDZONE_S        93.0                      /* Match time to go to end zone */
 #define MATCH_GOTO_ENDZONE_MS       MATCH_GOTO_ENDZONE_S * 1000.0
 
 #define ROBOT_WIDTH                 0.45

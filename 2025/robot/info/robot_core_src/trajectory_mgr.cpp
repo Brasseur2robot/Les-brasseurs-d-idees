@@ -43,6 +43,10 @@ typedef enum
  ******************************************************************************/
 TrajectoryMgrWaypointState trajectoryMgrWaypointState_en_g;
 
+static bool trajectoryFinished_b = false;
+static uint8_t trajectoryIndex_u8 = 0;
+static uint8_t nbMovement = 0;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -63,6 +67,30 @@ void TrajectoryMgrInit()
   //OdometrySetThetaDeg(90.0);
 }
 
+void TrajectoryBaseInit()
+{
+  /* Hack : get the number of movement */
+  switch (MatchMgrGetColor())
+  {
+    case MATCH_COLOR_NONE:
+      break;
+
+    case MATCH_COLOR_BLUE:
+      nbMovement = nbMovementBlue;
+      break;
+
+    case MATCH_COLOR_YELLOW:
+      nbMovement = nbMovementYellow;
+      break;
+  }
+}
+
+void TrajectoryNewTrajectory()
+{
+  trajectoryFinished_b = false;
+  trajectoryIndex_u8 = 0;
+}
+
 /**
    @brief     This function define the differents trajectory
 
@@ -74,10 +102,6 @@ void TrajectoryMgrInit()
 */
 uint8_t Trajectory(double colorSide)
 {
-  static uint8_t trajectoryIndex_u8 = 0;
-  static bool trajectoryFinished_b = false;
-  uint8_t nbMovement = 0;
-
   static double xMeterActual = 0.0;
   static double yMeterActual = 0.0;
   static double thetaDegActual = 0.0;
@@ -124,21 +148,6 @@ uint8_t Trajectory(double colorSide)
     Serial.println();
   }
 
-  /* Hack : get the number of movement */
-  switch (MatchMgrGetColor())
-  {
-    case MATCH_COLOR_NONE:
-      break;
-
-    case MATCH_COLOR_BLUE:
-      nbMovement = nbMovementBlue;
-      break;
-
-    case MATCH_COLOR_YELLOW:
-      nbMovement = nbMovementYellow;
-      break;
-  }
-
   if (trajectoryIndex_u8 >= nbMovement)
   {
     trajectoryFinished_b = true;
@@ -172,6 +181,31 @@ uint8_t Trajectory(double colorSide)
             thetaDegWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryYellowPoseArray[trajectoryIndex_u8].direction;
             actuatorState_b = trajectoryYellowPoseArray[trajectoryIndex_u8].actuatorState;
+
+            if (MatchMgrGetEventWaitforEndState() == true )
+            {
+              MatchMgrResetEventWaitforEndState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = WaitingYellowPose_t.x;
+              yMeterWaypoint = WaitingYellowPose_t.y;
+              thetaDegWaypoint = WaitingYellowPose_t.theta;
+              directionWaypoint_b = WaitingYellowPose_t.direction;
+              actuatorState_b = WaitingYellowPose_t.actuatorState;
+              nbMovement = 1;
+
+            }
+
+            if (MatchMgrGetEventEndzoneState() == true )
+            {
+              MatchMgrResetEventEndzoneState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = EndZoneYellowPose_t.x;
+              yMeterWaypoint = EndZoneYellowPose_t.y;
+              thetaDegWaypoint = EndZoneYellowPose_t.theta;
+              directionWaypoint_b = EndZoneYellowPose_t.direction;
+              actuatorState_b = EndZoneYellowPose_t.actuatorState;
+              nbMovement = 1;
+            }
             break;
 
           case MATCH_COLOR_BLUE:
@@ -180,6 +214,30 @@ uint8_t Trajectory(double colorSide)
             thetaDegWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryBluePoseArray[trajectoryIndex_u8].direction;
             actuatorState_b = trajectoryBluePoseArray[trajectoryIndex_u8].actuatorState;
+
+            if (MatchMgrGetEventWaitforEndState() == true )
+            {
+              MatchMgrResetEventWaitforEndState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = WaitingBluePose_t.x;
+              yMeterWaypoint = WaitingBluePose_t.y;
+              thetaDegWaypoint = WaitingBluePose_t.theta;
+              directionWaypoint_b = WaitingBluePose_t.direction;
+              actuatorState_b = WaitingBluePose_t.actuatorState;
+              nbMovement = 1;
+            }
+
+            if (MatchMgrGetEventEndzoneState() == true )
+            {
+              MatchMgrResetEventEndzoneState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = EndZoneBluePose_t.x;
+              yMeterWaypoint = EndZoneBluePose_t.y;
+              thetaDegWaypoint = EndZoneBluePose_t.theta;
+              directionWaypoint_b = EndZoneBluePose_t.direction;
+              actuatorState_b = EndZoneBluePose_t.actuatorState;
+              nbMovement = 1;
+            }
             break;
         }
 
@@ -198,7 +256,7 @@ uint8_t Trajectory(double colorSide)
           ServoBoardExtLeftRelease();
           ServoBoardExtRightRelease();
         }
-        
+
         /* Compute angle and distance */
         distanceWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, true);
         orientationWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, false);

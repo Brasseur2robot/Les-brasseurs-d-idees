@@ -7,6 +7,7 @@
 #include "match_mgr.h"
 #include "obstacle_sensor.h"
 #include "position_mgr.h"
+#include "trajectory_mgr.h"
 
 /******************************************************************************
    Constants and Macros
@@ -38,6 +39,11 @@ MatchMgrColorEn matchMgrColor_en_g;
 uint32_t matchMgrWaitingTimerDuration_u32_g;
 uint32_t matchMgrWaitingTimerStartTime_u32_g;
 
+bool matchMgrEventGotoWaitforend_b;
+bool matchMgrEventGotoEndzone_b;
+bool matchMgrEventFlagGotoWaitforend_b;
+bool matchMgrEventFlagGotoEndzone_b;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -53,6 +59,11 @@ void MatchMgrInit()
   attachInterrupt(digitalPinToInterrupt(SWITCH_REED_START_PIN), MatchMgrSwitchState, CHANGE);
   /* Set up the interrupt on the color switch to change the color */
   attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
+
+  matchMgrEventGotoWaitforend_b = false;
+  matchMgrEventGotoEndzone_b = false;
+  matchMgrEventFlagGotoWaitforend_b = false;
+  matchMgrEventFlagGotoEndzone_b = false;
 }
 
 void MatchMgrUpdate(bool timeMeasure_b)
@@ -111,6 +122,7 @@ void MatchMgrUpdate(bool timeMeasure_b)
         /* Moving */
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Moving");
+        MatchMgrUpdateEventTimer();
         MatchMgrUpdateEndTimer();
         break;
 
@@ -174,6 +186,8 @@ void MatchMgrStartMatch()
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
   /* Start the obstacle sensor */
   ObstacleSensorStart();
+  /* Init Base trajectory */
+  TrajectoryBaseInit();
 
   if (MATCH_MGR_DEBUG)
   {
@@ -201,11 +215,79 @@ void MatchMgrUpdateEndTimer()
   {
     /* Proceed to end */
     matchMgrState_en_g = MATCH_STATE_END;
+    /* TODO signal this by leds! */
+
     if (MATCH_MGR_DEBUG)
     {
       Serial.println("Match end!");
     }
   }
+}
+
+void MatchMgrUpdateEventTimer()
+{
+  /* Should test the events */
+
+  /* Compute elapsed time */
+  matchMgrElapsedTimeMs_u32_g = millis() - matchMgrStartTimeMs_u32_g;
+
+  /* Test if it is time to event WAITFOREND */
+  if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_WAITFOREND_MS) && (matchMgrEventGotoWaitforend_b == false) )
+  {
+    matchMgrEventGotoWaitforend_b = true;
+    matchMgrEventFlagGotoWaitforend_b = true;
+    TrajectoryNewTrajectory();
+
+    /* Proceed to zone */
+    //matchMgrState_en_g = MATCH_STATE_END;
+    /* TODO signal this by leds! */
+
+    if (MATCH_MGR_DEBUG)
+    {
+      Serial.print("[Event] Time :");
+      Serial.print(matchMgrElapsedTimeMs_u32_g);
+      Serial.println("Event Goto WaitForEnd");
+    }
+  }
+
+  /* Test if it is time to event GOTOENDZONE */
+  if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_ENDZONE_MS) && (matchMgrEventGotoEndzone_b == false) )
+  {
+    matchMgrEventGotoEndzone_b = true;
+    matchMgrEventFlagGotoEndzone_b = true;
+    TrajectoryNewTrajectory();
+        
+    /* Proceed to zone */
+    //matchMgrState_en_g = MATCH_STATE_END;
+    /* TODO signal this by leds! */
+
+    if (MATCH_MGR_DEBUG)
+    {
+      Serial.print("[Event] Time :");
+      Serial.print(matchMgrElapsedTimeMs_u32_g);
+      Serial.println("Event Goto EndZone");
+    }
+  }
+}
+
+bool MatchMgrGetEventWaitforEndState()
+{
+  return matchMgrEventFlagGotoWaitforend_b;
+}
+
+void MatchMgrResetEventWaitforEndState()
+{
+  matchMgrEventFlagGotoWaitforend_b = false;
+}
+
+bool MatchMgrGetEventEndzoneState()
+{
+  return matchMgrEventFlagGotoEndzone_b;
+}
+
+void MatchMgrResetEventEndzoneState()
+{
+  matchMgrEventFlagGotoEndzone_b = false;
 }
 
 void MatchMgrSetWaitingTimer(long waitingPeriodMs_u32)
