@@ -14,6 +14,7 @@ int32_t OdometryGetOrientationTop();
 double OdometryGetXMeter();
 double OdometryGetYMeter();
 double OdometryGetThetaRad();
+double OdometryGetThetaDeg();
 void OdometrySetXMeter(double xM_d);
 void OdometrySetYMeter(double xM_d);
 void OdometrySetThetaDeg(double thetaDeg_d);

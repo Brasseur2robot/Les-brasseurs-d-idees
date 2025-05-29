@@ -114,6 +114,11 @@ double OdometryGetThetaRad()
   return odometryThetaRad_d_g;
 }
 
+double OdometryGetThetaDeg()
+{
+  return odometryThetaRad_d_g * 180 / PI;
+}
+
 void OdometrySetXMeter(double xM_d)
 {
   odometryX_i32_g = (int32_t)MeterToTop(xM_d);
@@ -163,8 +168,7 @@ void OdometryUpdate(bool timeMeasure_b)
   distanceRight_i32_g = encoderRight.read() * FACTOR_WHEEL_RIGHT;
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
-  int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
-  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
+  int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient - orient_precedente; // correspond à Dqn mais en pas
 
   odometryOrientationTop_i32_g = (orient + orient_precedente) / 2; // correspond à qmoy en pas
@@ -189,6 +193,7 @@ void OdometryUpdate(bool timeMeasure_b)
 
   //Serial.println("Dx = " + String(odometryX_i32_g));
   //Serial.println("Dy = " + String(odometryY_i32_g));
+  //Serial.println("delta_d" + String(odometryThetaRad_d_g));
 
   orient_precedente = orient ; // actualisation de qn-1
   distance_precedente = odometryDistanceTop_i32_g ; //actualisation de Dn-1

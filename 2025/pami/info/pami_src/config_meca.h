@@ -207,7 +207,7 @@
  */
 #define WHEELBASE_M           0.079   /* Wheelbase of the pami [m] */
 //#define RAD_TO_TOP            N_TOP_PER_WHEEL_TURN / (WHEEL_DIAMETER_M / WHEELBASE_M ) / PI
-#define RAD_TO_TOP            (577.3776988 * 1.050614621 * FACTOR_DISTANCE)
+#define RAD_TO_TOP            (577.3776988 * 0.9409304756 * FACTOR_DISTANCE)
 
 #define BACK_LENGTH           0.057 /* Length between wheel center and the back of the PAMI */
 
