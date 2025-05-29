@@ -33,28 +33,31 @@
 #define MOVE_BACKWARD               false
 #define NO_THETA_ALIGN              361.0
 
+#define ACTUATOR_CATCH              true
+#define ACTUATOR_RELEASE            false         
+
 /* côté jaune */
 inline pose_t trajectoryYellowPoseArray[6] = {
   /* Position de départ */
-  //{MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true},
+  //{MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE},
   /* Recule jusque poser la banière */
-  {MATCH_START_POSITION_X_YELLOW * 1000.0,  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true},
+  {MATCH_START_POSITION_X_YELLOW * 1000.0,  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true, ACTUATOR_RELEASE},
   /* Avance tout droit, pour pouvoir touner ensuite */
-  {MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true},
+  {MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE},
   /* Avance jusque les conserves du milieu */
-  {1100.0,  700.0,  90.0,   MOVE_FORWARD,   false, true},
+  {1100.0,  700.0,  90.0,   MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
   /* Avance jusque après les conserves du milieu */
-  {1100.0,  900.0,  NO_THETA_ALIGN,   MOVE_FORWARD,   false, true},
+  {1100.0,  900.0,  NO_THETA_ALIGN,   MOVE_FORWARD,   false, true, ACTUATOR_CATCH},
   /* Demi-tour */
-  {1100.0,  900.0,  -90.0,  MOVE_FORWARD,   false, true},
+  {1100.0,  900.0,  -90.0,  MOVE_FORWARD,   false, true, ACTUATOR_CATCH},
   /* Aller jusqu'en zone de construction */
-  {1200.0,  300.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   false, true},
+  {1200.0,  300.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
 //  /* Reculer */
-//  {1200.0,  500.0,  -90.0,  MOVE_BACKWARD,  false, true},
+//  {1200.0,  500.0,  -90.0,  MOVE_BACKWARD,  false, true, ACTUATOR_RELEASE},
 //  /* Se placer devant la petite zone / tribune */
-//  {750.0,   500.0,  -90.0,  MOVE_FORWARD,   false, true},
+//  {750.0,   500.0,  -90.0,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
 //  /* Pousser */
-//  {750.0,   200.0,  -90.0,  MOVE_FORWARD,   false, true},
+//  {750.0,   200.0,  -90.0,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
 };
 
 #define nbMovementYellow                  sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
@@ -62,36 +65,44 @@ inline pose_t trajectoryYellowPoseArray[6] = {
 /* côté jaune */
 inline pose_t trajectoryBluePoseArray[6] = {
   /* Position de départ */
-  //{MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true},
+  //{MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE},
   /* Recule jusque poser la banière */
-  {3000.0 - (MATCH_START_POSITION_X_BLUE * 1000.0),  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true},
+  {3000.0 - (MATCH_START_POSITION_X_BLUE * 1000.0),  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true, ACTUATOR_RELEASE},
   /* Avance tout droit, pour pouvoir touner ensuite */
-  {3000.0 - MATCH_START_POSITION_X_BLUE * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true},
+  {3000.0 - MATCH_START_POSITION_X_BLUE * 1000.0,  MATCH_START_POSITION_Y * 1000.0,    NO_THETA_ALIGN,              MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE},
   /* Avance jusque les conserves du milieu */
-  {3000.0 - 1100.0,  700.0,  90.0,   MOVE_FORWARD,   false, true},
+  {3000.0 - 1100.0,  700.0,  90.0,   MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
   /* Avance jusque après les conserves du milieu */
-  {3000.0 - 1100.0,  900.0,  NO_THETA_ALIGN,   MOVE_FORWARD,   false, true},
+  {3000.0 - 1100.0,  900.0,  NO_THETA_ALIGN,   MOVE_FORWARD,   false, true, ACTUATOR_CATCH},
   /* Demi-tour */
-  {3000.0 - 1100.0,  900.0,  -90.0,  MOVE_FORWARD,   false, true},
+  {3000.0 - 1100.0,  900.0,  -90.0,  MOVE_FORWARD,   false, true, ACTUATOR_CATCH},
   /* Aller jusqu'en zone de construction */
-  {3000.0 - 1200.0,  300.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   false, true},
+  {3000.0 - 1200.0,  300.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
 //  /* Reculer */
-//  {1200.0,  500.0,  -90.0,  MOVE_BACKWARD,  false, true},
+//  {1200.0,  500.0,  -90.0,  MOVE_BACKWARD,  false, true, ACTUATOR_RELEASE},
 //  /* Se placer devant la petite zone / tribune */
-//  {750.0,   500.0,  -90.0,  MOVE_FORWARD,   false, true},
+//  {750.0,   500.0,  -90.0,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
 //  /* Pousser */
-//  {750.0,   200.0,  -90.0,  MOVE_FORWARD,   false, true},
+//  {750.0,   200.0,  -90.0,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE},
 };
 
 #define nbMovementBlue                  sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
 
-inline pose_t WaitingPose_t =
+inline pose_t WaitingYellowPose_t =
 /* Position d'attente */
   {350.0,  1200.0,  90.0, MOVE_FORWARD,   false,  true};
-inline pose_t EndZonePose_t =
+inline pose_t EndZoneYellowPose_t =
 /* Position de fin de match */
   {350.0,  1600.0,  90.0, MOVE_FORWARD,   false,  true};
 
+
+inline pose_t WaitingBluePose_t =
+/* Position d'attente */
+  {3000.0 - 350.0,  1200.0,  90.0, MOVE_FORWARD,   false,  true};
+inline pose_t EndZoneBluePose_t =
+/* Position de fin de match */
+  {3000.0 - 350.0,  1600.0,  90.0, MOVE_FORWARD,   false,  true};
+  
 #endif
 
 #endif

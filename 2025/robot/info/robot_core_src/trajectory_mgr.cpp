@@ -7,6 +7,7 @@
 #include "match_mgr.h"
 #include "odometry.h"
 #include "position_mgr.h"
+#include "servo_board.h"
 #include "trajectory_mgr.h"
 #include "trajectory_evasion.h"
 #include "trajectory_pythagora.h"
@@ -86,6 +87,7 @@ uint8_t Trajectory(double colorSide)
   static double distanceWaypoint = 0.0;
   static double orientationWaypoint = 0.0;
   static bool   directionWaypoint_b = true;
+  static double actuatorState_b = false;
 
   static double orientationToGo_d = 0.0;
   static double distanceToGo_d = 0.0;
@@ -169,6 +171,7 @@ uint8_t Trajectory(double colorSide)
             yMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].y;
             thetaDegWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryYellowPoseArray[trajectoryIndex_u8].direction;
+            actuatorState_b = trajectoryYellowPoseArray[trajectoryIndex_u8].actuatorState;
             break;
 
           case MATCH_COLOR_BLUE:
@@ -176,9 +179,26 @@ uint8_t Trajectory(double colorSide)
             yMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].y;
             thetaDegWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryBluePoseArray[trajectoryIndex_u8].direction;
+            actuatorState_b = trajectoryBluePoseArray[trajectoryIndex_u8].actuatorState;
             break;
         }
 
+        /* Do the actuator */
+        if (actuatorState_b == true)
+        {
+          ServoBoardCenterLeftCatch();
+          ServoBoardCenterRightCatch();
+          ServoBoardExtLeftCatch();
+          ServoBoardExtRightCatch();
+        }
+        else
+        {
+          ServoBoardCenterLeftRelease();
+          ServoBoardCenterRightRelease();
+          ServoBoardExtLeftRelease();
+          ServoBoardExtRightRelease();
+        }
+        
         /* Compute angle and distance */
         distanceWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, true);
         orientationWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, false);

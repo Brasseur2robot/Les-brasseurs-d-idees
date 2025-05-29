@@ -28,6 +28,7 @@ typedef struct PoseStruct {
     bool direction;             // if true, forward move else backwards
     bool resetTheta;            // if theta is to be reset
     bool obstacleSensorEnable;  // if obstacle sensor active or not
+    bool actuatorState;         // if true = catch, else release
 } pose_t;
 
 /******************************************************************************
