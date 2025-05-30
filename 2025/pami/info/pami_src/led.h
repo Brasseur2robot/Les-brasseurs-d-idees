@@ -4,11 +4,11 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define LED1_ID      0
-#define LED2_ID      1
-#define LED3_ID      2
-#define LED4_ID      3
-#define LED5_ID      4
+#define LED1_ID 0
+#define LED2_ID 1
+#define LED3_ID 2
+#define LED4_ID 3
+#define LED5_ID 4
 
 #define ANIM_STATE_OFF    0
 #define ANIM_STATE_ON     1

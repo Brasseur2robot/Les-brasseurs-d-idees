@@ -64,10 +64,10 @@ void setup() {
 }
 
 void loop() {
-//  MotorTest(MOTOR_DEADZONE);
-//  OdometryEncoderTest();
+  // MotorTest(MOTOR_DEADZONE);
+  // OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
-  //IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
+  // IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
   LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);

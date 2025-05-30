@@ -44,6 +44,9 @@ double odometryThetaRad_d_g;
 int32_t odometryDistanceTop_i32_g;
 int32_t odometryOrientationTop_i32_g;
 
+int32_t orient_precedente;
+int32_t orient;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -131,9 +134,34 @@ void OdometrySetYMeter(double yM_d)
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
-  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
+  double thetaTop_d = RadToTop(thetaDeg_d * DEG_TO_RAD);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
+  
+  if (ODOMETRY_DEBUG)
+  {
+    //  Serial.print("[Odometry] Theta deg set to : ");
+    //  Serial.print(thetaDeg_d);
+    //  Serial.print(", Previous orient :  ");
+    //  Serial.print(double(odometryOrientationTop_i32_g) * RAD_TO_DEG);
+    //  Serial.print(", Error ");
+    //  Serial.print(thetaErrorTop_d * RAD_TO_DEG);
+    //  Serial.print(", Previous init : ");
+    //  Serial.print(double(orient_init_i32_g) * RAD_TO_DEG);
+  }
+  
   orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
+  
+  if (ODOMETRY_DEBUG)
+  {
+    //  Serial.print(", Now : ");
+    //  Serial.print(double(orient_init_i32_g) * RAD_TO_DEG);
+    //  Serial.println();
+  }
+    
+  orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
+  orient_precedente = orient;
+    
+  OdometryUpdate(false);
 }
 
 /*
@@ -149,7 +177,7 @@ void OdometryUpdate(bool timeMeasure_b)
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
 
-  static int32_t distance_precedente, orient_precedente;
+  static int32_t distance_precedente;
 
   int32_t delta_d;
   int32_t delta_orient;
@@ -168,7 +196,7 @@ void OdometryUpdate(bool timeMeasure_b)
   distanceRight_i32_g = encoderRight.read() * FACTOR_WHEEL_RIGHT;
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
-  int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
+  orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient - orient_precedente; // correspond à Dqn mais en pas
 
   odometryOrientationTop_i32_g = (orient + orient_precedente) / 2; // correspond à qmoy en pas

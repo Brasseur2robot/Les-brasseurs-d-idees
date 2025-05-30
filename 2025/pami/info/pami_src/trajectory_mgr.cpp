@@ -557,8 +557,14 @@ void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8)
     ObstacleSensorStop();
     if (TRAJECTORY_DEBUG == true)
     {
+      if (trajectoryIndex_u8 == 0)
+      {
+        Serial.println("#### Trajectory Calibrate 2 ####");
+      }
       Serial.print("Index : ");
       Serial.println(trajectoryIndex_u8);
+      Serial.print("Angle calibrage  : ");
+      Serial.println(OdometryGetThetaDeg());
     }
     
     PositionMgrSetOrientationControl(true);
@@ -573,7 +579,7 @@ void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8)
         /* Reset the Y coordinate, and the theta orientation */
         OdometrySetYMeter(2.0 - BACK_LENGTH);
         //PositionMgrSetOrientationControl(false);
-        //OdometrySetThetaDeg(-90.0);
+        OdometrySetThetaDeg(-90.0);
         
         /* Move forward Y cm */
         PositionMgrGotoDistanceMeter(MATCH_START_POSITION_Y - BACK_LENGTH, true);
@@ -601,12 +607,12 @@ void TrajectoryCalibrateBorder2(uint8_t trajectoryIndex_u8)
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
           OdometrySetXMeter(BACK_LENGTH);
-          //OdometrySetThetaDeg(0.0);
+          OdometrySetThetaDeg(0.0);
         }
         else
         {
           OdometrySetXMeter(3.0 - BACK_LENGTH);
-          //OdometrySetThetaDeg(180.0);
+          OdometrySetThetaDeg(180.0);
         }
         /* Move forward X cm */
         PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X - BACK_LENGTH, true);
