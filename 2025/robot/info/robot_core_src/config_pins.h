@@ -28,7 +28,6 @@
 #define ENCODER_RIGHT_PIN_B   A3
 
 /* Stepper Pins */
-//#define STEPPER_XYZ_EN        XX
 #define STEPPER_X_STEP        23
 #define STEPPER_X_DIR         19
 #define STEPPER_Y_STEP        D12

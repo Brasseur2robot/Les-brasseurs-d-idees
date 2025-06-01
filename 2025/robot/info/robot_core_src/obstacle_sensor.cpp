@@ -7,6 +7,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include <VL53L0X_mod.h>
+#include "config.h"
 #include "led.h"
 #include "Wire.h"
 
@@ -51,6 +52,7 @@ uint16_t obstacleSensorThreshold_u16;
 */
 void ObstacleSensorInit()
 {
+#if DEBUG_SIMULATION == false
   sensor.setTimeout(500);
   if (!sensor.init())
   {
@@ -61,7 +63,9 @@ void ObstacleSensorInit()
   {
     LedSetAnim(LED1_ID, ANIM_STATE_ON);
   }
-
+#else
+    Serial.println("Simulation, no sensor connected");
+#endif
   obstacleSensorDetected_b = false;
   obstacleSensorThreshold_u16 = OBSTACLE_SENSOR_THRESHOLD_MM;
 }

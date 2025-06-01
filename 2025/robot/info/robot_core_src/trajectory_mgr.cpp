@@ -4,9 +4,11 @@
 #include <Arduino.h>
 #include "config.h"
 #include "config_match.h"
+#include "actuator.h"
 #include "match_mgr.h"
 #include "odometry.h"
 #include "position_mgr.h"
+#include "servo_board.h"
 #include "trajectory_mgr.h"
 #include "trajectory_evasion.h"
 #include "trajectory_pythagora.h"
@@ -42,6 +44,10 @@ typedef enum
  ******************************************************************************/
 TrajectoryMgrWaypointState trajectoryMgrWaypointState_en_g;
 
+static bool trajectoryFinished_b = false;
+static uint8_t trajectoryIndex_u8 = 0;
+static uint8_t nbMovement = 0;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -62,6 +68,30 @@ void TrajectoryMgrInit()
   //OdometrySetThetaDeg(90.0);
 }
 
+void TrajectoryBaseInit()
+{
+  /* Hack : get the number of movement */
+  switch (MatchMgrGetColor())
+  {
+    case MATCH_COLOR_NONE:
+      break;
+
+    case MATCH_COLOR_BLUE:
+      nbMovement = nbMovementBlue;
+      break;
+
+    case MATCH_COLOR_YELLOW:
+      nbMovement = nbMovementYellow;
+      break;
+  }
+}
+
+void TrajectoryNewTrajectory()
+{
+  trajectoryFinished_b = false;
+  trajectoryIndex_u8 = 0;
+}
+
 /**
    @brief     This function define the differents trajectory
 
@@ -73,10 +103,6 @@ void TrajectoryMgrInit()
 */
 uint8_t Trajectory(double colorSide)
 {
-  static uint8_t trajectoryIndex_u8 = 0;
-  static bool trajectoryFinished_b = false;
-  uint8_t nbMovement = 0;
-
   static double xMeterActual = 0.0;
   static double yMeterActual = 0.0;
   static double thetaDegActual = 0.0;
@@ -86,6 +112,9 @@ uint8_t Trajectory(double colorSide)
   static double distanceWaypoint = 0.0;
   static double orientationWaypoint = 0.0;
   static bool   directionWaypoint_b = true;
+  static double actuatorState_b = false;
+  static uint32_t waitingTimeMs_u32 = 0;
+  static uint8_t clawState_u8;
 
   static double orientationToGo_d = 0.0;
   static double distanceToGo_d = 0.0;
@@ -93,6 +122,9 @@ uint8_t Trajectory(double colorSide)
 
 
   if (TRAJECTORY_DEBUG) {
+    Serial.print("[Time] ");
+    Serial.print(MatchMgrGetElapsedTimeS());
+    Serial.print("s");
     Serial.print("Trajectory Index : ");
     Serial.println(trajectoryIndex_u8);
     Serial.print("Nombre movement : ");
@@ -120,21 +152,6 @@ uint8_t Trajectory(double colorSide)
         break;
     }
     Serial.println();
-  }
-
-  /* Hack : get the number of movement */
-  switch (MatchMgrGetColor())
-  {
-    case MATCH_COLOR_NONE:
-      break;
-
-    case MATCH_COLOR_BLUE:
-      nbMovement = nbMovementBlue;
-      break;
-
-    case MATCH_COLOR_YELLOW:
-      nbMovement = nbMovementYellow;
-      break;
   }
 
   if (trajectoryIndex_u8 >= nbMovement)
@@ -169,6 +186,38 @@ uint8_t Trajectory(double colorSide)
             yMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].y;
             thetaDegWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryYellowPoseArray[trajectoryIndex_u8].direction;
+            actuatorState_b = trajectoryYellowPoseArray[trajectoryIndex_u8].actuatorState;
+            waitingTimeMs_u32 = trajectoryYellowPoseArray[trajectoryIndex_u8].waitingTimeMs_u32;
+            clawState_u8 = trajectoryYellowPoseArray[trajectoryIndex_u8].clawState_u8;
+
+            if (MatchMgrGetEventWaitforEndState() == true )
+            {
+              MatchMgrResetEventWaitforEndState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = WaitingYellowPose_t.x;
+              yMeterWaypoint = WaitingYellowPose_t.y;
+              thetaDegWaypoint = WaitingYellowPose_t.theta;
+              directionWaypoint_b = WaitingYellowPose_t.direction;
+              actuatorState_b = WaitingYellowPose_t.actuatorState;
+              waitingTimeMs_u32 = WaitingYellowPose_t.waitingTimeMs_u32;
+              clawState_u8 = WaitingYellowPose_t.clawState_u8;
+              nbMovement = 1;
+
+            }
+
+            if (MatchMgrGetEventEndzoneState() == true )
+            {
+              MatchMgrResetEventEndzoneState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = EndZoneYellowPose_t.x;
+              yMeterWaypoint = EndZoneYellowPose_t.y;
+              thetaDegWaypoint = EndZoneYellowPose_t.theta;
+              directionWaypoint_b = EndZoneYellowPose_t.direction;
+              actuatorState_b = EndZoneYellowPose_t.actuatorState;
+              waitingTimeMs_u32 = WaitingYellowPose_t.waitingTimeMs_u32;
+              clawState_u8 = WaitingYellowPose_t.clawState_u8;
+              nbMovement = 1;
+            }
             break;
 
           case MATCH_COLOR_BLUE:
@@ -176,7 +225,54 @@ uint8_t Trajectory(double colorSide)
             yMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].y;
             thetaDegWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryBluePoseArray[trajectoryIndex_u8].direction;
+            actuatorState_b = trajectoryBluePoseArray[trajectoryIndex_u8].actuatorState;
+            waitingTimeMs_u32 = trajectoryBluePoseArray[trajectoryIndex_u8].waitingTimeMs_u32;
+            clawState_u8 = trajectoryBluePoseArray[trajectoryIndex_u8].clawState_u8;
+
+            if (MatchMgrGetEventWaitforEndState() == true )
+            {
+              MatchMgrResetEventWaitforEndState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = WaitingBluePose_t.x;
+              yMeterWaypoint = WaitingBluePose_t.y;
+              thetaDegWaypoint = WaitingBluePose_t.theta;
+              directionWaypoint_b = WaitingBluePose_t.direction;
+              actuatorState_b = WaitingBluePose_t.actuatorState;
+              waitingTimeMs_u32 = WaitingBluePose_t.waitingTimeMs_u32;
+              clawState_u8 = WaitingBluePose_t.clawState_u8;
+              nbMovement = 1;
+            }
+
+            if (MatchMgrGetEventEndzoneState() == true )
+            {
+              MatchMgrResetEventEndzoneState();
+              Serial.println("Event Wait for End loaded");
+              xMeterWaypoint = EndZoneBluePose_t.x;
+              yMeterWaypoint = EndZoneBluePose_t.y;
+              thetaDegWaypoint = EndZoneBluePose_t.theta;
+              directionWaypoint_b = EndZoneBluePose_t.direction;
+              actuatorState_b = EndZoneBluePose_t.actuatorState;
+              waitingTimeMs_u32 = EndZoneBluePose_t.waitingTimeMs_u32;
+              clawState_u8 = EndZoneBluePose_t.clawState_u8;
+              nbMovement = 1;
+            }
             break;
+        }
+
+        /* Do the actuator */
+        if (actuatorState_b == true)
+        {
+          ServoBoardCenterLeftCatch();
+          ServoBoardCenterRightCatch();
+          ServoBoardExtLeftCatch();
+          ServoBoardExtRightCatch();
+        }
+        else
+        {
+          ServoBoardCenterLeftRelease();
+          ServoBoardCenterRightRelease();
+          ServoBoardExtLeftRelease();
+          ServoBoardExtRightRelease();
         }
 
         /* Compute angle and distance */
@@ -221,7 +317,7 @@ uint8_t Trajectory(double colorSide)
 
         if (TRAJECTORY_DEBUG)
         {
-          Serial.print("[Aiming] I am at point x=");
+          Serial.print(" [Aiming] I am at point x=");
           Serial.print(xMeterActual);
           Serial.print(", y=");
           Serial.print(yMeterActual);
@@ -274,7 +370,38 @@ uint8_t Trajectory(double colorSide)
         {
           /* Set the next waypoint in the trajectory */
           trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+          /* Test if it needs to wait */
+          if (waitingTimeMs_u32 != 0)
+          {
+            MatchMgrSetWaitingTimer(waitingTimeMs_u32);
+          }
+          /* Claw */
+          switch (clawState_u8)
+          {
+            case CLAW_NOT:
+              /* Nothing to do */
+              break;
+
+            case CLAW_OUT:
+              ActuatorClawOut();
+              break;
+
+            case CLAW_IN:
+              ActuatorClawIn();
+              break;
+
+            default:
+              break;
+          }
+
           trajectoryIndex_u8++;
+
+          if (DEBUG_SIMULATION)
+          {
+            OdometrySetXMeter(xMeterWaypoint / 1000.0);
+            OdometrySetYMeter(yMeterWaypoint / 1000.0);
+            OdometrySetThetaDeg((OdometryGetThetaRad() * 180 / PI) + orientationToGo_d);
+          }
         }
         break;
 
@@ -288,6 +415,30 @@ uint8_t Trajectory(double colorSide)
         PositionMgrGotoOrientationDegree(orientationFinalToGo_d);
         /* Set the next waypoint in the trajectory */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+        /* Test if it needs to wait */
+        if (waitingTimeMs_u32 != 0)
+        {
+          MatchMgrSetWaitingTimer(waitingTimeMs_u32);
+        }
+        /* Claw */
+        switch (clawState_u8)
+        {
+          case CLAW_NOT:
+            /* Nothing to do */
+            break;
+
+          case CLAW_OUT:
+            ActuatorClawOut();
+            break;
+
+          case CLAW_IN:
+            ActuatorClawIn();
+            break;
+
+          default:
+            break;
+        }
+
         trajectoryIndex_u8++;
 
         if (DEBUG_SIMULATION)

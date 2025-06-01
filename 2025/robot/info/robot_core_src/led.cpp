@@ -180,17 +180,7 @@ void LedUpdate(bool timeMeasure_b)
     }
     pixels.setPixelColor(0, pixels.Color(ledAnimLum[LED1_ID], ledAnimLum[LED2_ID], ledAnimLum[LED3_ID]));
     pixels.show();
-    //delay(1);
-    //Serial.print(ledAnimInc[ledId]);
-    //Serial.print(" ");
-    //Serial.print(ledAnimLum[ledId]);
-    //Serial.print(" ");
   }
-  //Serial.println();
-
-  // Serial.print(inc);
-  // Serial.print(" ");
-  // Serial.println(lum);
 
   if (timeMeasure_b == true)
   {
