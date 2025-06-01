@@ -11,4 +11,7 @@ void ActuatorStepperXMove(uint16_t stepNb_u16);
 void ActuatorStepperYMove(uint16_t stepNb_u16);
 void ActuatorStepperZMove(uint16_t stepNb_u16);
 
+void ActuatorClawOut();
+void ActuatorClawIn();
+
 #endif

@@ -52,7 +52,7 @@ uint16_t obstacleSensorThreshold_u16;
 */
 void ObstacleSensorInit()
 {
-#ifndef DEBUG_SIMULATION
+#if DEBUG_SIMULATION == false
   sensor.setTimeout(500);
   if (!sensor.init())
   {

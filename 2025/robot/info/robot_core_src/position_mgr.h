@@ -29,6 +29,8 @@ typedef struct PoseStruct {
     bool resetTheta;            // if theta is to be reset
     bool obstacleSensorEnable;  // if obstacle sensor active or not
     bool actuatorState;         // if true = catch, else release
+    uint32_t waitingTimeMs_u32; // if non null, waitingTime after arriving at position
+    uint8_t clawState_u8;       // if 0, nothing to do, if 1 clawOut, if 2 clawIn
 } pose_t;
 
 /******************************************************************************

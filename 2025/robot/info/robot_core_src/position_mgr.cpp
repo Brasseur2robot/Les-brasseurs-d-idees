@@ -116,11 +116,12 @@ void PositionMgrUpdate(bool timeMeasure_b)
   /* Manages the update loop every pidGetDeltaTime() */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (DELTA_TIME_S * 1000.0) )
   {
-    /* issue a warning if more than a 50% increase in loop time */
-    //    if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (PidGetDeltaTime() * 1000.0 * 1.5) )
-    //    {
-    //      Serial.println("Position Manager Overtime");
-    //    }
+//    /* issue a warning if more than a 50% increase in loop time */
+//    if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (PidGetDeltaTime(&pidDistance_st_g) * 1000.0 * 1.2) )
+//    {
+//      Serial.print("Position Manager Overtime");
+//      Serial.println(currentTime_u32 - lastExecutionTime_u32);
+//    }
 
     uint32_t durationMeasureStart_u32 = 0;
     uint32_t durationMeasure_u32 = 0;

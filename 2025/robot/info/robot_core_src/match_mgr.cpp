@@ -197,6 +197,7 @@ void MatchMgrStartMatch()
 
 double MatchMgrGetElapsedTimeS()
 {
+  matchMgrElapsedTimeMs_u32_g = millis() - matchMgrStartTimeMs_u32_g;
   return ((double)matchMgrElapsedTimeMs_u32_g / 1000.0);
 }
 
@@ -290,7 +291,7 @@ void MatchMgrResetEventEndzoneState()
   matchMgrEventFlagGotoEndzone_b = false;
 }
 
-void MatchMgrSetWaitingTimer(long waitingPeriodMs_u32)
+void MatchMgrSetWaitingTimer(uint32_t waitingPeriodMs_u32)
 {
   /* Set the match manager to on_waiting */
   /* This should be done only if robot is not moving !!! */
