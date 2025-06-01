@@ -2,16 +2,15 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include "trajectory_mgr.h"
 #include "config.h"
 #include "led.h"
 #include "match_mgr.h"
 #include "obstacle_sensor.h"
 #include "odometry.h"
 #include "position_mgr.h"
-#include "trajectory_mgr.h"
 #include "trajectory_evasion.h"
 #include "config_match.h"
-#include "config.h"
 #include "trajectory_pythagora.h"
 
 /********************************************************************Encoder**********
@@ -42,17 +41,6 @@
  ******************************************************************************/
 
 /**
-   @brief     This function inits the trajectory manager module.
-
-
-   @param     none
-
-   @result    none
-
-*/
-void TrajectoryMgrInit()
-{
-}
 
 /**
    @brief     This function define the differents trajectory
@@ -70,21 +58,21 @@ void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
 
   #if defined(PAMI_1) || defined(PAMI_2) || defined(PAMI_3) || defined(PAMI_4)
 
-    if (TRAJECTORY_DEBUG) {
+
+    if (TRAJECTORY_DEBUG) 
+    {
       Serial.print("Trajectory Index : ");
       Serial.println(trajectoryIndex_u8);
       Serial.print("Nombre movement : ");
       Serial.println(nbMovement);
-      Serial.print("Trajectoire finis ? : ");
-      Serial.println(trajectoryFinished_b);
       /* Serial.println(trajectoryPoseArray[trajectoryIndex_u8].theta);
       Serial.println(trajectoryPoseArray[2].theta);
       Serial.println(trajectoryPoseArray[trajectoryIndex_u8+1].theta); */
-      }
+    }
 
     if (trajectoryIndex_u8 >= nbMovement) 
     {
-        trajectoryFinished_b = true;
+      trajectoryFinished_b = true;
     }
 
     else if (trajectoryFinished_b == false)
@@ -100,7 +88,7 @@ void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
         ObstacleSensorStop();
       }
 
-      else if (trajectoryPoseArray[trajectoryIndex_u8=1].obstacleSensorEnable == 1.0)
+      else if (trajectoryPoseArray[trajectoryIndex_u8+1].obstacleSensorEnable == 1.0)
       {
         if (TRAJECTORY_DEBUG) 
           {
@@ -131,10 +119,12 @@ void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
 
         if ((trajectoryPoseArray[trajectoryIndex_u8].x != trajectoryPoseArray[trajectoryIndex_u8+1].x) && (trajectoryPoseArray[trajectoryIndex_u8].y != trajectoryPoseArray[trajectoryIndex_u8+1].y)) 
         {
-          double hypothenuseLength = pythagoraCalculation(trajectoryPoseArray[trajectoryIndex_u8].x, trajectoryPoseArray[trajectoryIndex_u8].y, trajectoryPoseArray[trajectoryIndex_u8+1].x, trajectoryPoseArray[trajectoryIndex_u8+1].y, true);
+          double hypothenuseLength = pythagoraCalculation(trajectoryPoseArray[trajectoryIndex_u8].x, trajectoryPoseArray[trajectoryIndex_u8].y, trajectoryPoseArray[trajectoryIndex_u8+1].x, trajectoryPoseArray[trajectoryIndex_u8+1].y, 1.0);
 
           if (TRAJECTORY_DEBUG) 
           {
+            Serial.println("x1 " + String(trajectoryPoseArray[trajectoryIndex_u8].x) + ", y1 " + String(trajectoryPoseArray[trajectoryIndex_u8].y));
+            Serial.println("x2 " + String(trajectoryPoseArray[trajectoryIndex_u8+1].x) + ", y2 " + String(trajectoryPoseArray[trajectoryIndex_u8+1].y));
             Serial.println("Translation hypothénuse d'une distance : " + String(hypothenuseLength) + " mètre(s)");
           }
 
@@ -207,6 +197,13 @@ void Trajectory(double colorSide, uint8_t trajectoryIndex_u8)
           }
         }
       }
+
+      if (TRAJECTORY_DEBUG)
+      {
+        Serial.print("Trajectoire finis ? : ");
+        Serial.println(trajectoryFinished_b);
+      }
+
     }
   #endif
 }
@@ -227,6 +224,9 @@ void TrajectoryMgrUpdate(bool timeMeasure_b)
 
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
+
+  //Serial.println(OdometryGetXMeter());
+  //Serial.println(OdometryGetYMeter());
 
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (TRAJECTORY_UPDATE_PERIOD_S * 1000.0) )

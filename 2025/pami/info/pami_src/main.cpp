@@ -60,7 +60,6 @@ void setup() {
   OdometryInit();
   PositionMgrInit();
   SensorInit();
-  //TrajectoryMgrInit();
   //CustomTimerInit();
 }
 

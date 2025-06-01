@@ -175,8 +175,6 @@ void PositionMgrUpdate(bool timeMeasure_b)
 
     if (emergencyActivated_b == false)
     {
-      //Serial.println("X odometry : " + String(OdometryGetXMeter()));
-      //Serial.println("Y odometry : " + String(OdometryGetYMeter()));
 
       if ( ((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) )
       {
