@@ -158,8 +158,8 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_
  
     if (evasionFinished_b == false)
     {
-      if (lengthAfterEvasion <= 0.05)
-      {
+      /* if (lengthAfterEvasion <= 0.05)
+      { */
         switch (evasionIndex_u8)
         {
           case 0:
@@ -169,6 +169,7 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_
               Serial.println("EVASION COURTE");
               Serial.println("###############");
               Serial.println("//Evasion étape n°0");
+              Serial.println("Angle actuel : " + String(OdometryGetThetaDeg()));
               Serial.println("Rotation avec l'angle " + String(colorSide * evasionAngleTooShort1_d));
             }
             PositionMgrGotoOrientationDegree(colorSide * evasionAngleTooShort1_d);
@@ -178,6 +179,7 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_
             if (TRAJECTORY_EVASION_DEBUG) 
             { 
               Serial.println("//Evasion étape n°1");
+              Serial.println("Angle actuel : " + String(OdometryGetThetaDeg()));
               Serial.println("Translation d'une distance de " + String(evasionTranslationTooShort1_d));
             }
             PositionMgrGotoDistanceMeter(evasionTranslationTooShort1_d, true);
@@ -229,6 +231,15 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_
             break;
 
           case 7:
+            if (TRAJECTORY_EVASION_DEBUG)
+            {
+              Serial.println("//Evasion étape n°7");
+              Serial.println("Translation d'une distance de " + String(lengthAfterEvasion));
+            }
+            PositionMgrGotoDistanceMeter(lengthAfterEvasion, true);
+            break;
+          
+          case 8:
             if (TRAJECTORY_EVASION_DEBUG) 
             {
               Serial.println("Fin d'évitement"); 
@@ -243,7 +254,7 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_
             break;
         }
       }
-      else 
+      /* else 
       {
         switch (evasionIndex_u8) 
         {
@@ -332,7 +343,7 @@ void Evasion(double colorSide, uint8_t evasionIndex_u8, uint8_t trajectoryIndex_
           default:
             break;  
         }
-      }
-    }
+      } */
+    // }
   #endif
 }

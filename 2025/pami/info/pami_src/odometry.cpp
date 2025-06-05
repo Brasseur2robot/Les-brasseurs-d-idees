@@ -14,6 +14,7 @@
    Constants and Macros
  ******************************************************************************/
 #define ODOMETRY_DEBUG  false
+#define RAD_TO_TOP_DEBUG  false
 
 /******************************************************************************
   Types declarations
@@ -119,7 +120,7 @@ double OdometryGetThetaRad()
 
 double OdometryGetThetaDeg()
 {
-  return odometryThetaRad_d_g * 180 / PI;
+  return odometryThetaRad_d_g * RAD_TO_DEG;
 }
 
 void OdometrySetXMeter(double xM_d)
@@ -293,5 +294,11 @@ double RadToTop(double radian)
   double nTop = 0.0;
   //nTop = radian * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL / DIAMETER_ROBOT ) / 2.0 / PI;
   nTop = radian * RAD_TO_TOP;
+  if (RAD_TO_TOP_DEBUG)
+  {
+    Serial.println("Radian : " + String(radian));
+    Serial.println("RAD_TO_TOP : " + String(RAD_TO_TOP));
+    Serial.println("nTop : " + String(nTop));
+  }
   return nTop;
 }
