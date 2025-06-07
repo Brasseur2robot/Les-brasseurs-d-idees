@@ -6,28 +6,29 @@
  ******************************************************************************/
 typedef enum
 {
-  POSITION_STATE_NONE = 0u,         /* No state */
-  POSITION_STATE_MOVING = 1u,       /* Position manager is moving */
-  POSITION_STATE_STOPPED = 2u,      /* Position manager finished his move, ready for antother one */
+  POSITION_STATE_NONE = 0u,                /* No state */
+  POSITION_STATE_MOVING = 1u,              /* Position manager is moving */
+  POSITION_STATE_STOPPED = 2u,             /* Position manager finished his move, ready for antother one */
   POSITION_STATE_EMERGENCY_ACTIVATED = 3u, /* Position manager swap to the emergency trajectory */
-} PositionManagerStateEn;           /* Enumeration used to select the position manager state */
+} PositionManagerStateEn;                  /* Enumeration used to select the position manager state */
 
 typedef enum
 {
   POSITION_STATE_EMERGENCY_NONE = 0u,         /* No state */
-  POSITION_STATE_EMERGENCY_STOPPED = 1u, /* Position manager is stopped in emergency */
-  POSITION_STATE_EMERGENCY_MOVING = 2u, /* Position manager is moving in emergency */
-  POSITION_STATE_EMERGENCY_END = 3u, /* Position manager is at the end of the emergency */
-} PositionManagerStateEmergencyEn;      /* Enumeration used to select the position manager emergency state */
+  POSITION_STATE_EMERGENCY_STOPPED = 1u,      /* Position manager is stopped in emergency */
+  POSITION_STATE_EMERGENCY_MOVING = 2u,       /* Position manager is moving in emergency */
+  POSITION_STATE_EMERGENCY_END = 3u,          /* Position manager is at the end of the emergency */
+} PositionManagerStateEmergencyEn;            /* Enumeration used to select the position manager emergency state */
 
-typedef struct PoseStruct {
-    // Member definitions
-    double x;
-    double y;
-    double theta;
-    double direction;
-    double resetTheta;
-    double obstacleSensorEnable;
+typedef struct PoseStruct
+{
+  // Member definitions
+  double x;
+  double y;
+  double theta;
+  double direction;
+  double resetTheta;
+  double obstacleSensorEnable;
 } pose_t;
 
 /******************************************************************************

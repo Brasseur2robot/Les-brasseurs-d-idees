@@ -2,8 +2,7 @@
 #define config_h_
 
 /* Choose which robot is running the code */
-//#define SUMO_ZOPHON
-#define PAMI_1
+//#define PAMI_1
 //#define PAMI_2
 //#define PAMI_3
 //#define PAMI_4
@@ -14,11 +13,11 @@
 #include "config_pins.h"
 
 /* Common parameters */
-#define SERIAL_SPEED          1000000
-#define DEBUG_TIME            false
+#define SERIAL_SPEED 1000000
+#define DEBUG_TIME   false
 
 /* Utils */
-#define DEG_TO_RAD            PI / 180.0
-#define RAD_TO_DEG            180.0 / PI
+#define DEG_TO_RAD PI / 180.0
+#define RAD_TO_DEG 180.0 / PI
 
 #endif

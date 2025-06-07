@@ -10,14 +10,14 @@
  ******************************************************************************/
 typedef enum
 {
-  RAMP_STATE_NONE = 0u, /* No state selected */
-  RAMP_STATE_INIT = 1u, /* Ramp */
-  RAMP_STATE_START = 2u, /* Ramp */
-  RAMP_STATE_RAMPUP = 3u, /* Ramp */
+  RAMP_STATE_NONE = 0u,       /* No state selected */
+  RAMP_STATE_INIT = 1u,       /* Ramp */
+  RAMP_STATE_START = 2u,      /* Ramp */
+  RAMP_STATE_RAMPUP = 3u,     /* Ramp */
   RAMP_STATE_CONTINUOUS = 4u, /* Ramp */
-  RAMP_STATE_RAMPDOWN = 5u, /* Ramp */
-  RAMP_STATE_FINISHED = 6u, /* Ramp */
-} RampStateEn; /* Enumeration used to select the ramp state */
+  RAMP_STATE_RAMPDOWN = 5u,   /* Ramp */
+  RAMP_STATE_FINISHED = 6u,   /* Ramp */
+} RampStateEn;                /* Enumeration used to select the ramp state */
 
 typedef struct
 {

@@ -172,7 +172,8 @@ void ObstacleSensorSetThreshold(uint16_t value_u16)
 
    @result    none
 
-*/bool ObstacleSensorDetected()
+*/
+bool ObstacleSensorDetected()
 {
   return obstacleSensorDetected_b;
 }

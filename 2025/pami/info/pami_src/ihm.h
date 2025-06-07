@@ -4,11 +4,12 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define IHM_DISPLAY_SCREEN_NUMBER   5u
+#define IHM_DISPLAY_SCREEN_NUMBER 5u
 
-#define LOGO_HEIGHT   32
-#define LOGO_WIDTH    32
-static const unsigned char PROGMEM logo_bmp[] = {
+#define LOGO_HEIGHT 32
+#define LOGO_WIDTH 32
+static const unsigned char PROGMEM logo_bmp[] = 
+{
   0x00, 0x00, 0x00, 0x00, 0x00, 0x0F, 0xF0, 0x00, 0x00, 0x31, 0x0C, 0x00, 0x00, 0xC2, 0x83, 0x00,
   0x01, 0x01, 0x00, 0x80, 0x02, 0x00, 0x80, 0x40, 0x04, 0x01, 0xC0, 0x20, 0x08, 0x02, 0x20, 0x10,
   0x10, 0x1F, 0xF8, 0x08, 0x10, 0x20, 0x04, 0x08, 0x20, 0x40, 0x02, 0x04, 0x20, 0x40, 0x02, 0x04,
@@ -21,15 +22,15 @@ static const unsigned char PROGMEM logo_bmp[] = {
 /******************************************************************************
    Types declarations
  ******************************************************************************/
-typedef enum
+typedef enum 
 {
-  IHM_DISPLAY_SCREEN_NONE = 0u,                   /* No color selected */
-  IHM_DISPLAY_SCREEN_MATCH = 1u,                  /* Match screen */
-  IHM_DISPLAY_SCREEN_SENSOR_DEBUG = 2u,           /* Sensor debug screen */
-  IHM_DISPLAY_SCREEN_MOTOR_DEBUG = 3u,            /* Motor debug screen */
-  IHM_DISPLAY_SCREEN_CONTROL_DEBUG = 4u,          /* Control debug screen */
-  IHM_DISPLAY_SCREEN_LOGO = 5u,                   /* Logo screen */
-} IhmDisplayScreenEn; /* Enumeration used to select the screen to display */
+  IHM_DISPLAY_SCREEN_NONE = 0u,          /* No color selected */
+  IHM_DISPLAY_SCREEN_MATCH = 1u,         /* Match screen */
+  IHM_DISPLAY_SCREEN_SENSOR_DEBUG = 2u,  /* Sensor debug screen */
+  IHM_DISPLAY_SCREEN_MOTOR_DEBUG = 3u,   /* Motor debug screen */
+  IHM_DISPLAY_SCREEN_CONTROL_DEBUG = 4u, /* Control debug screen */
+  IHM_DISPLAY_SCREEN_LOGO = 5u,          /* Logo screen */
+} IhmDisplayScreenEn;                    /* Enumeration used to select the screen to display */
 
 /******************************************************************************
  * Function Declarations

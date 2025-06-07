@@ -450,7 +450,7 @@ void PositionMgrGotoOrientationDegree(double theta_deg)
   startDistance_i32_g = OdometryGetDistanceTop();
   startOrientation_i32_g = OdometryGetOrientationTop();
 
-  RampNew(&rampOrientation_st_g, (int32_t)RadToTop(theta_deg * PI / 180.0), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+  RampNew(&rampOrientation_st_g, (int32_t)RadToTop(theta_deg * DEG_TO_RAD), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
 }
 
 /**

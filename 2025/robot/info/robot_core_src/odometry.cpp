@@ -139,19 +139,19 @@ void OdometrySetYMeter(double yM_d)
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
-  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
+  double thetaTop_d = RadToTop(thetaDeg_d * DEG_TO_RAD);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
 //  Serial.print("[Odometry] Theta deg set to : ");
 //  Serial.print(thetaDeg_d);
 //  Serial.print(", Previous orient :  ");
-//  Serial.print(double(odometryOrientationTop_i32_g) * 180.0 / PI);
+//  Serial.print(double(odometryOrientationTop_i32_g) * RAD_TO_DEG);
 //  Serial.print(", Error ");
-//  Serial.print(thetaErrorTop_d * 180.0 / PI);
+//  Serial.print(thetaErrorTop_d * RAD_TO_DEG);
 //  Serial.print(", Previous init : ");
-//  Serial.print(double(orient_init_i32_g) * 180.0 / PI);
+//  Serial.print(double(orient_init_i32_g) * RAD_TO_DEG);
   orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
 //  Serial.print(", Now : ");
-//  Serial.print(double(orient_init_i32_g) * 180.0 / PI);
+//  Serial.print(double(orient_init_i32_g) * RAD_TO_DEG);
 //  Serial.println();
   orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
   orient_precedente = orient;
