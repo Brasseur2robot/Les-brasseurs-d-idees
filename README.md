@@ -8,10 +8,8 @@ Codebase de l'équipe légende des brasseurs d'idées concourant à la coupe de 
 
 ## Historique
 
-- [2025](https://github.com/Brasseur2robot/Les-brasseurs-d-idees/tree/2025).
+- [2025](https://github.com/Brasseur2robot/Les-brasseurs-d-idees/tree/2025)
 
 ## Palmarès
 
 - 2025 : 25ème au classement général et 9ème classement légende
-
-## License
