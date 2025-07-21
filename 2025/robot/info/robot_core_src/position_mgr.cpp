@@ -132,7 +132,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
-    ObstacleSensorUpdate(DEBUG_TIME);
+    //ObstacleSensorUpdate(DEBUG_TIME);
 
     /* Looks for obstacle detection, only if currently moving */
     if (positionMgrState_en_g == POSITION_STATE_MOVING)

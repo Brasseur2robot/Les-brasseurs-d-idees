@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "actuator.h"
 #include "config.h"
+#include "ihm.h"
 #include "led.h"
 #include "motor.h"
 #include "match_mgr.h"
@@ -50,29 +51,31 @@ void setup() {
   pinMode(SWITCH_REED_START_PIN, INPUT_PULLUP);
 
   /* Init de tous les modules */
+  Serial.println();
+  Serial.println("Init Robot Core Brd");
   ActuatorInit();
-//  IhmInit();
+  IhmInit();
   LedInit();
   MatchMgrInit();
   MotorInit();
-  ObstacleSensorInit();
+  //  ObstacleSensorInit();
   OdometryInit();
   PositionMgrInit();
-//  SensorInit();
-  ServoBoardInit();
+  //  SensorInit();
+  //  ServoBoardInit();
   TrajectoryMgrInit();
-//CustomTimerInit();
+  //CustomTimerInit();
 }
 
 void loop() {
-//  MotorTest(255);
-//  OdometryEncoderTest();
+  //  MotorTest(255);
+  //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
-//  IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
+  IhmUpdate(DEBUG_TIME);
   LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);
-//  SensorUpdate(DEBUG_TIME);
-  ServoBoardUpdate(DEBUG_TIME);
+  //  SensorUpdate(DEBUG_TIME);
+  //  ServoBoardUpdate(DEBUG_TIME);
   TrajectoryMgrUpdate(DEBUG_TIME);
 }

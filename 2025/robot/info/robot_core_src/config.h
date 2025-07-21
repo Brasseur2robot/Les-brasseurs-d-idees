@@ -15,7 +15,7 @@
 #define SERIAL_SPEED          1000000
 
 #define DEBUG_TIME            false
-#define DEBUG_SIMULATION      false
+#define DEBUG_SIMULATION      true
 
 /* Utils */
 #define DEG_TO_RAD            PI / 180.0
