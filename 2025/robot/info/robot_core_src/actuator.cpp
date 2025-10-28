@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <AccelStepper.h>
 #include <Dynamixel2Arduino.h>
+#include <TMC2209.h>
 #include "actuator.h"
 #include "config.h"
 
@@ -59,27 +60,24 @@ using namespace ControlTableItem;
 
 Dynamixel2Arduino dxl(SerialDynamixel, DYNAMIXEL_CTRL);
 
+HardwareSerial SerialStepperTmc(2);
+HardwareSerial& serial_stream = SerialStepperTmc;
+// Instantiate TMC2209
+TMC2209 stepperDriver01;
+TMC2209 stepperDriver02;
+TMC2209 stepperDriver03;
+#define STEPPER_TMC_BAUDRATE 115200
+#define REPLY_DELAY 10
+
+#define stepperDriverNb 3
+TMC2209 stepperDriver_st[stepperDriverNb];
+bool stepperDriverMoving_b[stepperDriverNb];
+bool stepperDriverEnable_b[stepperDriverNb];
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
 void ActuatorInit() {
-  // pinMode(STEPPER_X_STEP, OUTPUT);
-  // pinMode(STEPPER_X_DIR, OUTPUT);
-  // pinMode(STEPPER_Y_STEP, OUTPUT);
-  // pinMode(STEPPER_Y_DIR, OUTPUT);
-  // pinMode(STEPPER_Z_STEP, OUTPUT);
-  // pinMode(STEPPER_Z_DIR, OUTPUT);
-
-  // stepperX.setMaxSpeed(STEPPER_X_SPEED);
-  // stepperX.setAcceleration(STEPPER_X_ACCEL);
-  // stepperY.setMaxSpeed(STEPPER_Y_SPEED);
-  // stepperY.setAcceleration(STEPPER_Y_ACCEL);
-  // stepperZ.setMaxSpeed(STEPPER_Z_SPEED);
-  // stepperZ.setAcceleration(STEPPER_Z_ACCEL);
-
-  // stepperXMoving_b = false;
-  // stepperYMoving_b = false;
-  // stepperZMoving_b = false;
 
   /* Start the serial port where the dynamixel adapter is connected */
   SerialDynamixel.begin(DXL_BAUDRATE, SERIAL_8N1, DYNAMIXEL_RX, DYNAMIXEL_TX);
@@ -97,6 +95,117 @@ void ActuatorInit() {
 
   // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
   dxl.writeControlTableItem(PROFILE_VELOCITY, 10, 0);
+
+  /* Init the TMC drivers */
+  const uint8_t MICROSTEPS_PER_STEP_EXPONENT_MIN = 0;
+  const uint8_t MICROSTEPS_PER_STEP_EXPONENT_MAX = 8;
+  const uint8_t MICROSTEPS_PER_STEP_EXPONENT_INC = 1;
+  uint8_t microsteps_per_step_exponent = MICROSTEPS_PER_STEP_EXPONENT_MIN;
+
+  /* Start the serial port where the TMC drivers are connected */
+  SerialStepperTmc.begin(STEPPER_TMC_BAUDRATE, SERIAL_8N1, STEPPER_TMC_RX, STEPPER_TMC_TX);
+  /* Initialize stepper driver 01*/
+  stepperDriver_st[0].setup(serial_stream, STEPPER_TMC_BAUDRATE, TMC2209::SERIAL_ADDRESS_0, STEPPER_TMC_RX, STEPPER_TMC_TX);
+  stepperDriver_st[0].setReplyDelay(REPLY_DELAY);
+  stepperDriver_st[0].setMicrostepsPerStepPowerOfTwo(8);
+  stepperDriver_st[0].setRunCurrent(100);
+  stepperDriver_st[0].enable();
+  Serial.print("StepperDriver01 init : ");
+  if (not stepperDriver_st[0].isSetupAndCommunicating()) {
+    stepperDriverEnable_b[0] = false;
+    Serial.println("Failed");
+  } else {
+    stepperDriverEnable_b[0] = true;
+    Serial.println("Ok");
+  }
+  /* Initialize stepper driver 02*/
+  stepperDriver_st[1].setup(serial_stream, STEPPER_TMC_BAUDRATE, TMC2209::SERIAL_ADDRESS_1, STEPPER_TMC_RX, STEPPER_TMC_TX);
+  stepperDriver_st[1].setReplyDelay(REPLY_DELAY);
+  stepperDriver_st[1].setMicrostepsPerStepPowerOfTwo(8);
+  stepperDriver_st[1].setRunCurrent(100);
+  stepperDriver_st[1].enable();
+  Serial.print("StepperDriver02 init : ");
+  if (not stepperDriver_st[1].isSetupAndCommunicating()) {
+    stepperDriverEnable_b[1] = false;
+    Serial.println("Failed");
+  } else {
+    stepperDriverEnable_b[1] = true;
+    Serial.println("Ok");
+  }
+  /* Initialize stepper driver 03*/
+  stepperDriver_st[2].setup(serial_stream, STEPPER_TMC_BAUDRATE, TMC2209::SERIAL_ADDRESS_2, STEPPER_TMC_RX, STEPPER_TMC_TX);
+  stepperDriver_st[2].setReplyDelay(REPLY_DELAY);
+  stepperDriver_st[2].setMicrostepsPerStepPowerOfTwo(8);
+  stepperDriver_st[2].setRunCurrent(100);
+  stepperDriver_st[2].enable();
+  Serial.print("StepperDriver03 init : ");
+  if (not stepperDriver_st[2].isSetupAndCommunicating()) {
+    stepperDriverEnable_b[2] = false;
+    Serial.println("Failed");
+  } else {
+    stepperDriverEnable_b[2] = true;
+    Serial.println("Ok");
+  }
+
+  //   bool invert_direction = false;
+  //   while (1) {
+  //     if (not stepperDriver01.isSetupAndCommunicating()) {
+  //       Serial.println("1 Failed");
+  //       while (1)
+  //         ;
+  //     }
+  //     if (not stepperDriver02.isSetupAndCommunicating()) {
+  //       Serial.println("2 Failed");
+  //       while (1)
+  //         ;
+  //     }
+  //     if (not stepperDriver03.isSetupAndCommunicating()) {
+  //       Serial.println("3 Failed");
+  //       while (1)
+  //         ;
+  //     }
+  //     stepperDriver01.moveAtVelocity(0);
+  //     stepperDriver02.moveAtVelocity(0);
+  //     stepperDriver03.moveAtVelocity(0);
+  //     delay(1000);
+
+  //     Serial.println("Inverting");
+  //     if (invert_direction) {
+  //       stepperDriver01.enableInverseMotorDirection();
+  //       stepperDriver02.enableInverseMotorDirection();
+  //       stepperDriver03.enableInverseMotorDirection();
+  //     } else {
+  //       stepperDriver01.disableInverseMotorDirection();
+  //       stepperDriver02.disableInverseMotorDirection();
+  //       stepperDriver03.disableInverseMotorDirection();
+  //     }
+  //     invert_direction = not invert_direction;
+
+  //     stepperDriver01.moveAtVelocity(2000);
+  //     stepperDriver02.moveAtVelocity(2000);
+  //     stepperDriver03.moveAtVelocity(2000);
+
+  //     uint32_t startTime_u32 = millis();
+  //     uint32_t currentTime_u32 = startTime_u32;
+  //     static uint32_t lastExecutionTime_u32 = currentTime_u32; /* Quick fix to not have a big time calculated at first execution */
+
+  //   while ((currentTime_u32 - startTime_u32) <= 4000.0) {
+  //     //Serial.println("while 4s");
+  //     currentTime_u32 = millis();
+  //     if ((currentTime_u32 - lastExecutionTime_u32) >= (0.01 * 1000.0)) {
+  //       /* Store the last execution time */
+  //       lastExecutionTime_u32 = currentTime_u32;
+  //       // Serial.print("D01 :");
+  //       // Serial.print(stepperDriver01.getMicrostepCounter());
+  //       // Serial.print(", D02 :");
+  //       // Serial.print(stepperDriver02.getMicrostepCounter());
+  //       // Serial.print(", D03 :");
+  //       // Serial.print(stepperDriver03.getMicrostepCounter());
+  //       // Serial.println();
+  //     }
+  //   }
+  // }
+  //  Serial.println("Exiting");
 }
 
 void ActuatorUpdate(bool timeMeasure_b) {
@@ -116,105 +225,37 @@ void ActuatorUpdate(bool timeMeasure_b) {
       durationMeasureStart_u32 = micros();
 
     /* Actual Code */
-    //   if ( (stepperX.distanceToGo() != 0) )
-    //   {
-    //     stepperX.run();
-    //     if (ACTUATOR_DEBUG)
-    //     {
-    //       Serial.print("[Actuator] Stepper X moving");
-    //       Serial.println();
-    //     }
-    //   }
-    //   else
-    //   {
-    //     stepperXMoving_b = false;
-    //   }
 
-    //   if ( (stepperY.distanceToGo() != 0) )
-    //   {
-    //     stepperY.run();
-    //     if (ACTUATOR_DEBUG)
-    //     {
-    //       Serial.print("[Actuator] Stepper Y moving");
-    //       Serial.println();
-    //     }
-    //   }
-    //   else
-    //   {
-    //     stepperYMoving_b = false;
-    //   }
+    /* TODO */
 
-    //   if ( (stepperZ.distanceToGo() != 0) )
-    //   {
-    //     if (ACTUATOR_DEBUG)
-    //     {
-    //       Serial.print("[Actuator] Stepper Z moving");
-    //       Serial.println();
-    //     }
-    //     stepperZ.run();
-    //   }
-    //   else
-    //   {
-    //     stepperZMoving_b = false;
-    //   }
-
-    //   /* Measure execution time if needed */
-    //   if (timeMeasure_b)
-    //   {
-    //     durationMeasure_u32 = micros() - durationMeasureStart_u32;
-    //     Serial.print("Actuator loop lasted ");
-    //     Serial.print(durationMeasure_u32);
-    //     Serial.print(" us, ");
-    //   }
-  }
-}
-
-void ActuatorStepperXMove(uint16_t stepNb_u16) {
-  if (stepperXMoving_b == false) {
-    stepperXMoving_b = true;
-    // stepperX.move(stepNb_u16);
-    if (ACTUATOR_DEBUG) {
-      Serial.print("[Actuator] Stepper X move : ");
-      Serial.print(stepNb_u16);
-      Serial.println();
+    /* Measure execution time if needed */
+    if (timeMeasure_b) {
+      durationMeasure_u32 = micros() - durationMeasureStart_u32;
+      Serial.print("Actuator loop lasted ");
+      Serial.print(durationMeasure_u32);
+      Serial.print(" us, ");
     }
   }
 }
 
-void ActuatorStepperYMove(uint16_t stepNb_u16) {
-  if (stepperYMoving_b == false) {
-    stepperYMoving_b = true;
-    // stepperY.move(stepNb_u16);
-    if (ACTUATOR_DEBUG) {
-      Serial.print("[Actuator] Stepper Y move : ");
-      Serial.print(stepNb_u16);
-      Serial.println();
+void ActuatorStepperMove(uint8_t id_u8, int16_t velocity_i16) {
+  if (stepperDriverMoving_b[id_u8] == false) {
+    stepperDriverMoving_b[id_u8] = true;
+    /* invert if negative direction */
+    if (velocity_i16 < 0) {
+      stepperDriver_st[id_u8].enableInverseMotorDirection();
+    } else {
+      stepperDriver_st[id_u8].disableInverseMotorDirection();
     }
+    /* move the stepper */
+    stepperDriver_st[id_u8].moveAtVelocity(velocity_i16);
   }
 }
 
-void ActuatorStepperZMove(uint16_t stepNb_u16) {
-  if (stepperZMoving_b == false) {
-    stepperZMoving_b = true;
-    // stepperZ.move(stepNb_u16);
-    if (ACTUATOR_DEBUG) {
-      Serial.print("[Actuator] Stepper Z move : ");
-      Serial.print(stepNb_u16);
-      Serial.println();
-    }
-  }
-}
-
-void ActuatorClawOut() {
-  Serial.println("[Actuator] Claw out");
-  // stepperY.move(-STEPPER_DISTANCE);
-  // stepperZ.move(STEPPER_DISTANCE);
-}
-
-void ActuatorClawIn() {
-  Serial.println("[Actuator] Claw in");
-  // stepperY.move(STEPPER_DISTANCE);
-  // stepperZ.move(-STEPPER_DISTANCE);
+void ActuatorStepperStop(uint8_t id_u8) {
+  stepperDriverMoving_b[id_u8] = false;
+  /* stop the stepper */
+  stepperDriver_st[id_u8].moveAtVelocity(0);
 }
 
 void ActuatorDynScan() {

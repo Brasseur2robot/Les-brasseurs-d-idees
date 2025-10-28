@@ -7,12 +7,8 @@
 void ActuatorInit();
 void ActuatorUpdate(bool timeMeasure_b);
 
-void ActuatorStepperXMove(uint16_t stepNb_u16);
-void ActuatorStepperYMove(uint16_t stepNb_u16);
-void ActuatorStepperZMove(uint16_t stepNb_u16);
-
-void ActuatorClawOut();
-void ActuatorClawIn();
+void ActuatorStepperMove(uint8_t id_u8, int16_t stepNb_i16);
+void ActuatorStepperStop(uint8_t id_u8);
 
 void ActuatorDynScan();
 void ActuatorDynSetLed(uint8_t id, bool state);

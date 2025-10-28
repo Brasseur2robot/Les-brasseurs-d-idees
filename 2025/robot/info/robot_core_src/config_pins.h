@@ -45,6 +45,10 @@
 #define DYNAMIXEL_RX          D7
 #define DYNAMIXEL_TX          D6
 
+/* TMC Pins */
+#define STEPPER_TMC_RX        D3
+#define STEPPER_TMC_TX        D2
+
 #endif
 
 

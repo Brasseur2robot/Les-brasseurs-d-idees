@@ -383,11 +383,11 @@ uint8_t Trajectory(double colorSide)
               break;
 
             case CLAW_OUT:
-              ActuatorClawOut();
+              //ActuatorClawOut();
               break;
 
             case CLAW_IN:
-              ActuatorClawIn();
+              //ActuatorClawIn();
               break;
 
             default:
@@ -428,11 +428,11 @@ uint8_t Trajectory(double colorSide)
             break;
 
           case CLAW_OUT:
-            ActuatorClawOut();
+            //ActuatorClawOut();
             break;
 
           case CLAW_IN:
-            ActuatorClawIn();
+            //ActuatorClawIn();
             break;
 
           default:
