@@ -16,6 +16,7 @@
 #include "DFRobot_RGBLCD1602.h"
 #include "config.h"
 #include "actuator.h"
+#include "motor.h"
 
 /******************************************************************************
    Constants and Macros
@@ -52,6 +53,24 @@ int selectedId = 0;
 uint8_t Ids[10] = { 10, 11, 20, 21, 22, 23, 24, 25, 26, 27 };
 float dynPosition = 0.0;
 
+MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
+            ITEM_RANGE<int>(
+              "Left", 0, -5, -255, 255, [](const int value) {
+                /* Apply speed */
+                MotorLeftSetSpeed(value);
+                Serial.print("Left Speed : ");
+                Serial.println(value);
+              },
+              "%d"),
+              ITEM_RANGE<int>(
+              "Right", 0, -5, -255, 255, [](const int value) {
+                /* Apply speed */
+                MotorRightSetSpeed(value);
+                Serial.print("Right Speed : ");
+                Serial.println(value);
+              },
+              "%d"));
+
 MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
             ITEM_RANGE_REF<int>(
               "Dyn Id", selectedId, -1, 0, 9, [](const Ref<int> value) {
@@ -82,7 +101,7 @@ MENU_SCREEN(mainScreen, mainItems,
                 Serial.println(option);
               },
               WIDGET_LIST(options, 0, "%s", 0, true)),
-            ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
+            ITEM_SUBMENU("Motor", MotorCfgScreen), ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
 
 /******************************************************************************
    Functions Definitions

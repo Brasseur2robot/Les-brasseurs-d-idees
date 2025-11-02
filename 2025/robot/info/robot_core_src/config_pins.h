@@ -20,25 +20,15 @@
 
 /* Motor pins */
 #define MOTOR_LEFT_PIN_SENS1  A4
-#define MOTOR_LEFT_PIN_SENS2  A4
 #define MOTOR_LEFT_PIN_PWM    D13
-#define MOTOR_RIGHT_PIN_SENS1 D12
-#define MOTOR_RIGHT_PIN_SENS2 D12
+#define MOTOR_RIGHT_PIN_SENS1 D11
 #define MOTOR_RIGHT_PIN_PWM   D10
 
 /* Encoder pins */
-#define ENCODER_LEFT_PIN_A    A3
-#define ENCODER_LEFT_PIN_B    A2
-#define ENCODER_RIGHT_PIN_A   A1
-#define ENCODER_RIGHT_PIN_B   A0
-
-/* Stepper Pins */
-// #define STEPPER_X_STEP        23
-// #define STEPPER_X_DIR         19
-// #define STEPPER_Y_STEP        D12
-// #define STEPPER_Y_DIR         D10
-// #define STEPPER_Z_STEP        A4
-// #define STEPPER_Z_DIR         D13
+#define ENCODER_LEFT_PIN_A    A1
+#define ENCODER_LEFT_PIN_B    A0
+#define ENCODER_RIGHT_PIN_A   A2
+#define ENCODER_RIGHT_PIN_B   A3
 
 /* Dynamixel Pins */
 #define DYNAMIXEL_CTRL        D9

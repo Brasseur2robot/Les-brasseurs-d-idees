@@ -2,7 +2,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
-#include <AccelStepper.h>
+//#include <AccelStepper.h>
 #include <Dynamixel2Arduino.h>
 #include <TMC2209.h>
 #include "actuator.h"
