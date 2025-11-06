@@ -2,6 +2,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include <ItemBool.h>
 #include <ItemLabel.h>
 #include <ItemList.h>
 #include <ItemRange.h>
@@ -16,6 +17,7 @@
 #include "DFRobot_RGBLCD1602.h"
 #include "config.h"
 #include "actuator.h"
+#include "controller.h"
 #include "motor.h"
 
 /******************************************************************************
@@ -62,7 +64,7 @@ MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
                 Serial.println(value);
               },
               "%d"),
-              ITEM_RANGE<int>(
+            ITEM_RANGE<int>(
               "Right", 0, -5, -255, 255, [](const int value) {
                 /* Apply speed */
                 MotorRightSetSpeed(value);
@@ -94,6 +96,8 @@ MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
               },
               "%0.1f"));
 
+bool Autonome = false;
+
 MENU_SCREEN(mainScreen, mainItems,
             ITEM_BASIC("Robot Core Brd"),
             ITEM_WIDGET(
@@ -101,7 +105,28 @@ MENU_SCREEN(mainScreen, mainItems,
                 Serial.println(option);
               },
               WIDGET_LIST(options, 0, "%s", 0, true)),
-            ITEM_SUBMENU("Motor", MotorCfgScreen), ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
+
+            ITEM_BOOL("Mode", true, "Autonome", "Manette", [](const bool value) {
+              /* if true, autonomous mode is on, if false, controller mode is on*/
+              if (value == true) {
+                /* Set the autonomous mode */
+                //TODO do an elegant Position Mgr Start (to start pids to the actual point)
+                PositionMgrStart();
+                /* Disable the controller mode */
+                controllerEnable(false);
+              } else {
+                /* Disable autonomous mode */
+                //TODO replace with an elegant PositionMgrStop()
+                PositionMgrStop();
+                /* Enable controller mode */
+                controllerEnable(true);
+              }
+              Serial.println(value ? "Autonome" : "Manette");
+            }),
+
+            ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
+
+            ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
 
 /******************************************************************************
    Functions Definitions

@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "actuator.h"
 #include "config.h"
+#include "controller.h"
 #include "ihm.h"
 #include "led.h"
 #include "motor.h"
@@ -54,6 +55,7 @@ void setup() {
   Serial.println();
   Serial.println("Init Robot Core Brd");
   ActuatorInit();
+  ControllerInit(false);
   IhmInit();
   LedInit();
   MatchMgrInit();
@@ -71,6 +73,7 @@ void loop() {
   //  MotorTest(255);
   //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
+  ControllerUpdate(DEBUG_TIME);
   IhmUpdate(DEBUG_TIME);
   LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);

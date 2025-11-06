@@ -37,6 +37,8 @@ typedef struct PoseStruct {
  * Function Declarations
  ******************************************************************************/
 void PositionMgrInit();
+void PositionMgrStart();
+void PositionMgrStop();
 void PositionMgrUpdate(bool timeMeasure_b);
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg);
 void PositionMgrGotoPose(pose_t pose);

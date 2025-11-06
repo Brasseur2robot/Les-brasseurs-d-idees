@@ -9,6 +9,7 @@
    Constants and Macros
  ******************************************************************************/
 #define DEBUG_MOTOR false
+
 /******************************************************************************
   Types declarations
 ******************************************************************************/
@@ -42,11 +43,11 @@ int16_t motorRightSpeed_i16;
 */
 void MotorInit() {
   pinMode(MOTOR_LEFT_PIN_SENS1, OUTPUT);
-  pinMode(MOTOR_LEFT_PIN_PWM, OUTPUT);
   pinMode(MOTOR_RIGHT_PIN_SENS1, OUTPUT);
-  pinMode(MOTOR_RIGHT_PIN_PWM, OUTPUT);
 
-  //setPwmFrequency(3, 1);
+  /* Attach PWM to outputs using ledc API */
+  ledcAttach(MOTOR_LEFT_PIN_PWM, 20000, 8);
+  ledcAttach(MOTOR_RIGHT_PIN_PWM, 20000, 8);
 }
 
 /**
@@ -60,19 +61,19 @@ void MotorInit() {
 */
 void MotorStop() {
   digitalWrite(MOTOR_LEFT_PIN_SENS1, LOW);
-  analogWrite(MOTOR_LEFT_PIN_PWM, 0);
+  ledcWrite(MOTOR_LEFT_PIN_PWM, 0);
   digitalWrite(MOTOR_RIGHT_PIN_SENS1, LOW);
-  analogWrite(MOTOR_RIGHT_PIN_PWM, 0);
+  ledcWrite(MOTOR_RIGHT_PIN_PWM, 0);
 }
 
 void MotorLeftBrake() {
   digitalWrite(MOTOR_LEFT_PIN_SENS1, HIGH);
-  analogWrite(MOTOR_LEFT_PIN_PWM, 0);
+  ledcWrite(MOTOR_LEFT_PIN_PWM, 0);
 }
 
 void MotorRightBrake() {
   digitalWrite(MOTOR_RIGHT_PIN_SENS1, HIGH);
-  analogWrite(MOTOR_RIGHT_PIN_PWM, 0);
+  ledcWrite(MOTOR_RIGHT_PIN_PWM, 0);
 }
 
 /**
@@ -106,14 +107,14 @@ void MotorLeftSetSpeed(double motorSpeed_d) {
   /* Write speed on the outputs */
   if (motorLeftSpeed_i16 == 0) {
     digitalWrite(MOTOR_LEFT_PIN_SENS1, LOW);
-    analogWrite(MOTOR_LEFT_PIN_PWM, 0);
+    ledcWrite(MOTOR_LEFT_PIN_PWM, 0);
   } else {
     if (motorLeftSpeed_i16 > 0) {
       digitalWrite(MOTOR_LEFT_PIN_SENS1, LOW);
-      analogWrite(MOTOR_LEFT_PIN_PWM, abs(motorLeftSpeed_i16));
+      ledcWrite(MOTOR_LEFT_PIN_PWM, abs(motorLeftSpeed_i16));
     } else {
       digitalWrite(MOTOR_LEFT_PIN_SENS1, HIGH);
-      analogWrite(MOTOR_LEFT_PIN_PWM, abs(motorLeftSpeed_i16));
+      ledcWrite(MOTOR_LEFT_PIN_PWM, abs(motorLeftSpeed_i16));
     }
   }
 
@@ -155,14 +156,14 @@ void MotorRightSetSpeed(double motorSpeed_d) {
   /* Write speed on the outputs */
   if (motorRightSpeed_i16 == 0) {
     digitalWrite(MOTOR_RIGHT_PIN_SENS1, LOW);
-    analogWrite(MOTOR_RIGHT_PIN_PWM, 125);
+    ledcWrite(MOTOR_RIGHT_PIN_PWM, 125);
   } else {
     if (motorRightSpeed_i16 > 0) {
       digitalWrite(MOTOR_RIGHT_PIN_SENS1, LOW);
-      analogWrite(MOTOR_RIGHT_PIN_PWM, abs(motorRightSpeed_i16));
+      ledcWrite(MOTOR_RIGHT_PIN_PWM, abs(motorRightSpeed_i16));
     } else {
       digitalWrite(MOTOR_RIGHT_PIN_SENS1, HIGH);
-      analogWrite(MOTOR_RIGHT_PIN_PWM, abs(motorRightSpeed_i16));
+      ledcWrite(MOTOR_RIGHT_PIN_PWM, abs(motorRightSpeed_i16));
     }
   }
 
