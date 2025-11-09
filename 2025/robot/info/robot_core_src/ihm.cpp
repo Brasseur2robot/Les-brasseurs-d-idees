@@ -25,7 +25,6 @@
  ******************************************************************************/
 #define IHM_DEBUG false
 #define IHM_UPDATE_PERIOD 0.1 /* Refresh rate of the display 1/0.1 = 10fps */
-#define IHM_LCD_I2C_ADDRESS 0x2D
 
 /******************************************************************************
   Types declarations
@@ -42,7 +41,7 @@
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
-DFRobot_RGBLCD1602 lcd(IHM_LCD_I2C_ADDRESS, 16, 2);
+DFRobot_RGBLCD1602 lcd(IHM_LCD_I2C_ADD, 16, 2);
 DFRobot_RGBLCD1602_Adapter lcdAdapter(&lcd);
 CharacterDisplayRenderer renderer(&lcdAdapter, 16, 2);
 LcdMenu menu(renderer);

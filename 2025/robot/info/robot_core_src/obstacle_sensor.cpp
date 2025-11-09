@@ -1,5 +1,5 @@
 /* Obstacle sensor lasts  at most 1000us
-
+ Has a default address of 0x29
 */
 
 /******************************************************************************

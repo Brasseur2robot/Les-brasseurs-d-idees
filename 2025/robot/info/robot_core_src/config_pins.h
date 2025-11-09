@@ -39,6 +39,9 @@
 #define STEPPER_TMC_RX        D3
 #define STEPPER_TMC_TX        D2
 
+/* IO Expnder pins */
+#define IOX_SD_CS             8
+
 #endif
 
 
