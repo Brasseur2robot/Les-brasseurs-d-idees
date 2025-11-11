@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include <ItemBool.h>
+#include <ItemCommand.h>
 #include <ItemLabel.h>
 #include <ItemList.h>
 #include <ItemRange.h>
@@ -18,6 +19,7 @@
 #include "config.h"
 #include "actuator.h"
 #include "controller.h"
+#include "color_sensor.h"
 #include "motor.h"
 
 /******************************************************************************
@@ -124,6 +126,11 @@ MENU_SCREEN(mainScreen, mainItems,
             }),
 
             ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
+
+            ITEM_COMMAND("Color measure", []() {
+              /* Take a measurement with time tracking true */
+              ColorSensorMeasurement(true);
+            }),
 
             ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
 

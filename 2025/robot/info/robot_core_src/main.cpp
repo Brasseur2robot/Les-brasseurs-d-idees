@@ -6,6 +6,7 @@
 #include "actuator.h"
 #include "config.h"
 #include "controller.h"
+#include "color_sensor.h"
 #include "ihm.h"
 #include "io_expander.h"
 #include "led.h"
@@ -18,7 +19,7 @@
 #include "ramp.h"
 #include "sdcard.h"
 //#include "sensor.h"
-#include "servo_board.h"
+//#include "servo_board.h"
 #include "trajectory_mgr.h"
 #include "Wire.h"
 
@@ -59,6 +60,7 @@ void setup() {
   Serial.println("Init Robot Core Brd");
   ActuatorInit();
   ControllerInit(false);
+  ColorSensorInit();
   IhmInit();
   IoExpanderInit();
   LedInit();
