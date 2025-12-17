@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "actuator.h"
 #include "config.h"
+#include "com_wifi.h"
 //#include "customTimer.h"
 #include "ihm.h"
 #include "led.h"
@@ -52,15 +53,16 @@ void setup() {
 
   /* Init de tous les modules */
   ActuatorInit();
+  ComWifiInit();
   IhmInit();
-  LedInit();
+  //LedInit();
   MatchMgrInit();
   MotorInit();
   ObstacleSensorInit();
   OdometryInit();
   PositionMgrInit();
   SensorInit();
-  //TrajectoryMgrInit();
+  TrajectoryMgrInit();
   //CustomTimerInit();
 }
 
@@ -68,8 +70,8 @@ void loop() {
 //  MotorTest(MOTOR_DEADZONE);
 //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
-  //IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
-  LedUpdate(DEBUG_TIME);
+  IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms, now on esp32 26ms */
+  // LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);
   SensorUpdate(DEBUG_TIME);

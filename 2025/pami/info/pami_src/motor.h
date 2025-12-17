@@ -6,7 +6,7 @@
  ******************************************************************************/
 void MotorInit();
 void MotorStop();
-void MotorTest(int8_t speed);
+void MotorTest(int16_t speed);
 void MotorLeftBrake();
 void MotorRightBrake();
 void MotorLeftSetSpeed(double motorSpeed_d);

@@ -6,7 +6,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
-#include <Encoder.h>
+#include <ESP32Encoder.h>
 #include "config.h"
 #include "odometry.h"
 
@@ -30,8 +30,8 @@
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
-Encoder encoderLeft(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
-Encoder encoderRight(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
+ESP32Encoder encoderLeft;
+ESP32Encoder encoderRight;
 
 int32_t distanceLeft_i32_g;
 int32_t distanceRight_i32_g;
@@ -57,10 +57,18 @@ int32_t odometryOrientationTop_i32_g;
 */
 void OdometryInit()
 {
-  pinMode(ENCODER_LEFT_PIN_A, INPUT);
-  pinMode(ENCODER_LEFT_PIN_B, INPUT);
-  pinMode(ENCODER_RIGHT_PIN_A, INPUT);
-  pinMode(ENCODER_RIGHT_PIN_B, INPUT);
+  //pinMode(ENCODER_LEFT_PIN_A, INPUT);
+  //pinMode(ENCODER_LEFT_PIN_B, INPUT);
+  //pinMode(ENCODER_RIGHT_PIN_A, INPUT);
+  //pinMode(ENCODER_RIGHT_PIN_B, INPUT);
+
+// Enable the weak pull up resistors
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  encoderLeft.attachHalfQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
+  encoderRight.attachHalfQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
+
+  encoderLeft.clearCount();
+  encoderRight.clearCount();
 
   odometryX_i32_g = 0L;
   odometryY_i32_g = 0L;
@@ -159,8 +167,8 @@ void OdometryUpdate(bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   // Récupérons les mesures des codeurs
-  distanceLeft_i32_g = encoderLeft.read() * FACTOR_WHEEL_LEFT;
-  distanceRight_i32_g = encoderRight.read() * FACTOR_WHEEL_RIGHT;
+  distanceLeft_i32_g = encoderLeft.getCount() * FACTOR_WHEEL_LEFT;
+  distanceRight_i32_g = encoderRight.getCount() * FACTOR_WHEEL_RIGHT;
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
   int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
@@ -222,13 +230,14 @@ void OdometryUpdate(bool timeMeasure_b)
 
 void OdometryEncoderTest()
 {
-  int32_t distanceLeft = encoderLeft.read();
-  int32_t distanceRight = encoderRight.read();
+  int32_t distanceLeft = encoderLeft.getCount();
+  int32_t distanceRight = encoderRight.getCount();
   Serial.print("Encoder Left : ");
   Serial.print(distanceLeft);
   Serial.print(", Encoder Right : ");
   Serial.print(distanceRight);
   Serial.println();
+  delay(100);
 }
 
 double MeterToTop(double meter)

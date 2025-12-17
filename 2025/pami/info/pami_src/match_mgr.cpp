@@ -53,6 +53,10 @@ void MatchMgrInit()
   attachInterrupt(digitalPinToInterrupt(SWITCH_REED_START_PIN), MatchMgrSwitchState, CHANGE);
   /* Set up the interrupt on the color switch to change the color */
   attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
+  /* Set up the  nano esp32 rgb leds */
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
 }
 
 void MatchMgrUpdate(bool timeMeasure_b)
@@ -93,7 +97,7 @@ void MatchMgrUpdate(bool timeMeasure_b)
       case MATCH_STATE_READY:
         /* Ready, waiting to start */
         //Serial.println("Ready to start");
-        LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
+        //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
         break;
 
       case MATCH_STATE_ON_WAITING:
@@ -246,17 +250,35 @@ void MatchMgrChangeColor()
     /* if function is called, change the color to the other one */
     if (matchMgrColor_en_g == MATCH_COLOR_BLUE)
     {
-      matchMgrColor_en_g = MATCH_COLOR_YELLOW;
-      LedSetAnim(LED1_ID, ANIM_STATE_OFF);
-      LedSetAnim(LED5_ID, ANIM_STATE_ON);
+      MatchMgrSetColorBlue();
     }
     else
     {
-      matchMgrColor_en_g = MATCH_COLOR_BLUE;
-      LedSetAnim(LED1_ID, ANIM_STATE_ON);
-      LedSetAnim(LED5_ID, ANIM_STATE_OFF);
+      MatchMgrSetColorYellow();
     }
   }
+}
+
+void MatchMgrSetColorBlue()
+{
+  matchMgrColor_en_g = MATCH_COLOR_YELLOW;
+  //LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+  //LedSetAnim(LED5_ID, ANIM_STATE_ON);
+  /* Yellow color */
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_BLUE, HIGH);
+}
+
+void MatchMgrSetColorYellow()
+{
+  matchMgrColor_en_g = MATCH_COLOR_BLUE;
+  //LedSetAnim(LED1_ID, ANIM_STATE_ON);
+  //LedSetAnim(LED5_ID, ANIM_STATE_OFF);
+  /* Blue color */
+  digitalWrite(LED_RED, HIGH);
+  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_BLUE, LOW);
 }
 
 MatchMgrColorEn MatchMgrGetColor()

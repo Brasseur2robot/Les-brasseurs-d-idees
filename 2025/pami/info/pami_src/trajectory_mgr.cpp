@@ -14,10 +14,10 @@
 #include "config.h"
 #include "trajectory_pythagora.h"
 
-/********************************************************************Encoder**********
+/******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define TRAJECTORY_DEBUG            true
+#define TRAJECTORY_DEBUG            false
 #define COLOR_DEBUG                 false
 #define TRAJECTORY_UPDATE_PERIOD_S  0.1
 

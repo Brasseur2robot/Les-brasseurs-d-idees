@@ -104,7 +104,6 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   {
     motorSpeed_d = 255;
   }
-
   if (motorSpeed_d < -255)
   {
     motorSpeed_d = -255;
@@ -113,24 +112,29 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   motorLeftSpeed_i16 = int16_t(motorSpeed_d);
 
   /* Write speed on the outputs */
-  if (motorLeftSpeed_i16 > 0)
+  if (motorLeftSpeed_i16 == 0)
   {
-    digitalWrite(MOTOR_LEFT_PIN_INA1, HIGH);
-    analogWrite(MOTOR_LEFT_PIN_INA2, 255 - motorLeftSpeed_i16);
+    analogWrite(MOTOR_LEFT_PIN_INA1, 0);
+    analogWrite(MOTOR_LEFT_PIN_INA2, 0);
   }
   else
   {
-    digitalWrite(MOTOR_LEFT_PIN_INA1, LOW);
-    analogWrite(MOTOR_LEFT_PIN_INA2, -motorLeftSpeed_i16);
+    if (motorLeftSpeed_i16 > 0)
+    {
+      analogWrite(MOTOR_LEFT_PIN_INA1, abs(motorLeftSpeed_i16));
+      analogWrite(MOTOR_LEFT_PIN_INA2, 0);
+    }
+    else
+    {
+    analogWrite(MOTOR_LEFT_PIN_INA1, 0);
+    analogWrite(MOTOR_LEFT_PIN_INA2, abs(motorLeftSpeed_i16));
+    }
   }
 
   if (DEBUG_MOTOR)
   {
     Serial.print("Left Motor Command : ");
-    if (motorSpeed_d > 0)
-      Serial.print(motorLeftSpeed_i16);
-    else
-      Serial.print(motorLeftSpeed_i16);
+    Serial.print(abs(motorLeftSpeed_i16));
     Serial.println();
   }
 }
@@ -161,51 +165,66 @@ void MotorRightSetSpeed(double motorSpeed_d)
   {
     motorSpeed_d = 255;
   }
-
   if (motorSpeed_d < -255)
   {
     motorSpeed_d = -255;
   }
-  
-  motorRightSpeed_i16 = int16_t(motorSpeed_d);
 
+  motorRightSpeed_i16 = int16_t(motorSpeed_d);
+ 
   /* Write speed on the outputs */
-  if (motorSpeed_d > 0)
+  if (motorRightSpeed_i16 == 0)
   {
-    digitalWrite(MOTOR_RIGHT_PIN_INA1, HIGH); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, 255 - motorRightSpeed_i16);
+    analogWrite(MOTOR_RIGHT_PIN_INA1, 0);
+    analogWrite(MOTOR_RIGHT_PIN_INA2, 0);
   }
   else
   {
-    digitalWrite(MOTOR_RIGHT_PIN_INA1, LOW); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, -motorRightSpeed_i16);
+    if (motorRightSpeed_i16 > 0)
+    {
+      analogWrite(MOTOR_RIGHT_PIN_INA1, abs(motorRightSpeed_i16)); // direction
+      analogWrite(MOTOR_RIGHT_PIN_INA2, 0);
+    }
+    else
+    {
+      analogWrite(MOTOR_RIGHT_PIN_INA1, 0);
+      analogWrite(MOTOR_RIGHT_PIN_INA2, abs(motorRightSpeed_i16)); // direction
+    }
   }
 
   if (DEBUG_MOTOR)
   {
     Serial.print("Right Motor Command : ");
-    if (motorSpeed_d > 0)
-      Serial.print(motorRightSpeed_i16);
-    else
-      Serial.print(-motorRightSpeed_i16);
+    Serial.print(abs(motorRightSpeed_i16));
     Serial.println();
   }
 }
 
-void MotorTest(int8_t speed)
+void MotorTest(int16_t speed)
 {
-  Serial.println("Left : 255, Right : 255");
+  Serial.print("Left : ");
+  Serial.print(speed);
+  Serial.print(", Right : ");
+  Serial.print(speed);
+  Serial.println();
   MotorLeftSetSpeed(speed);
   MotorRightSetSpeed(speed);
   delay(1000);
+  
   Serial.println("Left : 0, Right : 0");
   MotorLeftSetSpeed(0);
   MotorRightSetSpeed(0);
   delay(1000);
-  Serial.println("Left : -255, Right : -255");
+
+  Serial.print("Left : ");
+  Serial.print(-speed);
+  Serial.print(", Right : ");
+  Serial.print(-speed);
+  Serial.println();
   MotorLeftSetSpeed(-speed);
   MotorRightSetSpeed(-speed);
   delay(1000);
+  
   Serial.println("Left : 0, Right : 0");
   MotorLeftSetSpeed(0);
   MotorRightSetSpeed(0);

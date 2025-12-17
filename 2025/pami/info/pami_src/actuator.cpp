@@ -2,7 +2,8 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
-#include <Servo.h>
+#include <ESP32Servo.h>
+#include "actuator.h"
 #include "config.h"
 
 /******************************************************************************
