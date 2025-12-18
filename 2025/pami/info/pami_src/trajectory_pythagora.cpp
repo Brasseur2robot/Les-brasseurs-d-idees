@@ -4,7 +4,7 @@
 double pythagoraCalculation(double x1, double y1, double x2, double y2, bool lengthChoice)
 {
   // Converting millimeter in meter
-  double height = (y1 - y2) / 1000.0;
+  double height = (y2 - y1) / 1000.0;
   double length = (x2 - x1) / 1000.0;
 
   double pythagoraResult;

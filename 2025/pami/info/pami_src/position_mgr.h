@@ -25,15 +25,18 @@ typedef struct PoseStruct {
     double x;
     double y;
     double theta;
-    double direction;
-    double resetTheta;
-    double obstacleSensorEnable;
+    bool direction;
+    bool resetTheta;
+    bool obstacleSensorEnable;
+    uint32_t waitingTimeMs_u32; // if non null, waitingTime after arriving at position
 } pose_t;
 
 /******************************************************************************
  * Function Declarations
  ******************************************************************************/
 void PositionMgrInit();
+void PositionMgrStart();
+void PositionMgrStop();
 void PositionMgrUpdate(bool timeMeasure_b);
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg);
 void PositionMgrGotoPose(pose_t pose);
@@ -47,5 +50,6 @@ void PositionMgrSetDistanceControl(bool state_b);
 void PositionMgrSetOrientationControl(bool state_b);
 bool PositionMgrGetDistanceControl();
 bool PositionMgrGetOrientationControl();
+void PositionMgrBlockingDetection(double distance_d, double orientation_d, double commandeDistance_d, double commandeOrientation_d);
 
 #endif

@@ -273,7 +273,6 @@ int32_t RampGetSpeed(RampParametersSt * ramp_pst)
   return ramp_pst->speedCurrentTopPerS_i32;
 }
 
-
 int32_t RampGetDistance(RampParametersSt * ramp_pst)
 {
   return ramp_pst->distanceCurrentTop_i32;

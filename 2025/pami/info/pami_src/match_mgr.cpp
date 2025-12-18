@@ -4,9 +4,12 @@
 #include <Arduino.h>
 #include "actuator.h"
 #include "config.h"
+#include "ihm.h"
 #include "led.h"
 #include "match_mgr.h"
+#include "obstacle_sensor.h"
 #include "position_mgr.h"
+#include "trajectory_mgr.h"
 
 /******************************************************************************
    Constants and Macros
@@ -169,6 +172,10 @@ void MatchMgrStartMatch()
   matchMgrStartTimeMs_u32_g = millis();
   /* Set the start delay (use for a delayed Pami start) */
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
+  /* Start the obstacle sensor */
+  ObstacleSensorStart();
+  /* Init Base trajectory */
+  TrajectoryBaseInit();
 
   if (MATCH_MGR_DEBUG)
   {

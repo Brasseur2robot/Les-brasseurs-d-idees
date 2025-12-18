@@ -5,60 +5,58 @@
 #include "trajectory_pythagora.h"
 
 /******************************************************************************
-   This is the match configuration of Zophon's Sumo robot
+   Generic definitions
  ******************************************************************************/
-#ifdef SUMO_ZOPHON
-
-/* Match Parameters */
-#define DUREE_ATTENTE_S           3.0                       /* Wait time before start [s], should be 85 seconds */
-#define DUREE_ATTENTE_MS          DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
-
-#define MATCH_DURATION_S          100.0                     /* Match duration [s] */
-#define MATCH_DURATION_MS         MATCH_DURATION_S * 1000.0
-
-#endif
+#define MOVE_FORWARD                true
+#define MOVE_BACKWARD               false
+#define NO_THETA_ALIGN              361.0
+#define RESET_THETA                 true
+#define NO_RESET_THETA              false
+#define OBSTACLE_SENSOR             true
+#define NO_OBSTACLE_SENSOR          false
 
 /******************************************************************************
    This is the match configuration of the PAMI 1
  ******************************************************************************/
  #ifdef PAMI_1
 
- /* Match Parameters */
- #define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
- #define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
+/* Match Parameters */
+//#define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
+//#define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
  
- #define MATCH_START_DELAY_S         2.0                       /* Pami delayed start time [s], should be 85 seconds */
- #define MATCH_START_DELAY_MS        MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
- 
- #define MATCH_DURATION_S            98.0                     /* Match duration [s] */
- #define MATCH_DURATION_MS           MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
- 
- #define MATCH_START_POSITION_X      0.09
- #define MATCH_START_POSITION_Y      0.06
- #define MATCH_START_POSITION_THETA  -3.0
- 
- // Start in square {(0,1850);(50,1950)}
- // End at (1250,1575)
- 
- #define X1                          25.0
- #define Y1                          1900.0
- #define X2                          1250.0
- #define Y2                          2050.0
- #define Y3                          -2000.0
- #define Y4                          1637.0
- 
- inline pose_t trajectoryPoseArray[7] = {
-   {X1, Y1, 0.0, 1.0, -1.0, 0.0},
-   {X2, Y1, 0.0, 1.0, -1.0, 0.0},
-   {X2, Y1, 90.0, 1.0, -1.0, 0.0},
-   {X2, Y2, 90.0, -1.0, -1.0, 0.0},
-   {X2, Y3, 90.0, 1.0, -1.0, 0.0},
-   {X2, Y3, 90.0, 1.0, 0.0, 0.0},
-   {X2, Y4, 90.0, 1.0, -1.0, 0.0},  
- };
- #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
- 
- #endif
+#define MATCH_START_DELAY_S           2.0                       /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
+
+#define MATCH_DURATION_S              98.0                      /* Match duration [s] */
+#define MATCH_DURATION_MS             MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
+
+#define PAMI_WIDTH                    0.085
+#define PAMI_BACKWIDTH                0.060
+
+#define MATCH_START_POSITION_X_YELLOW 0.5
+#define MATCH_START_POSITION_X_BLUE   3.0 - MATCH_START_POSITION_X_YELLOW
+#define MATCH_START_POSITION_Y        1.6
+#define MATCH_START_POSITION_THETA    -90.0
+
+/* côté jaune */
+inline pose_t trajectoryYellowPoseArray[1] = {
+  /* Position de départ */
+  //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR},
+  /* Position du garde manger à viser */
+  {700.0, 900.0, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR},
+};
+#define nbMovementYellow                sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
+
+/* côté bleu */
+inline pose_t trajectoryBluePoseArray[1] = {
+  /* Position de départ */
+  //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR},
+  /* Position du garde manger à viser */
+  {700.0, 900.0, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR},
+};
+#define nbMovementBlue                  sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
+
+#endif
 
 /******************************************************************************
    This is the match configuration of the PAMI 2
@@ -94,7 +92,6 @@ inline pose_t trajectoryPoseArray[3] = {
   {X2, Y2, ANGLE, -1.0, 1.0}
 };
 #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
-
 
 #endif
 
@@ -174,44 +171,6 @@ inline pose_t trajectoryPoseArray[3] = {
    {X3, Y3, (-(ANGLE) + ANGLE2)}
  };
  #define nbMovement                  sizeof(trajectoryPoseArray) / sizeof(trajectoryPoseArray[0]) - 1
- 
- #endif
-
-/******************************************************************************
-   This is the match configuration of the main Robot
- ******************************************************************************/
- #ifdef Robot
-
- #define X1                          1200.0
- #define Y1                          200.0
- #define Y2                          0.0
- #define ANGLE                       pythagoraCalculation(X1, Y1, X2, Y3, false)
- #define X2                          1100.0
- #define Y3                          800.0
- #define Y3                          500.0
- #define X3                          775.0
- #define Y5                          350.0
- #define Y6                          100.0
-
- inline pose_t trajectoryPoseArray[16] = {
-  {X1, Y1, 0.0, 1.0},
-  {X1, Y2, 0.0, -1.0},
-  {X1, Y1, 0.0, 1.0},
-  {X1, Y1, -ANGLE, 1.0},
-  {X2, Y3, -ANGLE, 1.0},
-  {X2, Y3, ANGLE, 1.0},
-  {X2, Y3, 180.0, 1.0},
-  {X2, Y3, -ANGLE, 1.0},
-  {X1, Y1, -ANGLE, 1.0},
-  {X1, Y1, ANGLE, 1.0},
-  {X1, Y4, ANGLE, -1.0},
-  {X1, Y4, 90.0, 1.0},
-  {X3, Y4, 90.0, 1.0},
-  {X3, Y4, -90.0, 1.0},
-  {X3, Y5, -90.0, 1.0},
-  {X3, Y6, -90.0, 1.0},
- };
-
  
  #endif
 

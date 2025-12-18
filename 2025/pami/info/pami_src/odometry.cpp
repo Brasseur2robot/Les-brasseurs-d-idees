@@ -44,6 +44,9 @@ double odometryThetaRad_d_g;
 int32_t odometryDistanceTop_i32_g;
 int32_t odometryOrientationTop_i32_g;
 
+int32_t orient_precedente;
+int32_t orient;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -57,15 +60,10 @@ int32_t odometryOrientationTop_i32_g;
 */
 void OdometryInit()
 {
-  //pinMode(ENCODER_LEFT_PIN_A, INPUT);
-  //pinMode(ENCODER_LEFT_PIN_B, INPUT);
-  //pinMode(ENCODER_RIGHT_PIN_A, INPUT);
-  //pinMode(ENCODER_RIGHT_PIN_B, INPUT);
-
-// Enable the weak pull up resistors
+  /* Configure esp32 encoders pins and pull-up */
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
-  encoderLeft.attachHalfQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
-  encoderRight.attachHalfQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
+  encoderLeft.attachFullQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
+  encoderRight.attachFullQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
 
   encoderLeft.clearCount();
   encoderRight.clearCount();
@@ -134,9 +132,12 @@ void OdometrySetYMeter(double yM_d)
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
-  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                // compute the target theta in top
-  double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
-  orient_init_i32_g -= thetaErrorTop_d;                                 // rotates the init orient from the error
+  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                    // compute the target theta in top
+  double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;       // compute the error between actual and target
+  orient_init_i32_g -= thetaErrorTop_d;                                     // rotates the init orient from the error
+  orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g);  // updates internal variables
+  orient_precedente = orient;
+  OdometryUpdate(false);
 }
 
 /*
@@ -152,7 +153,7 @@ void OdometryUpdate(bool timeMeasure_b)
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
 
-  static int32_t distance_precedente, orient_precedente;
+  static int32_t distance_precedente;
 
   int32_t delta_d;
   int32_t delta_orient;
@@ -169,6 +170,12 @@ void OdometryUpdate(bool timeMeasure_b)
   // Récupérons les mesures des codeurs
   distanceLeft_i32_g = encoderLeft.getCount() * FACTOR_WHEEL_LEFT;
   distanceRight_i32_g = encoderRight.getCount() * FACTOR_WHEEL_RIGHT;
+
+  if (DEBUG_SIMULATION)
+  {
+    distanceLeft_i32_g = 0;
+    distanceRight_i32_g = 0;
+  }
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
   int32_t orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
@@ -237,7 +244,6 @@ void OdometryEncoderTest()
   Serial.print(", Encoder Right : ");
   Serial.print(distanceRight);
   Serial.println();
-  delay(100);
 }
 
 double MeterToTop(double meter)

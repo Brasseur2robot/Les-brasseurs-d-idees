@@ -323,6 +323,9 @@ void LedAnimK2000()
   }
 }
 
+#define DUREE_ATTENTE_S   5
+#define DUREE_ATTENTE_MS  DUREE_ATTENTE_S * 1000.0
+
 void LedAnimStart()
 {
   LedAnimAllOff();
