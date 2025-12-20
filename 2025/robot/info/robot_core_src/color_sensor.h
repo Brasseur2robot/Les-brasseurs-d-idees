@@ -6,5 +6,7 @@
  ******************************************************************************/
 void ColorSensorInit();
 void ColorSensorMeasurement(bool timeMeasure_b);
+uint16_t ColorSensorGetBlue();
+uint16_t ColorSensorGetYellow();
 
 #endif

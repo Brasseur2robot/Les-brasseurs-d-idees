@@ -9,6 +9,7 @@
 #include <ItemRange.h>
 #include <ItemSubMenu.h>
 #include <ItemToggle.h>
+#include <ItemValue.h>
 #include <LcdMenu.h>
 #include <MenuScreen.h>
 #include <display/DFRobot_RGBLCD1602_Adapter.h>
@@ -56,6 +57,11 @@ int selectedId = 0;
 uint8_t Ids[10] = { 10, 11, 20, 21, 22, 23, 24, 25, 26, 27 };
 float dynPosition = 0.0;
 
+bool Autonome = false;
+
+uint16_t colorBlue_u16 = 0;
+uint16_t colorYellow_u16 = 0;
+
 MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
             ITEM_RANGE<int>(
               "Left", 0, -5, -255, 255, [](const int value) {
@@ -97,12 +103,21 @@ MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
               },
               "%0.1f"));
 
-bool Autonome = false;
+MENU_SCREEN(ColorSensorScreen, ColorSensorItems,
+            ITEM_COMMAND("Color measure", []() {
+              /* Take a measurement with time tracking true */
+              ColorSensorMeasurement(false);
+              colorBlue_u16 = ColorSensorGetBlue();
+              colorYellow_u16 = ColorSensorGetYellow();
+            }),
+            ITEM_VALUE("Blue  ", colorBlue_u16, "%d"),
+            ITEM_VALUE("Yellow", colorYellow_u16, "%d")
+            );
 
 MENU_SCREEN(mainScreen, mainItems,
             ITEM_BASIC("Robot Core Brd"),
             ITEM_WIDGET(
-              "Color", [](const uint8_t option) {
+              "Side", [](const uint8_t option) {
                 Serial.println(option);
               },
               WIDGET_LIST(options, 0, "%s", 0, true)),
@@ -125,12 +140,9 @@ MENU_SCREEN(mainScreen, mainItems,
               Serial.println(value ? "Autonome" : "Manette");
             }),
 
-            ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
+            ITEM_SUBMENU("Color Sensor", ColorSensorScreen),
 
-            ITEM_COMMAND("Color measure", []() {
-              /* Take a measurement with time tracking true */
-              ColorSensorMeasurement(true);
-            }),
+            ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
 
             ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
 
@@ -162,6 +174,7 @@ void IhmUpdate(bool timeMeasure_b) {
       durationMeasureStart_u32 = micros();
 
     /* Actual Code */
+    menu.poll();
 
     /* Measure execution time if needed */
     if (timeMeasure_b) {

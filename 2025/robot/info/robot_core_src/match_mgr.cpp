@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
+#include "com_wifi.h"
 #include "led.h"
 #include "match_mgr.h"
 #include "obstacle_sensor.h"
@@ -184,6 +185,8 @@ void MatchMgrStartMatch()
   matchMgrStartTimeMs_u32_g = millis();
   /* Set the start delay (use for a delayed Pami start) */
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
+  /* Send the start signal to the PAMIs TODO : define at which condition this should happen */
+  ComWifiSendStart();
   /* Start the obstacle sensor */
   ObstacleSensorStart();
   /* Init Base trajectory */
@@ -342,6 +345,7 @@ void MatchMgrChangeColor()
       LedSetAnim(LED1_ID, ANIM_STATE_ON);
       LedSetAnim(LED2_ID, ANIM_STATE_ON);
       LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+      ComWifiSendColor(MATCH_COLOR_BLUE);
       if (MATCH_MGR_DEBUG)
       {
         Serial.println("Color yellow selected");
@@ -353,6 +357,7 @@ void MatchMgrChangeColor()
       LedSetAnim(LED1_ID, ANIM_STATE_OFF);
       LedSetAnim(LED2_ID, ANIM_STATE_OFF);
       LedSetAnim(LED3_ID, ANIM_STATE_ON);
+      ComWifiSendColor(MATCH_COLOR_YELLOW);
       if (MATCH_MGR_DEBUG)
       {
         Serial.println("Color blue selected");

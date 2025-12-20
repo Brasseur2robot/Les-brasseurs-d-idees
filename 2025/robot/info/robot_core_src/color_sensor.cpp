@@ -47,19 +47,20 @@ uint16_t sensorValues[AS726x_NUM_CHANNELS];
 
 */
 void ColorSensorInit() {
-  //begin and make sure we can talk to the sensor
+  /* Init the color sensor object */
+  Serial.print("Color sensor init : ");
   if (!ams.begin()) {
-    Serial.println("could not connect to sensor! Please check your wiring.");
-    while (1)
-      ;
+    Serial.println("Failed");
+  } else {
+    Serial.println("OK");
   }
 }
 
 void ColorSensorMeasurement(bool timeMeasure_b) {
-  
+
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
-  
+
   if (timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
@@ -88,20 +89,29 @@ void ColorSensorMeasurement(bool timeMeasure_b) {
     Serial.print(" us, ");
   }
 
-  //Serial.print("Temp: ");
-  //Serial.print(temp);
-  Serial.print(" Violet: ");
-  Serial.print(sensorValues[AS726x_VIOLET]);
-  Serial.print(" Blue: ");
-  Serial.print(sensorValues[AS726x_BLUE]);
-  Serial.print(" Green: ");
-  Serial.print(sensorValues[AS726x_GREEN]);
-  Serial.print(" Yellow: ");
-  Serial.print(sensorValues[AS726x_YELLOW]);
-  Serial.print(" Orange: ");
-  Serial.print(sensorValues[AS726x_ORANGE]);
-  Serial.print(" Red: ");
-  Serial.print(sensorValues[AS726x_RED]);
-  Serial.println();
-  Serial.println();
+  if (DEBUG_COLOR) {
+    //Serial.print("Temp: ");
+    //Serial.print(temp);
+    Serial.print(" Violet: ");
+    Serial.print(sensorValues[AS726x_VIOLET]);
+    Serial.print(" Blue: ");
+    Serial.print(sensorValues[AS726x_BLUE]);
+    Serial.print(" Green: ");
+    Serial.print(sensorValues[AS726x_GREEN]);
+    Serial.print(" Yellow: ");
+    Serial.print(sensorValues[AS726x_YELLOW]);
+    Serial.print(" Orange: ");
+    Serial.print(sensorValues[AS726x_ORANGE]);
+    Serial.print(" Red: ");
+    Serial.print(sensorValues[AS726x_RED]);
+    Serial.println();
+  }
+}
+
+uint16_t ColorSensorGetBlue() {
+  return sensorValues[AS726x_BLUE];
+}
+
+uint16_t ColorSensorGetYellow() {
+  return sensorValues[AS726x_YELLOW];
 }

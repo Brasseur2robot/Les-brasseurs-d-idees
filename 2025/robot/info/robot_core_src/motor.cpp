@@ -167,9 +167,9 @@ void MotorRightSetSpeed(double motorSpeed_d) {
     }
   }
 
-  if (DEBUG_MOTOR) {
+  Serial.print(motorRightSpeed_i16);
+    if (DEBUG_MOTOR) {
     Serial.print("Right Motor Command : ");
-    Serial.print(motorRightSpeed_i16);
     Serial.println();
   }
 }
