@@ -40,7 +40,7 @@ void PositionMgrStop();
 void PositionMgrUpdate(bool timeMeasure_b);
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg);
 void PositionMgrGotoPose(pose_t pose);
-void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b);
+void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b);
 void PositionMgrGotoOrientationDegree(double theta_deg);
 PositionManagerStateEn PositionMgrGetState();
 PositionManagerStateEmergencyEn PositionMgrGetEmergencyState();

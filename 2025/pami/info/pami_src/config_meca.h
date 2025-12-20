@@ -25,7 +25,8 @@
  */
 #define WHEEL_DIAMETER_M      0.038     /* Wheel diameter [m] */
 //#define METER_TO_TOP          N_TOP_PER_WHEEL_TURN * FACTOR_DISTANCE / (WHEEL_DIAMETER_M * PI);
-#define METER_TO_TOP          (6868.0527 * FACTOR_DISTANCE)
+//#define METER_TO_TOP          (6868.0527 * FACTOR_DISTANCE)
+#define MILLIMETER_TO_TOP     (6.8680527 * FACTOR_DISTANCE)
 
 /*
  * To determine the distance needed to rotate of a certain angle, one has to 

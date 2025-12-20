@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "config.h"
 #include "ihm.h"
-//#include "led.h"
+#include "led.h"
 #include "motor.h"
 #include "obstacle_sensor.h"
 #include "odometry.h"
@@ -183,8 +183,8 @@ void PositionMgrUpdate(bool timeMeasure_b)
         consigneOrientation_d = 0.0;
         break;
     }
-    // Serial.println(1.2 * TopToMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) * 1000.0) );
-    ObstacleSensorSetThreshold( (uint16_t)(2.0 * TopToMeter(RampGetDistanceBrake(&rampDistance_st_g)) * 1000) );
+    // Serial.println(1.2 * TopToMilliMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) ) );
+    ObstacleSensorSetThreshold( (uint16_t)( 2.0 * TopToMilliMeter(RampGetDistanceBrake(&rampDistance_st_g)) ) );
     //Serial.println(ObstacleSensorDetected());
 
     /* If no emergency activation (no obstacle in sight) */
@@ -192,27 +192,29 @@ void PositionMgrUpdate(bool timeMeasure_b)
       /* if Ramp init, then stopped */
       if ((RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) {
         positionMgrState_en_g = POSITION_STATE_STOPPED;
-        //Serial.println("Ramp init, state stopped");
+        //Serial.print("Ramp init, state stopped, ");
       } else {
         /* if one of both ramp finished */
         if (((positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED))
             || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
-          //Serial.println("Ramp finished");
+          //Serial.print("Ramp finished, ");
           /* count tiemout detection */
           if (timeOutCount_u8 < 20) {
             timeOutCount_u8 += 1;
             positionMgrState_en_g = POSITION_STATE_MOVING;
-            //Serial.println("Incrementing timeout");
+            //Serial.print("Incrementing timeout, ");
+            //Serial.print(timeOutCount_u8);
+            //Serial.print(", ");
 
             /* if both pid error < acceptable range -> stopped */
-            if (((consigneDistance_d - OdometryGetDistanceTop()) < 5) && ((consigneOrientation_d - OdometryGetOrientationTop()) < 5)) {
+            if ( (abs(pidDistance_st_g.error_d) < 5) && (abs(pidOrientation_st_g.error_d) < 5) ) {
               positionMgrState_en_g = POSITION_STATE_STOPPED;
-              //Serial.println("Position reached");
+              //Serial.print("Position reached, ");
             }
           } else {
             positionMgrState_en_g = POSITION_STATE_STOPPED;
             timeOutCount_u8 = 0;
-            //Serial.println("Timeout reached");
+            //Serial.print("Timeout reached");
           }
         } else {
           //Serial.println("State Moving");
@@ -238,10 +240,11 @@ void PositionMgrUpdate(bool timeMeasure_b)
         //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_MOVING");
       }
     }
-    if (positionMgrState_en_g == POSITION_STATE_STOPPED)
-    {
-      IhmStart();
-    }
+    // if (positionMgrState_en_g == POSITION_STATE_STOPPED)
+    // {
+    //   IhmStart();
+    // }
+    //Serial.println();
 
 
     /* Sets the new reference on the pids */
@@ -299,9 +302,9 @@ void PositionMgrUpdate(bool timeMeasure_b)
       Serial.print("\t");
       Serial.print(pidDistance_st_g.kp_d * pidDistance_st_g.error_d);
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.integral_d);
+      Serial.print(pidDistance_st_g.ki_d * pidDistance_st_g.integral_d);
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.derivative_d);
+      Serial.print(pidDistance_st_g.kd_d * pidDistance_st_g.derivative_d);
       Serial.print("\t");
       Serial.print(pidDistance_st_g.output_d);
       Serial.println();
@@ -341,9 +344,9 @@ void PositionMgrUpdate(bool timeMeasure_b)
       Serial.print("\t");
       Serial.print(pidOrientation_st_g.kp_d * pidOrientation_st_g.error_d);
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.integral_d);
+      Serial.print(pidOrientation_st_g.ki_d * pidOrientation_st_g.integral_d);
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.derivative_d);
+      Serial.print(pidOrientation_st_g.kd_d * pidOrientation_st_g.derivative_d);
       Serial.print("\t");
       Serial.print(pidOrientation_st_g.output_d);
       Serial.println();
@@ -353,10 +356,10 @@ void PositionMgrUpdate(bool timeMeasure_b)
     {
       Serial.print("Time [ms] : ");
       Serial.print(currentTime_u32);
-      Serial.print(", X [m] : ");
-      Serial.print(OdometryGetXMeter());
-      Serial.print(", Y {m] : ");
-      Serial.print(OdometryGetYMeter());
+      Serial.print(", X [mm] : ");
+      Serial.print(OdometryGetXMilliMeter());
+      Serial.print(", Y [mm] : ");
+      Serial.print(OdometryGetYMilliMeter());
       Serial.print(", theta [rad] : ");
       Serial.print(OdometryGetThetaRad());
       //Serial.print(", ConsDistance [top] : ");
@@ -371,10 +374,10 @@ void PositionMgrUpdate(bool timeMeasure_b)
       //Serial.print(commandeDistance_d);
       //Serial.print(", commande Orientation : ");
       //Serial.print(commandeOrientation_d);
-      //Serial.print(", commande gauche : ");
-      //Serial.print(commandeDistance_d - commandeOrientation_d);
-      //Serial.print(", commande droite : ");
-      //Serial.print(commandeDistance_d + commandeOrientation_d);
+      Serial.print(", commande gauche : ");
+      Serial.print(commandeDistance_d - commandeOrientation_d);
+      Serial.print(", commande droite : ");
+      Serial.print(commandeDistance_d + commandeOrientation_d);
       Serial.println();
     }
 
@@ -412,7 +415,7 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
    @result    none
 
 */
-void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
+void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b)
 {
   IhmStop();
   //positionMgrStatus_u8_g = 0;
@@ -424,9 +427,9 @@ void PositionMgrGotoDistanceMeter(double distance_m, bool braking_b)
 
   /* Test if braking at the end of the ramp is required */
   if (braking_b == true)
-    RampNew(&rampDistance_st_g, (int32_t)MeterToTop(distance_m), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+    RampNew(&rampDistance_st_g, (int32_t)MilliMeterToTop(distance_m), 0, (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(ACCELERATION_SLOW));
   else
-    RampNew(&rampDistance_st_g, (int32_t)MeterToTop(distance_m), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+    RampNew(&rampDistance_st_g, (int32_t)MilliMeterToTop(distance_m), (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(ACCELERATION_SLOW));
 }
 
 /**
@@ -449,7 +452,7 @@ void PositionMgrGotoOrientationDegree(double theta_deg)
   startDistance_i32_g = OdometryGetDistanceTop();
   startOrientation_i32_g = OdometryGetOrientationTop();
 
-  RampNew(&rampOrientation_st_g, (int32_t)RadToTop(theta_deg * PI / 180.0), 0, (int32_t)MeterToTop(VITESSE_SLOW), (int32_t)MeterToTop(ACCELERATION_SLOW));
+  RampNew(&rampOrientation_st_g, (int32_t)RadToTop(theta_deg * PI / 180.0), 0, (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(ACCELERATION_SLOW));
 }
 
 /**

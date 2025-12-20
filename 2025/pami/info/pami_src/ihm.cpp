@@ -207,9 +207,9 @@ void IhmDrawScreenMatch()
   display.println();
 
   display.print(F("Pos: "));
-  display.print(OdometryGetXMeter());
+  display.print(OdometryGetXMilliMeter() / 1000.0);
   display.print(F(","));
-  display.print(OdometryGetYMeter());
+  display.print(OdometryGetYMilliMeter() / 1000.0);
   display.print(F(","));
   display.print(OdometryGetThetaRad() * 180 / PI);
   display.println();

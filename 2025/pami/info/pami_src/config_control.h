@@ -14,16 +14,16 @@
 
 #define KP_DISTANCE         0.5
 #define KI_DISTANCE         0.0
-#define KD_DISTANCE         0.0 // 0.0005
+#define KD_DISTANCE         0.001 // 0.0005
  
 #define KP_ORIENTATION      0.5
 #define KI_ORIENTATION      0.0
-#define KD_ORIENTATION      0.0 // 0.0005
+#define KD_ORIENTATION      0.001 // 0.0005
  
-#define VITESSE_SLOW        0.7   /* [m.s-1] */
-#define ACCELERATION_SLOW   0.6   /* [m.s-2] */
-#define VITESSE_MAX         1.0   /* [m.s-1] */
-#define ACCELERATION_MAX    0.9   /* [m.s-2] */
+#define VITESSE_SLOW        700.0     /* [mm.s-1] */
+#define ACCELERATION_SLOW   400.0     /* [mm.s-2] */
+#define VITESSE_MAX         1000.0    /* [mm.s-1] */
+#define ACCELERATION_MAX    500.0     /* [mm.s-2] */
  
 #endif
 

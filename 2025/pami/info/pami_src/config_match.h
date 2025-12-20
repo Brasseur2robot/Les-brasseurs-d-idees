@@ -30,13 +30,13 @@
 #define MATCH_DURATION_S              98.0                      /* Match duration [s] */
 #define MATCH_DURATION_MS             MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
 
-#define PAMI_WIDTH                    0.085
-#define PAMI_BACKWIDTH                0.060
+#define PAMI_WIDTH                    85.0                      /* From left wheel to right wheel [mm] */
+#define PAMI_BACKWIDTH                60.0                      /* From wheel contact point to back [mm] */
 
-#define MATCH_START_POSITION_X_YELLOW 0.5
-#define MATCH_START_POSITION_X_BLUE   3.0 - MATCH_START_POSITION_X_YELLOW
-#define MATCH_START_POSITION_Y        1.6
-#define MATCH_START_POSITION_THETA    -90.0
+#define MATCH_START_POSITION_X_YELLOW 500.0                     /* [mm] */
+#define MATCH_START_POSITION_X_BLUE   3000.0 - MATCH_START_POSITION_X_YELLOW  /* [mm] */
+#define MATCH_START_POSITION_Y        1600.0                    /* [mm] */
+#define MATCH_START_POSITION_THETA    -90.0                     /* [°] */
 
 /* côté jaune */
 inline pose_t trajectoryYellowPoseArray[1] = {
