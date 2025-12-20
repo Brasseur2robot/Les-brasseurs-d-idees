@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "config.h"
 #include "ihm.h"
-#include "led.h"
+//#include "led.h"
 #include "motor.h"
 #include "obstacle_sensor.h"
 #include "odometry.h"
@@ -153,8 +153,8 @@ void PositionMgrUpdate(bool timeMeasure_b)
         emergencyActivated_b = true;
         RampEmergencyStop(&rampDistance_st_g);
         RampEmergencyStop(&rampOrientation_st_g);
-        //LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
-        //LedSetBlinkNb(LED4_ID, 2);
+        LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
+        LedSetBlinkNb(LED4_ID, 2);
         Serial.println("Emergency");
       }
     }

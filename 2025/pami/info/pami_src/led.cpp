@@ -119,7 +119,7 @@ void LedUpdate(bool timeMeasure_b)
 
       case ANIM_STATE_ON:
         {
-          ledAnimLum[ledId] = 255;
+          ledAnimLum[ledId] = 1;
           break;
         }
 
@@ -132,7 +132,7 @@ void LedUpdate(bool timeMeasure_b)
               if ( (currentTime_u32 - ledAnimPreviousTime[ledId]) < ( (ledAnimBlinkIdx[ledId] + 1) * ANIM_BLINK_TIME_UP + ledAnimBlinkIdx[ledId] * ANIM_BLINK_TIME_DOWN) )
               {
                 // Up blink cycle
-                ledAnimLum[ledId] = 255;
+                ledAnimLum[ledId] = 1;
               }
               else
               {
@@ -185,7 +185,7 @@ void LedUpdate(bool timeMeasure_b)
           break;
         }
     }
-    analogWrite(ledAnimPin[ledId], ledAnimLum[ledId]);
+    digitalWrite(ledAnimPin[ledId], ledAnimLum[ledId]);
     //delay(1);
     //Serial.print(ledAnimInc[ledId]);
     //Serial.print(" ");

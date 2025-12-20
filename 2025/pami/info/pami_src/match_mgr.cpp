@@ -269,8 +269,8 @@ void MatchMgrChangeColor()
 void MatchMgrSetColorBlue()
 {
   matchMgrColor_en_g = MATCH_COLOR_YELLOW;
-  //LedSetAnim(LED1_ID, ANIM_STATE_OFF);
-  //LedSetAnim(LED5_ID, ANIM_STATE_ON);
+  LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED5_ID, ANIM_STATE_ON);
   /* Yellow color */
   digitalWrite(LED_RED, LOW);
   digitalWrite(LED_GREEN, LOW);
@@ -280,8 +280,8 @@ void MatchMgrSetColorBlue()
 void MatchMgrSetColorYellow()
 {
   matchMgrColor_en_g = MATCH_COLOR_BLUE;
-  //LedSetAnim(LED1_ID, ANIM_STATE_ON);
-  //LedSetAnim(LED5_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED1_ID, ANIM_STATE_ON);
+  LedSetAnim(LED5_ID, ANIM_STATE_OFF);
   /* Blue color */
   digitalWrite(LED_RED, HIGH);
   digitalWrite(LED_GREEN, HIGH);
