@@ -60,7 +60,7 @@ void ObstacleSensorInit()
   }
   else
   {
-    LedSetAnim(LED1_ID, ANIM_STATE_ON);
+    LedSetAnim(LED4_ID, ANIM_STATE_ON);
   }
 #else
     Serial.println("Simulation, no sensor connected");
