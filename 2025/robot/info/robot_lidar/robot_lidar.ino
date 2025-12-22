@@ -19,7 +19,7 @@ HardwareSerial lidarSerial(1);
 //LD06 ld06(lidarSerial);
 
 // Optional: constructor with PWM pin
-#define LD06_PWM_PIN 27
+#define LD06_PWM_PIN  27
 LD06 ld06(lidarSerial, LD06_PWM_PIN);
 
 
@@ -42,6 +42,7 @@ void toggleBuiltinLed() {
 void setup() {
   Serial.begin(2000000);  // Main serial output (for debug or visualization)
   pinMode(2, OUTPUT);
+  pinMode(LD06_PWM_PIN, OUTPUT);
 
   // Start Serial 1 with the defined RX and TX pins and a baud rate of 9600
   lidarSerial.begin(921600, SERIAL_8N1, 13, 14);
@@ -58,7 +59,7 @@ void setup() {
   // --- PWM speed control ---
   #ifdef LD06_PWM_PIN
   analogWriteFrequency(LD06_PWM_PIN, 30000); // PWM frequency: 20–50kHz recommended
-  analogWrite(LD06_PWM_PIN, 10);             // Duty cycle (~40%) sets rotation speed
+  analogWrite(LD06_PWM_PIN, 210);             // Duty cycle (~40%) sets rotation speed 210->4500 °/s
   #endif
 
   /*
@@ -109,14 +110,14 @@ void loop() {
       Serial.println(F("New scan completed."));
     }
 
-    // Retrieve LiDAR status information
+    // Retrieve LiDAR status information*/
     Serial.print(F("Rotation speed (°/s): "));
     Serial.println(ld06.getSpeed(), 1);
 
     Serial.print(F("Angle step (°): "));
     Serial.println(ld06.getAngleStep(), 3);
 
-    // Get number of valid points
+    /*// Get number of valid points
     uint16_t n = ld06.getNbPointsInScan();
     Serial.print(F("Valid points in scan: "));
     Serial.println(n);
