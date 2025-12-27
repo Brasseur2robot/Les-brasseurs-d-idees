@@ -51,7 +51,7 @@ uint8_t message[SIZE_MESSAGE] = {ID_PING, PLAYLOAD_PING};
    @result    none
 
 */
-void ComWifiInit() {
+void ComWifiInit(bool scan_b) {
   /* Set device in STA mode to begin with */
   WiFi.mode(WIFI_STA);
   Serial.println("ComWifi|Init");
@@ -65,8 +65,11 @@ void ComWifiInit() {
   //esp_now_register_send_cb(ComWifiOnDataSent);
 
   delay(1000);
-  while (ComWifiSearchPami() == 0) {
-    // Do the search while nothing found
+  if (scan_b == true)
+  {
+    while (ComWifiSearchPami() == 0) {
+      // Do the search while nothing found
+    }
   }
 }
 

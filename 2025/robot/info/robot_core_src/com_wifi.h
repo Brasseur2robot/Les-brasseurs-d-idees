@@ -10,7 +10,7 @@
 /******************************************************************************
  * Function Declarations
  ******************************************************************************/
-void ComWifiInit();
+void ComWifiInit(bool scan_b);
 void ComWifiInitESPNow();
 bool ComWifiSearchPami();
 void ComWifiScanForSlave();

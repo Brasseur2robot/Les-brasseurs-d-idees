@@ -6,7 +6,7 @@
 #include "actuator.h"
 #include "config.h"
 #include "com_wifi.h"
-//#include "controller.h"
+#include "controller.h"
 #include "color_sensor.h"
 #include "ihm.h"
 #include "io_expander.h"
@@ -20,7 +20,7 @@
 #include "ramp.h"
 #include "sdcard.h"
 //#include "sensor.h"
-//#include "servo_board.h"
+#include "servo_board.h"
 #include "trajectory_mgr.h"
 #include "Wire.h"
 
@@ -60,20 +60,20 @@ void setup() {
   Serial.println();
   Serial.println("Init Robot Core Brd");
   ActuatorInit();
-  ComWifiInit();
-  //ControllerInit(false);
+  ComWifiInit(false);
+  ControllerInit(false);
   ColorSensorInit();
   IhmInit();
   IoExpanderInit();
   LedInit();
   MatchMgrInit();
   MotorInit();
-  //  ObstacleSensorInit();
+  ObstacleSensorInit();
   OdometryInit();
   PositionMgrInit();
   SdcardInit();
   //  SensorInit();
-  //  ServoBoardInit();
+  ServoBoardInit();
   TrajectoryMgrInit();
 }
 
@@ -81,12 +81,12 @@ void loop() {
   //  MotorTest(255);
   //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
-  //ControllerUpdate(DEBUG_TIME);
+  ControllerUpdate(DEBUG_TIME);
   IhmUpdate(DEBUG_TIME);
   LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);
   //  SensorUpdate(DEBUG_TIME);
-  //  ServoBoardUpdate(DEBUG_TIME);
+  ServoBoardUpdate(DEBUG_TIME);
   TrajectoryMgrUpdate(DEBUG_TIME);
 }
