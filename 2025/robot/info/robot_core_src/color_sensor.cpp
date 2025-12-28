@@ -48,8 +48,8 @@ uint16_t sensorValues[AS726x_NUM_CHANNELS];
 */
 void ColorSensorInit() {
   /* Init the color sensor object */
-  Serial.print("Color sensor init : ");
-  if (!ams.begin()) {
+  Serial.print("ColorSensor|Init : ");
+  if (!ams.begin(&Wire)) {
     Serial.println("Failed");
   } else {
     Serial.println("OK");

@@ -47,7 +47,16 @@ Adafruit_PWMServoDriver servoBoard = Adafruit_PWMServoDriver(SERVO_BOARD_ADDRESS
  ******************************************************************************/
 void ServoBoardInit()
 {
-  servoBoard.begin();
+  Serial.print("ServoBrd|Init : ");
+  if (!servoBoard.begin())
+  {
+    Serial.print("Failed");
+  }
+  else
+  {
+    Serial.print("OK");
+  }
+  Serial.println();
   /*
      In theory the internal oscillator (clock) is 25MHz but it really isn't
      that precise. You can 'calibrate' this by tweaking this number until
@@ -67,10 +76,10 @@ void ServoBoardInit()
   servoBoard.setOscillatorFrequency(27000000);
   servoBoard.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
 
-  ServoBoardCenterLeftRelease();
-  ServoBoardCenterRightRelease();
-  ServoBoardExtLeftRelease();
-  ServoBoardExtRightRelease();
+// ServoBoardCenterLeftRelease();
+// ServoBoardCenterRightRelease();
+// ServoBoardExtLeftRelease();
+// ServoBoardExtRightRelease();
 //  delay(2000);
 //  ServoBoardCenterLeftCatch();
 //  ServoBoardCenterRightCatch();
@@ -175,23 +184,20 @@ void ServoBoardExtRightRelease()
 
 void ServoBoardTest(uint8_t servoId_u8)
 {
-  while (1)
+  for (double servoAngle_d = 0.0; servoAngle_d <= 180.0; servoAngle_d += 10.0)
   {
-    for (double servoAngle_d = 0.0; servoAngle_d <= 180.0; servoAngle_d++)
-    {
-      Serial.print("Servo angle test : ");
-      Serial.print(servoAngle_d);
-      Serial.println();
-      ServoBoardSet(servoId_u8, servoAngle_d);
-      delay(500);
-    }
-    for (double servoAngle_d = 180.0; servoAngle_d >= 0.0; servoAngle_d--)
-    {
-      Serial.print("Servo angle test : ");
-      Serial.print(servoAngle_d);
-      Serial.println();
-      ServoBoardSet(servoId_u8, servoAngle_d);
-      delay(500);
-    }
+    Serial.print("Servo angle test : ");
+    Serial.print(servoAngle_d);
+    Serial.println();
+    ServoBoardSet(servoId_u8, servoAngle_d);
+    delay(500);
+  }
+  for (double servoAngle_d = 180.0; servoAngle_d >= 0.0; servoAngle_d -= 10.0)
+  {
+    Serial.print("Servo angle test : ");
+    Serial.print(servoAngle_d);
+    Serial.println();
+    ServoBoardSet(servoId_u8, servoAngle_d);
+    delay(500);
   }
 }

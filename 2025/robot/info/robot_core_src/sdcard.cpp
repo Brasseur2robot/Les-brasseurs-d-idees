@@ -37,20 +37,23 @@ void SdcardInit() {
   /* Chip select */
   SdcardCsEnable(LOW);
 
+  Serial.print("SDCard|Init : ");
+
   if (!SD.begin(4)) {
     Serial.println("Card Mount Failed");
     return;
   }
+  else
+  {
+    Serial.println("OK");
+  }
   uint8_t cardType = SD.cardType();
   SdcardCsEnable(HIGH);
 
+  Serial.print("SDCard|Card Type: ");
   if (cardType == CARD_NONE) {
     Serial.println("No SD card attached");
-    return;
-  }
-
-  Serial.print("SD Card Type: ");
-  if (cardType == CARD_MMC) {
+  } else if (cardType == CARD_MMC) {
     Serial.println("MMC");
   } else if (cardType == CARD_SD) {
     Serial.println("SDSC");

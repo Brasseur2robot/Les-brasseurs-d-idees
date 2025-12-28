@@ -52,15 +52,16 @@ uint16_t obstacleSensorThreshold_u16;
 */
 void ObstacleSensorInit()
 {
+  Serial.print("ObsSensor|Init : ");
 #if DEBUG_SIMULATION == false
   sensor.setTimeout(500);
   if (!sensor.init())
   {
-    Serial.println("Failed to detect and initialize sensor!");
-    while (1) {}
+    Serial.println("Failed");
   }
   else
   {
+    Serial.println("Ok");
     LedSetAnim(LED1_ID, ANIM_STATE_ON);
   }
 #else
@@ -72,17 +73,25 @@ void ObstacleSensorInit()
 
 void ObstacleSensorStart()
 {
+#if DEBUG_SIMULATION == false
   obstacleSensorEnable_b = true;
   /* Blinking once Led 4 to indicate sensor enabled */
   LedSetAnim(LED1_ID, ANIM_STATE_BLINK);
   LedSetBlinkNb(LED1_ID, 1);
+#else
+    Serial.println("Simulation, no sensor started");
+#endif
 }
 
 void ObstacleSensorStop()
 {
+#if DEBUG_SIMULATION == false
   obstacleSensorEnable_b = false;
   /* Led full on to indicate sensor off */
   LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+#else
+    Serial.println("Simulation, no sensor stopped");
+#endif
 }
 
 /**
@@ -104,10 +113,12 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
   /* Get the distance in [cm] */
   uint16_t distance_u16;
 
+#if DEBUG_SIMULATION == false
   if (sensor.readRangeNoBlocking(distance_u16))
   {
 
   }
+#endif
 
   if (obstacleSensorEnable_b == true)
   {

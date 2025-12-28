@@ -32,12 +32,15 @@ Adafruit_AW9523 aw;
    Functions Definitions
  ******************************************************************************/
 void IoExpanderInit() {
-  if (!aw.begin(IO_EXPANDER_ADD)) {
-    Serial.println("AW9523 not found? Check wiring!");
-    while (1) delay(10);  // halt forever
+  Serial.print("IOexpander|Init : ");
+  if (aw.begin(IO_EXPANDER_ADD) == false)
+  {
+    Serial.print("Failed");
   }
-  Serial.println("AW9523 found!");
-  
+  else
+  {
+    Serial.println("OK");
+  }
   aw.pinMode(IOX_SD_CS, OUTPUT);
 }
 

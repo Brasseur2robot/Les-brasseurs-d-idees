@@ -22,6 +22,7 @@
 #include "controller.h"
 #include "color_sensor.h"
 #include "motor.h"
+#include "servo_board.h"
 
 /******************************************************************************
    Constants and Macros
@@ -62,6 +63,19 @@ bool Autonome = false;
 uint16_t colorBlue_u16 = 0;
 uint16_t colorYellow_u16 = 0;
 
+int selectedServoId = 0;
+
+MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
+            ITEM_RANGE_REF<int>("Servo Id", selectedServoId, 1, 0, 15, [](const Ref<int> value) {
+              Serial.println(value.value);
+              }, "%d"),
+            ITEM_COMMAND("Test Servo id", []() {
+              Serial.print("Test servo ");
+              Serial.println(selectedServoId);
+              ServoBoardTest(selectedServoId);
+              })
+            );
+
 MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
             ITEM_RANGE<int>(
               "Left", 0, -5, -255, 255, [](const int value) {
@@ -78,7 +92,8 @@ MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
                 Serial.print("Right Speed : ");
                 Serial.println(value);
               },
-              "%d"));
+              "%d")
+            );
 
 MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
             ITEM_RANGE_REF<int>(
@@ -101,7 +116,8 @@ MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
               "Position", dynPosition, -5.0f, 0.0f, 300.0f, [](const Ref<float> value) {
                 ActuatorDynSetGoalPosition(Ids[selectedId], dynPosition);
               },
-              "%0.1f"));
+              "%0.1f")
+            );
 
 MENU_SCREEN(ColorSensorScreen, ColorSensorItems,
             ITEM_COMMAND("Color measure", []() {
@@ -144,7 +160,10 @@ MENU_SCREEN(mainScreen, mainItems,
 
             ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
 
-            ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen));
+            ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen),
+
+            ITEM_SUBMENU("Servo Cfg", ServoCfgScreen)
+            );
 
 /******************************************************************************
    Functions Definitions
