@@ -68,9 +68,9 @@ void OdometryInit()
   // Enable the weak pull up resistors
   ESP32Encoder::useInternalWeakPullResistors = puType::up;
   // use pin 19 and 18 for the first encoder
-  encoderLeft.attachHalfQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
+  encoderLeft.attachFullQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
   // use pin 17 and 16 for the second encoder
-  encoderRight.attachHalfQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
+  encoderRight.attachFullQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
 
   encoderLeft.clearCount();
   encoderRight.clearCount();
