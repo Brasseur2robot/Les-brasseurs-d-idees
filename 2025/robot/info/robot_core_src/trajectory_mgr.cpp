@@ -259,22 +259,6 @@ uint8_t Trajectory(double colorSide)
             break;
         }
 
-        /* Do the actuator */
-        if (actuatorState_b == true)
-        {
-          ServoBoardCenterLeftCatch();
-          ServoBoardCenterRightCatch();
-          ServoBoardExtLeftCatch();
-          ServoBoardExtRightCatch();
-        }
-        else
-        {
-          ServoBoardCenterLeftRelease();
-          ServoBoardCenterRightRelease();
-          ServoBoardExtLeftRelease();
-          ServoBoardExtRightRelease();
-        }
-
         /* Compute angle and distance */
         distanceWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, true);
         orientationWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, false);

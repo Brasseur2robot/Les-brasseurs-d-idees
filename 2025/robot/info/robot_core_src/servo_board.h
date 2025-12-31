@@ -17,22 +17,33 @@
 #define SERVO_BOARD_CENT_RIGHT_ID 2
 
 /******************************************************************************
+   Types declarations
+ ******************************************************************************/
+typedef struct
+{
+  bool enable_b;
+  uint8_t id_u8;
+  bool isFinished_b;
+  uint32_t startTime_u32;
+  uint32_t duration_u32;
+  double startAngle_d;
+  double stopAngle_d;
+  double targetAngle_d;
+} ServoControllerSt; /* typedef for ramp parameters */
+
+/******************************************************************************
  * Function Declarations
  ******************************************************************************/
 void ServoBoardInit();
 void ServoBoardUpdate(bool timeeasure_b);
 void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d);
-
-void ServoBoardCenterLeftCatch();
-void ServoBoardCenterRightCatch();
-void ServoBoardExtLeftCatch();
-void ServoBoardExtRightCatch();
-
-void ServoBoardCenterLeftRelease();
-void ServoBoardCenterRightRelease();
-void ServoBoardExtLeftRelease();
-void ServoBoardExtRightRelease();
-
 void ServoBoardTest(uint8_t servoId_u8);
+
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double startAngle_d, double stopAngle_d, uint32_t duration_u32);
+void ServoControllerSetTarget(ServoControllerSt * servoController_st, double targetAngle_d, uint32_t duration_u32);
+void ServoControllerGotoStart(ServoControllerSt * servoController_st);
+void ServoControllerGotoEnd(ServoControllerSt * servoController_st);
+void ServoControllerUpdate(ServoControllerSt * servoController_st);
+bool ServoControllerIsFinished(ServoControllerSt * servoController_st);
 
 #endif
