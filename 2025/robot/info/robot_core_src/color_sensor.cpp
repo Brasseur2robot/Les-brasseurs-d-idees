@@ -49,11 +49,15 @@ uint16_t sensorValues[AS726x_NUM_CHANNELS];
 void ColorSensorInit() {
   /* Init the color sensor object */
   Serial.print("ColorSensor|Init : ");
+#if DEBUG_SIMULATION == false
   if (!ams.begin(&Wire)) {
     Serial.println("Failed");
   } else {
     Serial.println("OK");
   }
+#else
+    Serial.println("Simulation, no ColorSensor connected.");
+#endif
 }
 
 void ColorSensorMeasurement(bool timeMeasure_b) {
@@ -64,6 +68,7 @@ void ColorSensorMeasurement(bool timeMeasure_b) {
   if (timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
+#if DEBUG_SIMULATION == false
   //read the device temperature
   //uint8_t temp = ams.readTemperature();
 
@@ -81,6 +86,9 @@ void ColorSensorMeasurement(bool timeMeasure_b) {
   //read the values!
   ams.readRawValues(sensorValues);
   //ams.readCalibratedValues(calibratedValues);
+#else
+  Serial.println("ColorSensor|Simulation, no measure done.");
+#endif
 
   if (timeMeasure_b) {
     durationMeasure_u32 = micros() - durationMeasureStart_u32;

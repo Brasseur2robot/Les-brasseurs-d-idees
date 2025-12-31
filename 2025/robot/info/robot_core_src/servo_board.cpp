@@ -48,15 +48,18 @@ Adafruit_PWMServoDriver servoBoard = Adafruit_PWMServoDriver(SERVO_BOARD_ADDRESS
 void ServoBoardInit()
 {
   Serial.print("ServoBrd|Init : ");
+#if DEBUG_SIMULATION == false
   if (!servoBoard.begin())
   {
-    Serial.print("Failed");
+    Serial.println("Failed");
   }
   else
   {
-    Serial.print("OK");
+    Serial.println("OK");
   }
-  Serial.println();
+#else
+    Serial.println("Simulation, no board connected.");
+#endif
   /*
      In theory the internal oscillator (clock) is 25MHz but it really isn't
      that precise. You can 'calibrate' this by tweaking this number until
@@ -126,7 +129,15 @@ void ServoBoardUpdate(bool timeMeasure_b)
 void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d)
 {
   uint16_t pulselength = map(servoAngle_d, 0, 180, SERVOMIN, SERVOMAX);
+#if DEBUG_SIMULATION == false
   servoBoard.setPWM(servoId_u8, 0, pulselength);
+#else
+  Serial.print("ServoBoard|Simulated move of servo ");
+  Serial.print(servoId_u8);
+  Serial.print(" to ");
+  Serial.print(servoAngle_d);
+  Serial.println("°.");
+#endif
 
   if (SERVO_BOARD_DEBUG)
   {
