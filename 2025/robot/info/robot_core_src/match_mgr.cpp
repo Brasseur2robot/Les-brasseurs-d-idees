@@ -59,7 +59,7 @@ void MatchMgrInit()
   /* Set up the interrupt on the reed switch to start the preparation (falling) and the match (rising) */
   attachInterrupt(digitalPinToInterrupt(SWITCH_REED_START_PIN), MatchMgrSwitchState, CHANGE);
   /* Set up the interrupt on the color switch to change the color */
-  attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
+  //attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
 
   matchMgrEventGotoWaitforend_b = false;
   matchMgrEventGotoEndzone_b = false;
@@ -333,35 +333,51 @@ void MatchMgrUpdateWaitingTimer()
   /* else, still waiting! */
 }
 
-void MatchMgrChangeColor()
+void MatchMgrChangeColor(MatchMgrColorEn selectedColor_en)
 {
   /* Change color only if match not started */
   if (matchMgrState_en_g == MATCH_STATE_COLOR_SELECTION)
   {
     /* if function is called, change the color to the other one */
-    if (matchMgrColor_en_g == MATCH_COLOR_BLUE)
+    switch(selectedColor_en)
     {
-      matchMgrColor_en_g = MATCH_COLOR_YELLOW;
-      LedSetAnim(LED1_ID, ANIM_STATE_ON);
-      LedSetAnim(LED2_ID, ANIM_STATE_ON);
-      LedSetAnim(LED3_ID, ANIM_STATE_OFF);
-      ComWifiSendColor(MATCH_COLOR_BLUE);
-      if (MATCH_MGR_DEBUG)
-      {
-        Serial.println("Color yellow selected");
-      }
-    }
-    else
-    {
-      matchMgrColor_en_g = MATCH_COLOR_BLUE;
-      LedSetAnim(LED1_ID, ANIM_STATE_OFF);
-      LedSetAnim(LED2_ID, ANIM_STATE_OFF);
-      LedSetAnim(LED3_ID, ANIM_STATE_ON);
-      ComWifiSendColor(MATCH_COLOR_YELLOW);
-      if (MATCH_MGR_DEBUG)
-      {
-        Serial.println("Color blue selected");
-      }
+      case MATCH_COLOR_NONE:
+        matchMgrColor_en_g = MATCH_COLOR_NONE;
+        LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED2_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+        if (MATCH_MGR_DEBUG)
+        {
+          Serial.println("Should not be possible to change back to none");
+        }
+        break;
+      
+      case MATCH_COLOR_BLUE:
+        matchMgrColor_en_g = MATCH_COLOR_BLUE;
+        LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED2_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED3_ID, ANIM_STATE_ON);
+        ComWifiSendColor(MATCH_COLOR_YELLOW);
+        if (MATCH_MGR_DEBUG)
+        {
+          Serial.println("Color blue selected");
+        }
+        break;
+
+      case MATCH_COLOR_YELLOW:
+        matchMgrColor_en_g = MATCH_COLOR_YELLOW;
+        LedSetAnim(LED1_ID, ANIM_STATE_ON);
+        LedSetAnim(LED2_ID, ANIM_STATE_ON);
+        LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+        ComWifiSendColor(MATCH_COLOR_BLUE);
+        if (MATCH_MGR_DEBUG)
+        {
+          Serial.println("Color yellow selected");
+        }
+        break;
+      
+      default:
+        break;
     }
   }
 }

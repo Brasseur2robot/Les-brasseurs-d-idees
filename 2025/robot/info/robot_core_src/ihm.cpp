@@ -21,7 +21,9 @@
 #include "actuator.h"
 #include "controller.h"
 #include "color_sensor.h"
+#include "ihm.h"
 #include "motor.h"
+#include "match_mgr.h"
 #include "servo_board.h"
 
 /******************************************************************************
@@ -52,7 +54,8 @@ LcdMenu menu(renderer);
 SimpleRotary encoder(IHM_ENCODER_PIN_A, IHM_ENCODER_PIN_B, IHM_ENCODER_SW_PIN);
 SimpleRotaryAdapter encoderA(&menu, &encoder);
 
-std::vector<const char*> options = { "Blue", "Yellow" };
+uint8_t selectedColor = 0;
+std::vector<const char*> colors = {"None", "Blue", "Yellow"};
 
 int selectedId = 0;
 uint8_t Ids[10] = { 10, 11, 20, 21, 22, 23, 24, 25, 26, 27 };
@@ -64,6 +67,25 @@ uint16_t colorBlue_u16 = 0;
 uint16_t colorYellow_u16 = 0;
 
 int selectedServoId = 0;
+void changeColor()
+{
+  /* Set color to none */
+  if (selectedColor == 0)
+  {
+  IhmSetColor(0, 255, 0);
+  MatchMgrChangeColor(MATCH_COLOR_NONE);
+  } else if (selectedColor == 1)
+  {
+  /* Set color to blue */
+  IhmSetColor(0, 0, 255);
+  MatchMgrChangeColor(MATCH_COLOR_BLUE);
+  } else if (selectedColor == 2)
+  {
+  /* Set color to yellow */
+    IhmSetColor(255, 255, 0);
+    MatchMgrChangeColor(MATCH_COLOR_YELLOW);
+  }
+}
 
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
             ITEM_RANGE_REF<int>("Servo Id", selectedServoId, 1, 0, 15, [](const Ref<int> value) {
@@ -132,11 +154,10 @@ MENU_SCREEN(ColorSensorScreen, ColorSensorItems,
 
 MENU_SCREEN(mainScreen, mainItems,
             ITEM_BASIC("Robot Core Brd"),
-            ITEM_WIDGET(
-              "Side", [](const uint8_t option) {
-                Serial.println(option);
-              },
-              WIDGET_LIST(options, 0, "%s", 0, true)),
+            ITEM_LIST_REF("Color", colors, [](const Ref<uint8_t> color) {
+              Serial.println(colors[color.value]);
+              changeColor();
+              }, selectedColor),
 
             ITEM_BOOL("Mode", true, "Autonome", "Manette", [](const bool value) {
               /* if true, autonomous mode is on, if false, controller mode is on*/
@@ -174,6 +195,8 @@ void IhmInit() {
   dynPosition = ActuatorDynGetPresentPosition(Ids[selectedId]);
   Serial.print("Position read : ");
   Serial.println(dynPosition);
+  /* Set RGB color to orange, signaling that the robot init is not finished */
+  IhmSetColor(255, 165, 0);
 }
 
 void IhmUpdate(bool timeMeasure_b) {
@@ -205,4 +228,10 @@ void IhmUpdate(bool timeMeasure_b) {
   }
   /* Should be done as quick as possible*/
   encoderA.observe();
+}
+
+void IhmSetColor(uint8_t red, uint8_t green, uint8_t blue)
+{
+  lcdAdapter.setRGBcolor(red, green, blue);
+  lcdAdapter.show();
 }

@@ -52,7 +52,7 @@ void setup() {
   Wire.begin();
   Wire.setClock(400000UL);
 
-  pinMode(SWITCH_COLOR_PIN, INPUT_PULLUP);
+  //  pinMode(SWITCH_COLOR_PIN, INPUT_PULLUP);
   //  pinMode(SWITCH_MODE_PIN, INPUT_PULLUP);
   pinMode(SWITCH_REED_START_PIN, INPUT_PULLUP);
 
@@ -75,6 +75,8 @@ void setup() {
   //  SensorInit();
   ServoBoardInit();
   TrajectoryMgrInit();
+  /* Set RGB color to green, signaling the robot init is finished */
+  IhmSetColor(0, 255, 0);
 }
 
 void loop() {

@@ -82,7 +82,14 @@ void ControllerUpdate(bool timeMeasure_b) {
         /* Take care of buttons */
         if (e.stickButton == true) {
           /* Change color */
-          MatchMgrChangeColor();
+          if (MatchMgrGetColor() == MATCH_COLOR_BLUE)
+          {
+            MatchMgrChangeColor(MATCH_COLOR_YELLOW);
+          }
+          else
+          {
+            MatchMgrChangeColor(MATCH_COLOR_BLUE);
+          }
         }
 
         if (CONTROLLER_DEBUG) {
