@@ -18,6 +18,7 @@
 #include <input/SimpleRotaryAdapter.h>
 #include "DFRobot_RGBLCD1602.h"
 #include "config.h"
+#include "action_mgr.h"
 #include "actuator.h"
 #include "controller.h"
 #include "color_sensor.h"
@@ -152,6 +153,13 @@ MENU_SCREEN(ColorSensorScreen, ColorSensorItems,
             ITEM_VALUE("Yellow", colorYellow_u16, "%d")
             );
 
+MENU_SCREEN(ActionScreen, ActionItems,
+            ITEM_COMMAND("Action READY", []() {
+              /* Launch action Ready */
+              ActionMgrSetNextAction(ACTION_MGR_ID_READY, WAIT);
+            })
+            );
+
 MENU_SCREEN(mainScreen, mainItems,
             ITEM_BASIC("Robot Core Brd"),
             ITEM_LIST_REF("Color", colors, [](const Ref<uint8_t> color) {
@@ -178,6 +186,8 @@ MENU_SCREEN(mainScreen, mainItems,
             }),
 
             ITEM_SUBMENU("Color Sensor", ColorSensorScreen),
+
+            ITEM_SUBMENU("Action", ActionScreen),
 
             ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
 

@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include <SPI.h>
+#include "action_mgr.h"
 #include "actuator.h"
 #include "config.h"
 #include "com_wifi.h"
@@ -59,6 +60,7 @@ void setup() {
   /* Init de tous les modules */
   Serial.println();
   Serial.println("Init Robot Core Brd");
+  ActionMgrInit();
   ActuatorInit();
   ComWifiInit(false);
   ControllerInit(false);
@@ -82,6 +84,7 @@ void setup() {
 void loop() {
   //  MotorTest(255);
   //  OdometryEncoderTest();
+  ActionMgrUpdate(DEBUG_TIME);
   ActuatorUpdate(DEBUG_TIME);
   ControllerUpdate(DEBUG_TIME);
   IhmUpdate(DEBUG_TIME);

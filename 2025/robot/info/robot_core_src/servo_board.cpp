@@ -13,45 +13,6 @@
 #define SERVO_BOARD_DEBUG                       false
 #define SERVO_BOARD_UPDATE_PERIOD               0.1   /* Refresh rate of the display 1/0.1 = 10fps */
 
-#define SERVO_BOARD_CENTER_LEFT_CATCH_ANGLE     30.0
-#define SERVO_BOARD_CENTER_LEFT_RELEASE_ANGLE   140.0
-
-#define SERVO_BOARD_CENTER_RIGHT_CATCH_ANGLE    140.0
-#define SERVO_BOARD_CENTER_RIGHT_RELEASE_ANGLE  0.0
-
-#define SERVO_BOARD_EXT_LEFT_CATCH_ANGLE        0.0
-#define SERVO_BOARD_EXT_LEFT_RELEASE_ANGLE      120.0
-
-#define SERVO_BOARD_EXT_RIGHT_CATCH_ANGLE       0.0
-#define SERVO_BOARD_EXT_RIGHT_RELEASE_ANGLE     120.0
-
-#define SERVO_BOARD_NB_SERVO                    16
-
-#define SERVO_BOARD_ARM_LEFT_ID                 0
-#define SERVO_BOARD_ARM_LEFT_RETRACTED          0.0
-#define SERVO_BOARD_ARM_LEFT_EXTENDED           180.0
-#define SERVO_BOARD_ARM_LEFT_TIME               2000
-
-#define SERVO_BOARD_ARM_RIGHT_ID                1
-#define SERVO_BOARD_ARM_RIGHT_RETRACTED         180.0
-#define SERVO_BOARD_ARM_RIGHT_EXTENDED          0.0
-#define SERVO_BOARD_ARM_RIGHT_TIME              2000
-
-#define SERVO_BOARD_SLOPE_ID                    2
-#define SERVO_BOARD_SLOPE_RETRACTED             4.0
-#define SERVO_BOARD_SLOPE_EXTENDED              40.0
-#define SERVO_BOARD_SLOPE_TIME                  2000
-
-#define SERVO_BOARD_SELECTOR_ID                 3
-#define SERVO_BOARD_SELECTOR_RETRACTED          75.0
-#define SERVO_BOARD_SELECTOR_EXTENDED           125.0
-#define SERVO_BOARD_SELECTOR_TIME               2000
-
-#define SERVO_BOARD_STOPPER_ID                  4
-#define SERVO_BOARD_STOPPER_RETRACTED           55.0
-#define SERVO_BOARD_STOPPER_EXTENDED            70.0
-#define SERVO_BOARD_STOPPER_TIME                2000
-
 /******************************************************************************
   Types declarations
 ******************************************************************************/
@@ -68,7 +29,7 @@
    Module Global Variables
  ******************************************************************************/
 Adafruit_PWMServoDriver servoBoard = Adafruit_PWMServoDriver(SERVO_BOARD_ADDRESS, Wire);
-ServoControllerSt servoCtrl_tst[SERVO_BOARD_NB_SERVO];
+ServoControllerSt servoCtrl_tst[SERVO_BOARD_NB_SERVO_CONTROLLER];
 
 /******************************************************************************
    Functions Definitions
@@ -112,40 +73,15 @@ void ServoBoardInit()
   /* Init of all servo controllers */
   ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, SERVO_BOARD_ARM_LEFT_EXTENDED, SERVO_BOARD_ARM_LEFT_TIME);
   ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, SERVO_BOARD_ARM_RIGHT_EXTENDED, SERVO_BOARD_ARM_RIGHT_TIME);
-  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, SERVO_BOARD_SELECTOR_EXTENDED, SERVO_BOARD_SELECTOR_TIME);
-  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, SERVO_BOARD_STOPPER_EXTENDED, SERVO_BOARD_STOPPER_TIME);
-  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, SERVO_BOARD_SLOPE_EXTENDED, SERVO_BOARD_SLOPE_TIME);
+  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, SERVO_BOARD_SLOPE_EXTENDED, SERVO_BOARD_SLOPE_TIME);
+  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, SERVO_BOARD_SELECTOR_EXTENDED, SERVO_BOARD_SELECTOR_TIME);
+  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, SERVO_BOARD_STOPPER_EXTENDED, SERVO_BOARD_STOPPER_TIME);
 
   /* All servos go to start, without waiting for the moves to finish */
-  for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO; index++)
+  for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
   {
     ServoControllerGotoStart(&servoCtrl_tst[index]);
   }
-  
-  // while(ServoControllerIsFinished(&servoCtrl_tst[0]) == false)
-  // {
-  //   Serial.print("ServoCtrl|Time");
-  //   Serial.print(millis());
-  //   Serial.println(",waiting for move to finish");
-  //   ServoControllerUpdate(&servoCtrl_tst[0]);
-  //   delay(100);
-  // }
-  // Serial.println("Move finished");
-  //
-  // ServoControllerGotoEnd(&servoCtrl_tst[0]);
-  // ServoControllerGotoEnd(&servoCtrl_tst[1]);
-  // ServoControllerGotoEnd(&servoCtrl_tst[2]);
-  // ServoControllerGotoEnd(&servoCtrl_tst[3]);
-  // ServoControllerGotoEnd(&servoCtrl_tst[4]);
-  // while(ServoControllerIsFinished(&servoCtrl_tst[0]) == false)
-  // {
-  //   Serial.print("ServoCtrl|Time");
-  //   Serial.print(millis());
-  //   Serial.println(",waiting for move to finish");
-  //   ServoControllerUpdate(&servoCtrl_tst[0]);
-  //   delay(100);
-  // }
-  // Serial.println("Move finished");
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)
@@ -167,7 +103,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
       durationMeasureStart_u32 = micros();
 
     /* Actual Code */
-    for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO; index++)
+    for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
     {
       ServoControllerUpdate(&servoCtrl_tst[index]);
     }
@@ -240,12 +176,6 @@ void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, 
   servoController_st->targetAngle_d = 0.0;
 }
 
-void ServoControllerSetTarget(ServoControllerSt * servoController_st, double targetAngle_d, uint32_t duration_u32)
-{
-  servoController_st->targetAngle_d = targetAngle_d;
-  servoController_st->duration_u32 = duration_u32;
-}
-
 void ServoControllerGotoStart(ServoControllerSt * servoController_st)
 {
   /* Does the registered action */
@@ -271,7 +201,21 @@ void ServoControllerUpdate(ServoControllerSt * servoController_st)
   }
 }
 
-bool ServoControllerIsFinished(ServoControllerSt * servoController_st)
+void ServoControllerSetTarget(uint8_t id_u8, double targetAngle_d, uint32_t duration_u32)
 {
-  return servoController_st->isFinished_b;
+  /* Should verifiy that the target angle is between min and max authorized */
+  // TODO
+  servoCtrl_tst[id_u8].targetAngle_d = targetAngle_d;
+  /* Should compute duration based on a registered servo speed */
+  servoCtrl_tst[id_u8].duration_u32 = duration_u32;
+
+  /* Launches the registered action */
+  ServoBoardSet(id_u8 , servoCtrl_tst[id_u8].targetAngle_d);
+  servoCtrl_tst[id_u8].startTime_u32 = millis();
+  servoCtrl_tst[id_u8].isFinished_b = false;
+}
+
+bool ServoControllerIsFinished(uint8_t id_u8)
+{
+  return servoCtrl_tst[id_u8].isFinished_b;
 }
