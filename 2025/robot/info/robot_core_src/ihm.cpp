@@ -89,14 +89,36 @@ void changeColor()
 }
 
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
-            ITEM_RANGE_REF<int>("Servo Id", selectedServoId, 1, 0, 15, [](const Ref<int> value) {
-              Serial.println(value.value);
-              }, "%d"),
-            ITEM_COMMAND("Test Servo id", []() {
-              Serial.print("Test servo ");
-              Serial.println(selectedServoId);
-              ServoBoardTest(selectedServoId);
-              })
+            ITEM_RANGE<double>("ArmL", SERVO_BOARD_ARM_LEFT_MIN, -5.0, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, [](const double value) {
+              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, value, 2000))
+              {
+                Serial.println("Target impossible.");
+              }
+            }, "%0.1f"),
+            ITEM_RANGE<double>("ArmR", SERVO_BOARD_ARM_RIGHT_MAX, -5.0, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, [](const double value) {
+              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, value, 2000))
+              {
+                Serial.println("Target impossible.");
+              }
+            }, "%0.1f"),
+            ITEM_RANGE<double>("Slope", SERVO_BOARD_SLOPE_MIN, -1.0, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, [](const double value) {
+              if(!ServoControllerSetTarget(SERVO_BOARD_SLOPE_ID, value, 2000))
+              {
+                Serial.println("Target impossible.");
+              }
+            }, "%0.1f"),
+            ITEM_RANGE<double>("Selector", SERVO_BOARD_SELECTOR_MIN, -1.0, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, [](const double value) {
+              if(!ServoControllerSetTarget(SERVO_BOARD_SELECTOR_ID, value, 2000))
+              {
+                Serial.println("Target impossible.");
+              }
+            }, "%0.1f"),
+            ITEM_RANGE<double>("Stopper", SERVO_BOARD_STOPPER_MIN, -1.0, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, [](const double value) {
+              if(!ServoControllerSetTarget(SERVO_BOARD_STOPPER_ID, value, 2000))
+              {
+                Serial.println("Target impossible.");
+              }
+            }, "%0.1f"),
             );
 
 MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
@@ -154,17 +176,21 @@ MENU_SCREEN(ColorSensorScreen, ColorSensorItems,
             );
 
 MENU_SCREEN(ActionScreen, ActionItems,
-            ITEM_COMMAND("Action READY", []() {
+            ITEM_COMMAND("Do READY", []() {
               /* Launch action Ready */
               ActionMgrSetNextAction(ACTION_MGR_ID_READY, WAIT);
             }),
-            ITEM_COMMAND("Action GRAB BOXES", []() {
+            ITEM_COMMAND("Do GRAB BOXES", []() {
               /* Launch action Ready */
               ActionMgrSetNextAction(ACTION_MGR_ID_GRAB_BOXES, WAIT);
             }),
-            ITEM_COMMAND("Action SORT EJECT", []() {
+            ITEM_COMMAND("Do EJECT", []() {
               /* Launch action Ready */
               ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT, WAIT);
+            }),
+            ITEM_COMMAND("Do EJECT INVERT", []() {
+              /* Launch action Ready */
+              ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT_INVERT, WAIT);
             })
             );
 

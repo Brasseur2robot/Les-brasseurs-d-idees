@@ -71,17 +71,18 @@ void ServoBoardInit()
 #endif
 
   /* Init of all servo controllers */
-  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, SERVO_BOARD_ARM_LEFT_EXTENDED, SERVO_BOARD_ARM_LEFT_TIME);
-  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, SERVO_BOARD_ARM_RIGHT_EXTENDED, SERVO_BOARD_ARM_RIGHT_TIME);
-  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, SERVO_BOARD_SLOPE_EXTENDED, SERVO_BOARD_SLOPE_TIME);
-  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, SERVO_BOARD_SELECTOR_EXTENDED, SERVO_BOARD_SELECTOR_TIME);
-  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, SERVO_BOARD_STOPPER_EXTENDED, SERVO_BOARD_STOPPER_TIME);
+  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_TIME);
+  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_TIME);
+  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_TIME);
+  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_TIME);
+  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_TIME);
 
   /* All servos go to start, without waiting for the moves to finish */
-  for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
+  /*for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
   {
     ServoControllerGotoStart(&servoCtrl_tst[index]);
-  }
+  }*/
+  // Not anymore with min max logic. Should be better to start the READY action.
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)
@@ -229,6 +230,16 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dura
   }
 
   return result_b;
+}
+
+double ServoControllerGetAngleMin(uint8_t id_u8)
+{
+  return servoCtrl_tst[id_u8].angleMin_d;
+}
+
+double ServoControllerGetAngleMax(uint8_t id_u8)
+{
+  return servoCtrl_tst[id_u8].angleMax_d;
 }
 
 bool ServoControllerIsFinished(uint8_t id_u8)

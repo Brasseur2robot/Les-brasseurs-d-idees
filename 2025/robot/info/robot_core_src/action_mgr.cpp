@@ -50,36 +50,50 @@ static actionStep_t actionStepReady_st[ACTION_MGR_READY_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_EXTENDED, NOWAIT},
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, NOWAIT}
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NOWAIT}
   /* Grabber to add */
 };
 
-#define ACTION_MGR_GRAB_BOXES_NBSTEPS  5
+#define ACTION_MGR_GRAB_BOXES_NBSTEPS  6
 static actionStep_t actionStepGrabBoxes_st[ACTION_MGR_GRAB_BOXES_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, WAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_EXTENDED, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_EXTENDED, WAIT},
   /* Grabber should pinch */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, NOWAIT},
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, WAIT}
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, WAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_EXTENDED, WAIT}
 };
 
-#define ACTION_MGR_SORT_EJECT_NBSTEPS  3
+#define ACTION_MGR_SORT_EJECT_NBSTEPS  4
 static actionStep_t actionStepSortEject_st[ACTION_MGR_SORT_EJECT_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, WAIT},
   /* Color Sensor Step, that should change the selector position */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, WAIT},
   /* Grabber should open */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, WAIT},
   /* First box is ejected (robot should move)*/
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, WAIT}
 };
 
-static actionCatalog_t actionMgrCatalog_st[5] = {
+#define ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS  4
+static actionStep_t actionStepSortEjectInvert_st[ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS] = {
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, WAIT},
+  /* Color Sensor Step, that should change the selector position */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_EXTENDED, WAIT},
+  /* Grabber should open */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, WAIT},
+  /* First box is ejected (robot should move)*/
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, WAIT}
+};
+
+static actionCatalog_t actionMgrCatalog_st[6] = {
   {ACTION_MGR_ID_NONE, NULL},
   {ACTION_MGR_ID_READY, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
   {ACTION_MGR_ID_ASSEMBLE_BOXES, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
   {ACTION_MGR_ID_GRAB_BOXES, &actionStepGrabBoxes_st[0], ACTION_MGR_GRAB_BOXES_NBSTEPS},
-  {ACTION_MGR_ID_SORT_EJECT, &actionStepSortEject_st[0], ACTION_MGR_SORT_EJECT_NBSTEPS}
+  {ACTION_MGR_ID_SORT_EJECT, &actionStepSortEject_st[0], ACTION_MGR_SORT_EJECT_NBSTEPS},
+  {ACTION_MGR_ID_SORT_EJECT_INVERT, &actionStepSortEjectInvert_st[0], ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS}
 };
 
 /******************************************************************************
@@ -110,6 +124,9 @@ void ActionMgrInit()
   actionMgrCurrentStep_u8_g = 0;
   actionMgrNbStep_u8_g = 0;
   actionMgrCurrentActionIsWait_b_g = false;
+  ServoBoardInit();
+  /* Load action READY at startup */
+  ActionMgrSetNextAction(ACTION_MGR_ID_READY, true);
 }
 
 void ActionMgrUpdate(bool timeMeasure_b)
@@ -294,6 +311,14 @@ bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
         break;
     
       case ACTION_MGR_ID_SORT_EJECT:
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+
+      case ACTION_MGR_ID_SORT_EJECT_INVERT:
         actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
         actionMgrCurrentActionId_u8_g = actionId_u8;
         actionMgrCurrentStep_u8_g = 0;

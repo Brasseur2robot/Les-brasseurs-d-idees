@@ -26,6 +26,7 @@ typedef enum
   ACTION_MGR_ID_ASSEMBLE_BOXES= 2u,     /* Reassemble the boxes in front of the robot to be able to grab them */
   ACTION_MGR_ID_GRAB_BOXES = 3u,        /* Lower arm and take boxes, raise the arm back to ready position */
   ACTION_MGR_ID_SORT_EJECT = 4u,        /* Move arm to back and sort the boxes while ejecting them */
+  ACTION_MGR_ID_SORT_EJECT_INVERT = 5u, /* Move arm to back and sort the boxes while ejecting them */
 } ActionMgrIdEn;                        /* Enumeration used to select the action Id */
 
 typedef enum

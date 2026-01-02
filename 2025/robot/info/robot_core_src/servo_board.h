@@ -15,14 +15,14 @@
 
 #define SERVO_BOARD_ARM_LEFT_ID                 0
 #define SERVO_BOARD_ARM_LEFT_MIN                0.0
-#define SERVO_BOARD_ARM_LEFT_MAX                180.0
+#define SERVO_BOARD_ARM_LEFT_MAX                145.0
 #define SERVO_BOARD_ARM_LEFT_RETRACTED          SERVO_BOARD_ARM_LEFT_MIN
 #define SERVO_BOARD_ARM_LEFT_EXTENDED           SERVO_BOARD_ARM_LEFT_MAX
 #define SERVO_BOARD_ARM_LEFT_TIME               2000
 
 #define SERVO_BOARD_ARM_RIGHT_ID                1
 #define SERVO_BOARD_ARM_RIGHT_MIN               0.0
-#define SERVO_BOARD_ARM_RIGHT_MAX               180.0
+#define SERVO_BOARD_ARM_RIGHT_MAX               145.0
 #define SERVO_BOARD_ARM_RIGHT_RETRACTED         SERVO_BOARD_ARM_RIGHT_MAX
 #define SERVO_BOARD_ARM_RIGHT_EXTENDED          SERVO_BOARD_ARM_RIGHT_MIN
 #define SERVO_BOARD_ARM_RIGHT_TIME              2000
@@ -44,8 +44,8 @@
 #define SERVO_BOARD_STOPPER_ID                  4
 #define SERVO_BOARD_STOPPER_MIN                 55.0
 #define SERVO_BOARD_STOPPER_MAX                 70.0
-#define SERVO_BOARD_STOPPER_RETRACTED           SERVO_BOARD_STOPPER_MIN
-#define SERVO_BOARD_STOPPER_EXTENDED            SERVO_BOARD_STOPPER_MAX
+#define SERVO_BOARD_STOPPER_RETRACTED           SERVO_BOARD_STOPPER_MAX
+#define SERVO_BOARD_STOPPER_EXTENDED            SERVO_BOARD_STOPPER_MIN
 #define SERVO_BOARD_STOPPER_TIME                2000
 
 /******************************************************************************
@@ -76,6 +76,8 @@ void ServoControllerGotoStart(ServoControllerSt * servoController_st);
 void ServoControllerGotoEnd(ServoControllerSt * servoController_st);
 void ServoControllerUpdate(ServoControllerSt * servoController_st);
 bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t duration_u32);
+double ServoControllerGetAngleMin(uint8_t id_u8);
+double ServoControllerGetAngleMax(uint8_t id_u8);
 bool ServoControllerIsFinished(uint8_t id_u8);
 
 #endif

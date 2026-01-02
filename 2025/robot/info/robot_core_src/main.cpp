@@ -75,7 +75,6 @@ void setup() {
   PositionMgrInit();
   SdcardInit();
   //  SensorInit();
-  ServoBoardInit();
   TrajectoryMgrInit();
   /* Set RGB color to green, signaling the robot init is finished */
   IhmSetColor(0, 255, 0);
