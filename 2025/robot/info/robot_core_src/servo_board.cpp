@@ -164,22 +164,22 @@ void ServoBoardTest(uint8_t servoId_u8)
   }
 }
 
-void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double startAngle_d, double stopAngle_d, uint32_t duration_u32)
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, uint32_t duration_u32)
 {
   servoController_st->enable_b = false;
   servoController_st->id_u8 = id_u8;
   servoController_st->isFinished_b = false;
   servoController_st->startTime_u32 = 0;
   servoController_st->duration_u32 = duration_u32;
-  servoController_st->startAngle_d = startAngle_d;
-  servoController_st->stopAngle_d = stopAngle_d;
-  servoController_st->targetAngle_d = 0.0;
+  servoController_st->angleMin_d = angleMin_d;
+  servoController_st->angleMax_d = angleMax_d;
+  servoController_st->angleTarget_d = 0.0;
 }
 
 void ServoControllerGotoStart(ServoControllerSt * servoController_st)
 {
   /* Does the registered action */
-  ServoBoardSet(servoController_st->id_u8 , servoController_st->startAngle_d);
+  ServoBoardSet(servoController_st->id_u8 , servoController_st->angleMin_d);
   servoController_st->startTime_u32 = millis();
   servoController_st->isFinished_b = false;
 }
@@ -187,7 +187,7 @@ void ServoControllerGotoStart(ServoControllerSt * servoController_st)
 void ServoControllerGotoEnd(ServoControllerSt * servoController_st)
 {
   /* Does the registered action */
-  ServoBoardSet(servoController_st->id_u8 , servoController_st->stopAngle_d);
+  ServoBoardSet(servoController_st->id_u8 , servoController_st->angleMax_d);
   servoController_st->startTime_u32 = millis();
   servoController_st->isFinished_b = false;
 }
@@ -201,18 +201,34 @@ void ServoControllerUpdate(ServoControllerSt * servoController_st)
   }
 }
 
-void ServoControllerSetTarget(uint8_t id_u8, double targetAngle_d, uint32_t duration_u32)
+bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t duration_u32)
 {
-  /* Should verifiy that the target angle is between min and max authorized */
-  // TODO
-  servoCtrl_tst[id_u8].targetAngle_d = targetAngle_d;
-  /* Should compute duration based on a registered servo speed */
-  servoCtrl_tst[id_u8].duration_u32 = duration_u32;
+  bool result_b = false;
 
-  /* Launches the registered action */
-  ServoBoardSet(id_u8 , servoCtrl_tst[id_u8].targetAngle_d);
-  servoCtrl_tst[id_u8].startTime_u32 = millis();
-  servoCtrl_tst[id_u8].isFinished_b = false;
+  /* Verification that the target angle is between min and max authorized */
+  if ( (angleTarget_d >= servoCtrl_tst[id_u8].angleMin_d) && (angleTarget_d <= servoCtrl_tst[id_u8].angleMax_d) )
+  {
+    /* TODO Should verify that crtl.isFinished is true, to know that the previous move is finished? */
+
+    servoCtrl_tst[id_u8].angleTarget_d = angleTarget_d;
+    /* Should compute duration based on a registered servo speed */
+    servoCtrl_tst[id_u8].duration_u32 = duration_u32;
+
+    /* Launches the registered action */
+    ServoBoardSet(id_u8 , servoCtrl_tst[id_u8].angleTarget_d);
+    servoCtrl_tst[id_u8].startTime_u32 = millis();
+    servoCtrl_tst[id_u8].isFinished_b = false;
+
+    /* Target possible */
+    result_b = true;
+  }
+  else
+  {
+    /* Target impossible */
+    result_b = false;
+  }
+
+  return result_b;
 }
 
 bool ServoControllerIsFinished(uint8_t id_u8)

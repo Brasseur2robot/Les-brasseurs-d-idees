@@ -172,7 +172,10 @@ void ActionMgrUpdate(bool timeMeasure_b)
           if (actuatorTypeCurrent_en == ACTION_ACTUATOR_TYPE_SERVO)
           {
             /* Sets the action in the servo controller, should have a duration instead of 2000 */
-            ServoControllerSetTarget(actuatorIdCurrent_u8, actuatorTargetCurrent_d, 2000);
+            if (!ServoControllerSetTarget(actuatorIdCurrent_u8, actuatorTargetCurrent_d, 2000))
+            {
+              Serial.println("ActionMgr|CurrentStep - Target impossible.");
+            }
           }
 
           /* Should we wait for the steps end? */
@@ -232,7 +235,7 @@ void ActionMgrUpdate(bool timeMeasure_b)
           else
           {
             /* Keeps on waiting */
-            Serial.println("ActionMgr|Waiting");
+            //Serial.println("ActionMgr|Waiting");
           }
         }
         break;
