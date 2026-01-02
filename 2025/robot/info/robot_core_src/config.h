@@ -15,6 +15,7 @@
 
 #define DEBUG_TIME            false
 #define DEBUG_SIMULATION      true
+#define DEBUG_NO_OBS          true
 
 /* Addresses i2c */
 #define SERVOBOARD_ADD        0x40 // can be 0x41 etc...
