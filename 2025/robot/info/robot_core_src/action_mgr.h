@@ -24,7 +24,7 @@ typedef enum
   ACTION_MGR_ID_NONE = 0u,              /* No Id */
   ACTION_MGR_ID_READY = 1u,             /* Position to start the match, arm raised to minimum perimeter */
   ACTION_MGR_ID_ASSEMBLE_BOXES= 2u,     /* Reassemble the boxes in front of the robot to be able to grab them */
-  ACTION_MGR_ID_LOAD = 3u,              /* Lower arm and take boxes, raise the arm back to ready position */
+  ACTION_MGR_ID_GRAB_BOXES = 3u,        /* Lower arm and take boxes, raise the arm back to ready position */
   ACTION_MGR_ID_SORT_EJECT = 4u,        /* Move arm to back and sort the boxes while ejecting them */
 } ActionMgrIdEn;                        /* Enumeration used to select the action Id */
 
@@ -49,7 +49,7 @@ typedef struct ActionStepStruct {
  ******************************************************************************/
 void ActionMgrInit();
 void ActionMgrUpdate(bool timeMeasure_b);
-void ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b);
+bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b);
 void ActionMgrNextStep();
 
 

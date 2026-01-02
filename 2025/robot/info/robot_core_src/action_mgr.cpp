@@ -54,24 +54,32 @@ static actionStep_t actionStepReady_st[ACTION_MGR_READY_NBSTEPS] = {
   /* Grabber to add */
 };
 
-#define NB_STEPS_DEPOSE_SANS  2
-static actionStep_t deposeCaisseSansRetournement_st[NB_STEPS_DEPOSE_SANS] = {
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, WAIT},
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, WAIT}
+#define ACTION_MGR_GRAB_BOXES_NBSTEPS  5
+static actionStep_t actionStepGrabBoxes_st[ACTION_MGR_GRAB_BOXES_NBSTEPS] = {
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, WAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_EXTENDED, NOWAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_EXTENDED, WAIT},
+  /* Grabber should pinch */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, NOWAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, WAIT}
 };
 
-#define NB_STEPS_DEPOSE_AVEC  2
-static actionStep_t deposeCaisseAvecRetournement_st[NB_STEPS_DEPOSE_AVEC] = {
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_EXTENDED, WAIT},
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, WAIT}
+#define ACTION_MGR_SORT_EJECT_NBSTEPS  3
+static actionStep_t actionStepSortEject_st[ACTION_MGR_SORT_EJECT_NBSTEPS] = {
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, WAIT},
+  /* Color Sensor Step, that should change the selector position */
+  /* Grabber should open */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, WAIT},
+  /* First box is ejected (robot should move)*/
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, WAIT}
 };
 
 static actionCatalog_t actionMgrCatalog_st[5] = {
   {ACTION_MGR_ID_NONE, NULL},
   {ACTION_MGR_ID_READY, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
-  {ACTION_MGR_ID_ASSEMBLE_BOXES, &deposeCaisseSansRetournement_st[0], NB_STEPS_DEPOSE_SANS},
-  {ACTION_MGR_ID_LOAD, &deposeCaisseSansRetournement_st[0], NB_STEPS_DEPOSE_SANS},
-  {ACTION_MGR_ID_SORT_EJECT, &deposeCaisseSansRetournement_st[0], NB_STEPS_DEPOSE_SANS}
+  {ACTION_MGR_ID_ASSEMBLE_BOXES, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
+  {ACTION_MGR_ID_GRAB_BOXES, &actionStepGrabBoxes_st[0], ACTION_MGR_GRAB_BOXES_NBSTEPS},
+  {ACTION_MGR_ID_SORT_EJECT, &actionStepSortEject_st[0], ACTION_MGR_SORT_EJECT_NBSTEPS}
 };
 
 /******************************************************************************
@@ -136,58 +144,62 @@ void ActionMgrUpdate(bool timeMeasure_b)
       
       case ACTION_MGR_STATE_NEXT_STEP:
         /* Currently doing an action */
-        /* Retrieves the current action step parameters for the action catalog */
-        actionStepCurrent_pst = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].actionStep_pst;
         
-        actuatorTypeCurrent_en = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].actuatorType_en;
-        actuatorIdCurrent_u8 = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].id_u8;
-        actuatorTargetCurrent_d = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].target_d;
-        actuatorWaitTofinishCurrent_b = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].waitToFinish_b;
-
-        Serial.print("ActionMgr|NextStep - ActuatorType : ");
-        Serial.print(actuatorTypeCurrent_en);
-        Serial.print(", Id : ");
-        Serial.print(actuatorIdCurrent_u8);
-        Serial.print(", target : ");
-        Serial.print(actuatorTargetCurrent_d);
-        Serial.print(", wait : ");
-        Serial.print(actuatorWaitTofinishCurrent_b);
-        Serial.print(", startTime : ");
-        Serial.print(currentTime_u32);
-        Serial.println();
-
-        /* Launch the action */
-        if (actuatorTypeCurrent_en == ACTION_ACTUATOR_TYPE_SERVO)
+        /* While the state stays at NEXT STEP, one should launch the next step (to do quasi simultaneous actions) */
+        while (actionMgrState_en_g == ACTION_MGR_STATE_NEXT_STEP)
         {
-          /* Sets the action in the servo controller, should have a duration instead of 2000 */
-          ServoControllerSetTarget(actuatorIdCurrent_u8, actuatorTargetCurrent_d, 2000);
-        }
+          actionStepCurrent_pst = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].actionStep_pst;
 
-        /* Should we wait for the steps end? */
-        if (actuatorWaitTofinishCurrent_b == true)
-        {
-          /* If the step requires waiting, it should put the state to WAITING */
-          actionMgrState_en_g = ACTION_MGR_STATE_WAITING;
-          Serial.println("ActionMgr|State waiting.");
-        }
-        else
-        {
-          /* Was it the last step? */
-          if ( actionMgrCurrentStep_u8_g < (actionMgrNbStep_u8_g - 1) )
+          /* Retrieves the current action step parameters for the action catalog */
+          actuatorTypeCurrent_en = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].actuatorType_en;
+          actuatorIdCurrent_u8 = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].id_u8;
+          actuatorTargetCurrent_d = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].target_d;
+          actuatorWaitTofinishCurrent_b = actionStepCurrent_pst[actionMgrCurrentStep_u8_g].waitToFinish_b;
+
+          Serial.print("ActionMgr|NextStep - ActuatorType : ");
+          Serial.print(actuatorTypeCurrent_en);
+          Serial.print(", Id : ");
+          Serial.print(actuatorIdCurrent_u8);
+          Serial.print(", target : ");
+          Serial.print(actuatorTargetCurrent_d);
+          Serial.print(", wait : ");
+          Serial.print(actuatorWaitTofinishCurrent_b);
+          Serial.print(", startTime : ");
+          Serial.print(currentTime_u32);
+          Serial.println();
+
+          /* Launch the action */
+          if (actuatorTypeCurrent_en == ACTION_ACTUATOR_TYPE_SERVO)
           {
-            /* No, increments the step counter and goes to next step */
-            /* (re-entering the mgr should go to next step? TODO is the update delay too much?) */
-            actionMgrCurrentStep_u8_g++;
-            actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
-            Serial.print("ActionMgr|Not waiting. Next step : ");
-            Serial.print(actionMgrCurrentStep_u8_g);
-            Serial.println();
+            /* Sets the action in the servo controller, should have a duration instead of 2000 */
+            ServoControllerSetTarget(actuatorIdCurrent_u8, actuatorTargetCurrent_d, 2000);
+          }
+
+          /* Should we wait for the steps end? */
+          if (actuatorWaitTofinishCurrent_b == true)
+          {
+            /* If the step requires waiting, it should put the state to WAITING */
+            actionMgrState_en_g = ACTION_MGR_STATE_WAITING;
+            Serial.println("ActionMgr|State waiting.");
           }
           else
           {
-            /* Yes, go to step done */
-            actionMgrState_en_g = ACTION_MGR_STATE_DONE;
-            Serial.println("ActionMgr|Not waiting. Action done");
+            /* Was it the last step? */
+            if ( actionMgrCurrentStep_u8_g < (actionMgrNbStep_u8_g - 1) )
+            {
+              /* No, increments the step counter and goes to next step */
+              actionMgrCurrentStep_u8_g++;
+              actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+              Serial.print("ActionMgr|Not waiting. Next step : ");
+              Serial.print(actionMgrCurrentStep_u8_g);
+              Serial.println();
+            }
+            else
+            {
+              /* Yes, go to step done */
+              actionMgrState_en_g = ACTION_MGR_STATE_DONE;
+              Serial.println("ActionMgr|Not waiting. Action done");
+            }
           }
         }
         break;
@@ -204,7 +216,6 @@ void ActionMgrUpdate(bool timeMeasure_b)
             if ( actionMgrCurrentStep_u8_g < (actionMgrNbStep_u8_g - 1) )
             {
               /* No, increments the step counter and goes to next step */
-              /* (re-entering the mgr should go to next step? TODO is the update delay too much?) */
               actionMgrCurrentStep_u8_g++;
               actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
               Serial.print("ActionMgr|Finished waiting. Next step : ");
@@ -245,36 +256,55 @@ void ActionMgrUpdate(bool timeMeasure_b)
   }
 }
 
-void ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
+bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
 {
-  /* This sould load the new action, by id reference */
-  switch(actionId_u8)
-  {
-    case ACTION_MGR_ID_NONE:
-      break;
-    
-    case ACTION_MGR_ID_READY:
-      actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
-      actionMgrCurrentActionId_u8_g = actionId_u8;
-      actionMgrCurrentStep_u8_g = 0;
-      actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
-      actionMgrCurrentActionIsWait_b_g = isWait_b;
-      break;
-    
-    case ACTION_MGR_ID_ASSEMBLE_BOXES:
-      break;
-    
-    case ACTION_MGR_ID_LOAD:
-      break;
-    
-    case ACTION_MGR_ID_SORT_EJECT:
-      break;
+  bool result_b = false;
 
-    default:
-      break; 
-  }
-  if (ACTION_MGR_DEBUG)
+  /* Verify if the action mgr has nothing to do, else do not proceed */
+  if ( (actionMgrState_en_g == ACTION_MGR_STATE_NONE) || (actionMgrState_en_g == ACTION_MGR_STATE_DONE) )
   {
+    /* This sould load the new action, by id reference */
+    /* TODO is it necessary to do the switch? are there differences between ids?
+      Maybe just a verification of a valid id is enough ? */
+    switch(actionId_u8)
+    {
+      case ACTION_MGR_ID_NONE:
+        break;
+    
+      case ACTION_MGR_ID_READY:
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+    
+      case ACTION_MGR_ID_ASSEMBLE_BOXES:
+        break;
+    
+      case ACTION_MGR_ID_GRAB_BOXES:
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+    
+      case ACTION_MGR_ID_SORT_EJECT:
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+
+      default:
+        break; 
+    }
+    result_b = true;
+
+    if (ACTION_MGR_DEBUG)
+    {
     Serial.print("ActionMgr|Setup new action, id : ");
     Serial.print(actionMgrCurrentActionId_u8_g);
     Serial.print(", wait : ");
@@ -282,7 +312,20 @@ void ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
     Serial.print(", nb of steps : ");
     Serial.print(actionMgrNbStep_u8_g);
     Serial.println();
+    }
   }
+  else
+  {
+    result_b = false;
+    if (ACTION_MGR_DEBUG)
+    {
+      Serial.print("ActionMgr|New action not set, state is : ");
+      Serial.print(actionMgrState_en_g);
+      Serial.println();
+    }
+  }
+
+  return result_b;
 }
 
 void ActionMgrNextStep()

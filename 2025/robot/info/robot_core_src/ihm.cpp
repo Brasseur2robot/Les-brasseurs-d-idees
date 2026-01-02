@@ -157,6 +157,14 @@ MENU_SCREEN(ActionScreen, ActionItems,
             ITEM_COMMAND("Action READY", []() {
               /* Launch action Ready */
               ActionMgrSetNextAction(ACTION_MGR_ID_READY, WAIT);
+            }),
+            ITEM_COMMAND("Action GRAB BOXES", []() {
+              /* Launch action Ready */
+              ActionMgrSetNextAction(ACTION_MGR_ID_GRAB_BOXES, WAIT);
+            }),
+            ITEM_COMMAND("Action SORT EJECT", []() {
+              /* Launch action Ready */
+              ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT, WAIT);
             })
             );
 
