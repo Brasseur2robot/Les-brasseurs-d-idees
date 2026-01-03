@@ -4,13 +4,13 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
+#define WAIT    true
+#define NOWAIT  false
+#define NODELAY 0u
 
 /******************************************************************************
    Types declarations
  ******************************************************************************/
-#define WAIT    true
-#define NOWAIT  false
-
 typedef enum
 {
   ACTION_MGR_STATE_NONE = 0u,           /* No state */
@@ -42,6 +42,7 @@ typedef struct ActionStepStruct {
     ActuatorTypeEn actuatorType_en;     /* Type of the actuator */
     uint8_t id_u8;                      /* Id of the actuator */
     double target_d;                    /* Position to go to */
+    uint32_t supplDelayMs;              /* Supplementary delay [ms], to allow for a pause at the end of an action step */
     bool waitToFinish_b;                /* false to not wait, true to wait for the move to finish before doing the next */
 } actionStep_t;
 

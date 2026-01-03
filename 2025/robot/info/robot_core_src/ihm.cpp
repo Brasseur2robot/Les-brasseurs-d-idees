@@ -90,31 +90,31 @@ void changeColor()
 
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
             ITEM_RANGE<double>("ArmL", SERVO_BOARD_ARM_LEFT_MIN, -5.0, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, value, 2000))
+              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, value, NODELAY))
               {
                 Serial.println("Target impossible.");
               }
             }, "%0.1f"),
             ITEM_RANGE<double>("ArmR", SERVO_BOARD_ARM_RIGHT_MAX, -5.0, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, value, 2000))
+              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, value, NODELAY))
               {
                 Serial.println("Target impossible.");
               }
             }, "%0.1f"),
             ITEM_RANGE<double>("Slope", SERVO_BOARD_SLOPE_MIN, -1.0, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_SLOPE_ID, value, 2000))
+              if(!ServoControllerSetTarget(SERVO_BOARD_SLOPE_ID, value, NODELAY))
               {
                 Serial.println("Target impossible.");
               }
             }, "%0.1f"),
             ITEM_RANGE<double>("Selector", SERVO_BOARD_SELECTOR_MIN, -1.0, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_SELECTOR_ID, value, 2000))
+              if(!ServoControllerSetTarget(SERVO_BOARD_SELECTOR_ID, value, NODELAY))
               {
                 Serial.println("Target impossible.");
               }
             }, "%0.1f"),
             ITEM_RANGE<double>("Stopper", SERVO_BOARD_STOPPER_MIN, -1.0, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_STOPPER_ID, value, 2000))
+              if(!ServoControllerSetTarget(SERVO_BOARD_STOPPER_ID, value, NODELAY))
               {
                 Serial.println("Target impossible.");
               }

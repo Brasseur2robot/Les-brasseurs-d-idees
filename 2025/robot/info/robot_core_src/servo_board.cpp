@@ -10,7 +10,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define SERVO_BOARD_DEBUG                       false
+#define SERVO_BOARD_DEBUG                       true
 #define SERVO_BOARD_UPDATE_PERIOD               0.1   /* Refresh rate of the display 1/0.1 = 10fps */
 
 /******************************************************************************
@@ -71,18 +71,11 @@ void ServoBoardInit()
 #endif
 
   /* Init of all servo controllers */
-  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_TIME);
-  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_TIME);
-  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_TIME);
-  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_TIME);
-  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_TIME);
-
-  /* All servos go to start, without waiting for the moves to finish */
-  /*for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
-  {
-    ServoControllerGotoStart(&servoCtrl_tst[index]);
-  }*/
-  // Not anymore with min max logic. Should be better to start the READY action.
+  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_SPEED);
+  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_SPEED);
+  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_SPEED);
+  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_SPEED);
+  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_SPEED);
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)
@@ -165,16 +158,18 @@ void ServoBoardTest(uint8_t servoId_u8)
   }
 }
 
-void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, uint32_t duration_u32)
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double speed_d)
 {
   servoController_st->enable_b = false;
   servoController_st->id_u8 = id_u8;
   servoController_st->isFinished_b = false;
+  servoController_st->speed_d = speed_d;
   servoController_st->startTime_u32 = 0;
-  servoController_st->duration_u32 = duration_u32;
+  servoController_st->duration_u32 = 0;
   servoController_st->angleMin_d = angleMin_d;
   servoController_st->angleMax_d = angleMax_d;
   servoController_st->angleTarget_d = 0.0;
+  servoController_st->angleCurrent_d = 0.0;
 }
 
 void ServoControllerGotoStart(ServoControllerSt * servoController_st)
@@ -202,7 +197,7 @@ void ServoControllerUpdate(ServoControllerSt * servoController_st)
   }
 }
 
-bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t duration_u32)
+bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t delaySuppMs_u32)
 {
   bool result_b = false;
 
@@ -210,15 +205,37 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dura
   if ( (angleTarget_d >= servoCtrl_tst[id_u8].angleMin_d) && (angleTarget_d <= servoCtrl_tst[id_u8].angleMax_d) )
   {
     /* TODO Should verify that crtl.isFinished is true, to know that the previous move is finished? */
-
     servoCtrl_tst[id_u8].angleTarget_d = angleTarget_d;
-    /* Should compute duration based on a registered servo speed */
-    servoCtrl_tst[id_u8].duration_u32 = duration_u32;
+
+    /* Compute duration based on a registered servo speed */
+    double angleToMove_d = abs(servoCtrl_tst[id_u8].angleTarget_d - servoCtrl_tst[id_u8].angleCurrent_d);
+    /* Speed is given in [s/60°], hence the * 1000 / 60 to have a duration in [ms] */
+    servoCtrl_tst[id_u8].duration_u32 = (uint32_t)angleToMove_d * servoCtrl_tst[id_u8].speed_d * 1000.0 / 60.0;
+
+    if (SERVO_BOARD_DEBUG)
+    {
+      Serial.print("ServoBoard|Actual : ");
+      Serial.print(servoCtrl_tst[id_u8].angleCurrent_d);
+      Serial.print(", target");
+      Serial.print(angleTarget_d);
+      Serial.print(", angleToMove : ");
+      Serial.print(angleToMove_d);
+      Serial.print(", which lasts : ");
+      Serial.print(servoCtrl_tst[id_u8].duration_u32);
+      Serial.print(" ms");
+      Serial.print(", and a supplementary delay of : ");
+      Serial.print(delaySuppMs_u32);
+      Serial.println();
+    }
+
+    /* Add the supplementary delay to the duration */
+    servoCtrl_tst[id_u8].duration_u32 += delaySuppMs_u32;
 
     /* Launches the registered action */
     ServoBoardSet(id_u8 , servoCtrl_tst[id_u8].angleTarget_d);
     servoCtrl_tst[id_u8].startTime_u32 = millis();
     servoCtrl_tst[id_u8].isFinished_b = false;
+    servoCtrl_tst[id_u8].angleCurrent_d = servoCtrl_tst[id_u8].angleTarget_d;
 
     /* Target possible */
     result_b = true;

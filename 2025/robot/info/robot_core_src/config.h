@@ -21,7 +21,7 @@
 #define SERVOBOARD_ADD        0x40 // can be 0x41 etc...
 #define IO_EXPANDER_ADD       0x58
 #define IHM_LCD_I2C_ADD       0x2D
-#define COLOR_SENSOR_ADD      0x49 // For GY-AS7262 (i2c and RxTx capable)
+#define COLOR_SENSOR_ADD      0x49 // For GY-AS7262 (i2c and Serial capable)
 //#define COLOR_SENSOR_ADD     0x39 // For GY- AS7341
 
 /* Utils */
