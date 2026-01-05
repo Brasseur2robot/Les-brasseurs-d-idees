@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include "action_mgr.h"
 #include "actuator.h"
+#include "actuator_dxl.h"
 #include "config.h"
 #include "com_wifi.h"
 #include "controller.h"
@@ -85,6 +86,7 @@ void loop() {
   //  OdometryEncoderTest();
   ActionMgrUpdate(DEBUG_TIME);
   ActuatorUpdate(DEBUG_TIME);
+  ActuatorDxlUpdate(DEBUG_TIME);
   ControllerUpdate(DEBUG_TIME);
   IhmUpdate(DEBUG_TIME);
   LedUpdate(DEBUG_TIME);

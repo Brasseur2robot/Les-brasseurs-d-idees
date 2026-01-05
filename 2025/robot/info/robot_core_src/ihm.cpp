@@ -19,7 +19,7 @@
 #include "DFRobot_RGBLCD1602.h"
 #include "config.h"
 #include "action_mgr.h"
-#include "actuator.h"
+#include "actuator_dxl.h"
 #include "controller.h"
 #include "color_sensor.h"
 #include "ihm.h"
@@ -60,7 +60,7 @@ std::vector<const char*> colors = {"None", "Blue", "Yellow"};
 
 int selectedId = 0;
 uint8_t Ids[10] = { 10, 11, 20, 21, 22, 23, 24, 25, 26, 27 };
-float dynPosition = 0.0;
+float dxlPosition = ACTUATOR_DXL_GRABBER_START;
 
 bool Autonome = false;
 
@@ -142,24 +142,24 @@ MENU_SCREEN(MotorCfgScreen, MotorCfgItems,
 
 MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
             ITEM_RANGE_REF<int>(
-              "Dyn Id", selectedId, -1, 0, 9, [](const Ref<int> value) {
-                Serial.print("Dyn Id : ");
+              "Dxl Id", selectedId, -1, 0, 9, [](const Ref<int> value) {
+                Serial.print("Dxl Id : ");
                 //Serial.println(value.value);
                 Serial.println(Ids[value.value]);
                 // Refresh the data of the currently selected servo
-                dynPosition = ActuatorDynGetPresentPosition(Ids[value.value]);
+                dxlPosition = ActuatorDxlGetPresentPosition(Ids[value.value]);
                 Serial.print("Position read : ");
-                Serial.println(dynPosition);
+                Serial.println(dxlPosition);
                 // Refresh the menu
                 menu.refresh();
               },
               "%d"),
             ITEM_TOGGLE("Led", [](bool state) {
-              ActuatorDynSetLed(Ids[selectedId], state);
+              ActuatorDxlSetLed(Ids[selectedId], state);
             }),
             ITEM_RANGE_REF<float>(
-              "Position", dynPosition, -5.0f, 0.0f, 300.0f, [](const Ref<float> value) {
-                ActuatorDynSetGoalPosition(Ids[selectedId], dynPosition);
+              "Position", dxlPosition, -5.0f, ACTUATOR_DXL_GRABBER_MIN, ACTUATOR_DXL_GRABBER_MIN, [](const Ref<float> value) {
+                ActuatorDxlSetGoalPosition(Ids[selectedId], dxlPosition);
               },
               "%0.1f")
             );
@@ -236,9 +236,9 @@ MENU_SCREEN(mainScreen, mainItems,
 void IhmInit() {
   renderer.begin();
   menu.setScreen(mainScreen);
-  dynPosition = ActuatorDynGetPresentPosition(Ids[selectedId]);
+  dxlPosition = ActuatorDxlGetPresentPosition(Ids[selectedId]);
   Serial.print("Position read : ");
-  Serial.println(dynPosition);
+  Serial.println(dxlPosition);
   /* Set RGB color to orange, signaling that the robot init is not finished */
   IhmSetColor(255, 165, 0);
 }

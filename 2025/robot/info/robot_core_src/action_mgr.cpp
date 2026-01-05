@@ -9,6 +9,7 @@
 #include "config.h"
 #include "action_mgr.h"
 #include "servo_board.h"
+#include "actuator_dxl.h"
 
 /******************************************************************************
    Constants and Macros
@@ -43,30 +44,38 @@ static actionProgram_t actionProgramTest_st = {
   ACTION_MGR_ID_READY, WAIT
 };
 
-#define ACTION_MGR_READY_NBSTEPS  5
+#define ACTION_MGR_READY_NBSTEPS  6
 static actionStep_t actionStepReady_st[ACTION_MGR_READY_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_EXTENDED, NODELAY, NOWAIT},
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, NOWAIT}
-  /* Grabber to add */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, NOWAIT},
+  /* Grabber opens */
+  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, NOWAIT}
 };
 
-#define ACTION_MGR_GRAB_BOXES_NBSTEPS  6
+#define ACTION_MGR_GRAB_BOXES_NBSTEPS  8
 static actionStep_t actionStepGrabBoxes_st[ACTION_MGR_GRAB_BOXES_NBSTEPS] = {
-  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, WAIT},
+  /* Peparing slope and grabber */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_RETRACTED, NODELAY, WAIT},
+  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, WAIT},
+  /* Arm goes down */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_EXTENDED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_EXTENDED, NODELAY, WAIT},
   /* Grabber should pinch */
+  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_RETRACTED, NODELAY, WAIT},
+  /* Arm goes back up */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, NODELAY, WAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_EXTENDED, NODELAY, WAIT}
 };
 
-#define ACTION_MGR_SORT_EJECT_NBSTEPS  4
+#define ACTION_MGR_SORT_EJECT_NBSTEPS  5
 static actionStep_t actionStepSortEject_st[ACTION_MGR_SORT_EJECT_NBSTEPS] = {
+  /* Stopper in place and grabber opens */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, WAIT},
+  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, WAIT},
   /* Color Sensor Step, that should change the selector position */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_EXTENDED, NODELAY, WAIT},
   /* Grabber should open */
@@ -75,9 +84,11 @@ static actionStep_t actionStepSortEject_st[ACTION_MGR_SORT_EJECT_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, WAIT}
 };
 
-#define ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS  4
+#define ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS  5
 static actionStep_t actionStepSortEjectInvert_st[ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS] = {
+  /* Stopper in place and grabber opens */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, WAIT},
+  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, WAIT},
   /* Color Sensor Step, that should change the selector position */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, NODELAY, WAIT},
   /* Grabber should open */
@@ -124,6 +135,7 @@ void ActionMgrInit()
   actionMgrNbStep_u8_g = 0;
   actionMgrCurrentActionIsWait_b_g = false;
   ServoBoardInit();
+  ActuatorDxlInit();
   /* Load action READY at startup */
   ActionMgrSetNextAction(ACTION_MGR_ID_READY, true);
 }
@@ -192,6 +204,13 @@ void ActionMgrUpdate(bool timeMeasure_b)
             {
               Serial.println("ActionMgr|CurrentStep - Target impossible.");
             }
+          } else if (actuatorTypeCurrent_en == ACTION_ACTUATOR_TYPE_DYNAMIXEL)
+          {
+            /* Sets the action in the dxl controller */
+            if (ActuatorDxlSetGoalPosition(actuatorIdCurrent_u8, actuatorTargetCurrent_d) == 0)
+            {
+              Serial.println("ActionMgr|CurrentStep - Target impossible.");
+            }
           }
 
           /* Should we wait for the steps end? */
@@ -253,6 +272,34 @@ void ActionMgrUpdate(bool timeMeasure_b)
             /* Keeps on waiting */
             //Serial.println("ActionMgr|Waiting");
           }
+        } else if (actuatorTypeCurrent_en == ACTION_ACTUATOR_TYPE_DYNAMIXEL)
+        {
+          if (ActuatorDxlControllerIsFinished(actuatorIdCurrent_u8) == true)
+          {
+            /* the step is finished, should go to next step */
+            /* Was it the last step? */
+            if ( actionMgrCurrentStep_u8_g < (actionMgrNbStep_u8_g - 1) )
+            {
+              /* No, increments the step counter and goes to next step */
+              actionMgrCurrentStep_u8_g++;
+              actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+              Serial.print("ActionMgr|Finished waiting. Next step : ");
+              Serial.print(actionMgrCurrentStep_u8_g);
+              Serial.println();
+            }
+            else
+            {
+              /* Yes, go to step done */
+              actionMgrState_en_g = ACTION_MGR_STATE_DONE;
+              Serial.println("ActionMgr|Action done");
+            }
+          }
+          else
+          {
+            /* Keeps on waiting */
+            //Serial.println("ActionMgr|Waiting on Dxl");
+          }
+
         }
         break;
 
