@@ -194,12 +194,20 @@ MENU_SCREEN(ActionScreen, ActionItems,
             })
             );
 
+/* TODO Submenu with files detected to add in the menu */
+MENU_SCREEN(SDFilesScreen, SDFilesItems,
+            ITEM_LABEL("Files"),
+            ITEM_BASIC("No files")
+            );
+
 MENU_SCREEN(mainScreen, mainItems,
             ITEM_BASIC("Robot Core Brd"),
             ITEM_LIST_REF("Color", colors, [](const Ref<uint8_t> color) {
               Serial.println(colors[color.value]);
               changeColor();
               }, selectedColor),
+            
+            ITEM_SUBMENU("SD Files", SDFilesScreen),
 
             ITEM_BOOL("Mode", true, "Autonome", "Manette", [](const bool value) {
               /* if true, autonomous mode is on, if false, controller mode is on*/
@@ -278,4 +286,9 @@ void IhmSetColor(uint8_t red, uint8_t green, uint8_t blue)
 {
   lcdAdapter.setRGBcolor(red, green, blue);
   lcdAdapter.show();
+}
+
+void IhmAddFile(const char filename[])
+{
+  SDFilesScreen->addItem( ITEM_BASIC(filename) );
 }

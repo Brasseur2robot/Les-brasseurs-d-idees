@@ -20,6 +20,7 @@
 #include "pid.h"
 #include "position_mgr.h"
 #include "ramp.h"
+#include "robot_mgr.h"
 #include "sdcard.h"
 //#include "sensor.h"
 #include "servo_board.h"
@@ -77,6 +78,7 @@ void setup() {
   SdcardInit();
   //  SensorInit();
   TrajectoryMgrInit();
+  RobotMgrInit();
   /* Set RGB color to green, signaling the robot init is finished */
   IhmSetColor(0, 255, 0);
 }

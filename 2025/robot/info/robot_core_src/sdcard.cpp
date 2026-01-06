@@ -6,13 +6,14 @@
 #include "SD.h"
 #include "SPI.h"
 #include "config.h"
+#include "ihm.h"
 #include "io_expander.h"
 #include "sdcard.h"
 
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define SDCARD_DEBUG true
+#define SDCARD_DEBUG false
 
 /******************************************************************************
   Types declarations
@@ -112,6 +113,8 @@ void SdcardListDir(fs::FS &fs, const char *dirname, uint8_t levels) {
       Serial.print(file.name());
       Serial.print("  SIZE: ");
       Serial.println(file.size());
+      /* Add filename to the submenu */
+      //IhmAddFile(file.name());
     }
     file = root.openNextFile();
   }
@@ -145,23 +148,35 @@ void SdcardRemoveDir(fs::FS &fs, const char *path) {
   SdcardCsEnable(HIGH);
 }
 
-void SdcardReadFile(fs::FS &fs, const char *path) {
+File SdcardReadFile(fs::FS &fs, const char *path) {
   SdcardCsEnable(LOW);
 
-  Serial.printf("Reading file: %s\n", path);
+  Serial.printf("SDCard|Reading file: %s\n", path);
 
   File file = fs.open(path);
   if (!file) {
-    Serial.println("Failed to open file for reading");
-    return;
+    Serial.println("SDCard|Failed to open file for reading");
   }
 
-  Serial.print("Read from file: ");
-  while (file.available()) {
-    Serial.write(file.read());
+  if (SDCARD_DEBUG)
+  {
+    Serial.print("SDCard|Read from file: ");
+    while (file.available()) {
+      Serial.write(file.read());
+    }
+    Serial.println();
+    /* Close and reopen the file */
+    file.close();
+    file = fs.open(path);
   }
+
+  return file;
+}
+
+void SdCardCloseFile(fs::FS &fs, File file)
+{
+  /* Close the file and free the SPI bus */
   file.close();
-
   SdcardCsEnable(HIGH);
 }
 
