@@ -5,7 +5,9 @@
  * Function Declarations
  ******************************************************************************/
 void ColorSensorInit();
-void ColorSensorMeasurement(bool timeMeasure_b);
+void ColorSensorUpdate(bool timeMeasure_b);
+void ColorSensorStartMeasure();
+bool ColorSensorIsFinished();
 uint16_t ColorSensorGetBlue();
 uint16_t ColorSensorGetYellow();
 

@@ -66,6 +66,7 @@ bool Autonome = false;
 
 uint16_t colorBlue_u16 = 0;
 uint16_t colorYellow_u16 = 0;
+bool measureAsked_b = false;
 
 int selectedServoId = 0;
 void changeColor()
@@ -166,10 +167,9 @@ MENU_SCREEN(DynamixelCfgScreen, DynamixelID10Items,
 
 MENU_SCREEN(ColorSensorScreen, ColorSensorItems,
             ITEM_COMMAND("Color measure", []() {
-              /* Take a measurement with time tracking true */
-              ColorSensorMeasurement(false);
-              colorBlue_u16 = ColorSensorGetBlue();
-              colorYellow_u16 = ColorSensorGetYellow();
+              /* Start a measurement */
+              ColorSensorStartMeasure();
+              measureAsked_b = true;
             }),
             ITEM_VALUE("Blue  ", colorBlue_u16, "%d"),
             ITEM_VALUE("Yellow", colorYellow_u16, "%d")
@@ -268,6 +268,16 @@ void IhmUpdate(bool timeMeasure_b) {
       durationMeasureStart_u32 = micros();
 
     /* Actual Code */
+    if (measureAsked_b == true)
+    {
+      /* test if measure is done */
+      if (ColorSensorIsFinished() == true)
+      {
+        measureAsked_b = false;
+        colorBlue_u16 = ColorSensorGetBlue();
+        colorYellow_u16 = ColorSensorGetYellow();
+      }
+    }
     menu.poll();
 
     /* Measure execution time if needed */

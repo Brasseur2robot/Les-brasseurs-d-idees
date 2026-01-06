@@ -89,6 +89,7 @@ void loop() {
   ActionMgrUpdate(DEBUG_TIME);
   ActuatorUpdate(DEBUG_TIME);
   ActuatorDxlUpdate(DEBUG_TIME);
+  ColorSensorUpdate(DEBUG_TIME);
   ControllerUpdate(DEBUG_TIME);
   IhmUpdate(DEBUG_TIME);
   LedUpdate(DEBUG_TIME);
