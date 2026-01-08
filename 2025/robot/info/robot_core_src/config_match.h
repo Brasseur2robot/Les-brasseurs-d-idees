@@ -21,13 +21,13 @@
 #define MATCH_GOTO_ENDZONE_S        93.0                      /* Match time to go to end zone */
 #define MATCH_GOTO_ENDZONE_MS       MATCH_GOTO_ENDZONE_S * 1000.0
 
-#define ROBOT_WIDTH                 0.45
-#define ROBOT_BACKWIDTH             0.044
+#define ROBOT_WIDTH                 450.0                     /* From left encoder to right encoder [mm] */
+#define ROBOT_BACKWIDTH             44.0                      /* From encoder contact point to back [mm] */
 
-#define MATCH_START_POSITION_X_YELLOW   (1.225)   // + ROBOT_WIDTH / 2.0)
-#define MATCH_START_POSITION_X_BLUE     (1.2)     // + ROBOT_WIDTH / 2.0)
-#define MATCH_START_POSITION_Y      (0.1 + ROBOT_BACKWIDTH)
-#define MATCH_START_POSITION_THETA  90.0
+#define MATCH_START_POSITION_X_YELLOW   (1225.0)   // + ROBOT_WIDTH / 2.0)  /* [mm] */
+#define MATCH_START_POSITION_X_BLUE     (1200.0)   // + ROBOT_WIDTH / 2.0)  /* [mm] */
+#define MATCH_START_POSITION_Y      (100.0 + ROBOT_BACKWIDTH)               /* [mm] */
+#define MATCH_START_POSITION_THETA  90.0                                    /* [°] */
 
 #define MOVE_FORWARD                true
 #define MOVE_BACKWARD               false
@@ -44,9 +44,9 @@ inline pose_t trajectoryYellowPoseArray[11] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_YELLOW * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Recule jusque poser la banière */
-  {MATCH_START_POSITION_X_YELLOW * 1000.0,  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
+  {MATCH_START_POSITION_X_YELLOW,  ROBOT_BACKWIDTH - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Avance tout droit, limite zone */
-  {MATCH_START_POSITION_X_YELLOW * 1000.0,  550.0,  NO_THETA_ALIGN, MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
+  {MATCH_START_POSITION_X_YELLOW,  550.0,  NO_THETA_ALIGN, MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Tourne vers devant  les canettes */
   {750.0,   550.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Avance devant les canette */
@@ -74,9 +74,9 @@ inline pose_t trajectoryBluePoseArray[11] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X * 1000.0,  MATCH_START_POSITION_Y * 1000.0,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Recule jusque poser la banière */
-  {3000.0 - (MATCH_START_POSITION_X_BLUE * 1000.0),  ROBOT_BACKWIDTH * 1000.0 - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
+  {3000.0 - (MATCH_START_POSITION_X_BLUE),  ROBOT_BACKWIDTH - 20.0,    MATCH_START_POSITION_THETA,  MOVE_BACKWARD,  false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Avance tout droit, limite zone */
-  {3000.0 - (MATCH_START_POSITION_X_BLUE * 1000.0),  550.0,  NO_THETA_ALIGN, MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
+  {3000.0 - (MATCH_START_POSITION_X_BLUE),  550.0,  NO_THETA_ALIGN, MOVE_FORWARD,   false,  true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Tourne vers devant  les canettes */
   {3000.0 - 750.0,   550.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   false, true, ACTUATOR_RELEASE, 0, CLAW_NOT},
   /* Avance devant les canette */

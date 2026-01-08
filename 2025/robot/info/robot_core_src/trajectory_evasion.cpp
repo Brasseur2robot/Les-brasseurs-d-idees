@@ -96,7 +96,7 @@
            Serial.println("Translation à la distance 0.2");
            //Serial.println(PositionMgrGetState()); 
          }
-         //PositionMgrGotoDistanceMeter(0.2, true);
+         //PositionMgrGotoDistanceMilliMeter(0.2, true);
          break;
  
        case 2:
@@ -110,8 +110,8 @@
          break;
 
        case 3:
-         Serial.println("X meter :" + String(OdometryGetXMeter()));
-         Serial.println("Y meter :" + String(OdometryGetYMeter()));
+         Serial.println("X [mm] :" + String(OdometryGetXMilliMeter()));
+         Serial.println("Y [mm] :" + String(OdometryGetYMilliMeter()));
          break;
 
  

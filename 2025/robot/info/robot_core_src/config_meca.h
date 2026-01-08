@@ -24,8 +24,8 @@
  * it requires 4200.0 / (PI*0.04) tops for 1m.
  */
 #define WHEEL_DIAMETER_M      0.040     /* Wheel diameter [m] */
-//#define METER_TO_TOP          N_TOP_PER_WHEEL_TURN * FACTOR_DISTANCE / (WHEEL_DIAMETER_M * PI);
-#define METER_TO_TOP          (7957.747154 * FACTOR_DISTANCE)
+//#define MILLIMETER_TO_TOP          N_TOP_PER_WHEEL_TURN * FACTOR_DISTANCE / (WHEEL_DIAMETER_M * PI);
+#define MILLIMETER_TO_TOP          (7.957747154 * FACTOR_DISTANCE)
 
 /*
  * To determine the distance needed to rotate of a certain angle, one has to 
