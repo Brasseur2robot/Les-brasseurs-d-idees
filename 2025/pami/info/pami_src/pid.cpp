@@ -44,16 +44,16 @@ void PidInit(PidControllerSt * pid_pst)
 {
   pid_pst->enable_b = false;
   pid_pst->antiWindup_b = false;
-  pid_pst->deltaTime_d = 0.0;
-  pid_pst->reference_d = 0.0;
-  pid_pst->error_d = 0.0;
-  pid_pst->previousError_d = 0.0;
-  pid_pst->kp_d = 0.0;
-  pid_pst->ki_d = 0.0;
-  pid_pst->kd_d = 0.0;
-  pid_pst->integral_d = 0.0;
-  pid_pst->derivative_d = 0.0;
-  pid_pst->output_d = 0.0;
+  pid_pst->deltaTime_f = 0.0;
+  pid_pst->reference_f = 0.0;
+  pid_pst->error_f = 0.0;
+  pid_pst->previousError_f = 0.0;
+  pid_pst->kp_f = 0.0;
+  pid_pst->ki_f = 0.0;
+  pid_pst->kd_f = 0.0;
+  pid_pst->integral_f = 0.0;
+  pid_pst->derivative_f = 0.0;
+  pid_pst->output_f = 0.0;
 }
 
 void PidStart(PidControllerSt * pid_pst)
@@ -67,12 +67,12 @@ void PidStop(PidControllerSt * pid_pst)
 {
   /* Takes care of stopping a Pid */
   pid_pst->enable_b = false;
-  pid_pst->reference_d = 0.0;
-  pid_pst->error_d = 0.0;
-  pid_pst->previousError_d = 0.0;
-  pid_pst->integral_d = 0.0;
-  pid_pst->derivative_d = 0.0;
-  pid_pst->output_d = 0.0;
+  pid_pst->reference_f = 0.0;
+  pid_pst->error_f = 0.0;
+  pid_pst->previousError_f = 0.0;
+  pid_pst->integral_f = 0.0;
+  pid_pst->derivative_f = 0.0;
+  pid_pst->output_f = 0.0;
 }
 
 void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b)
@@ -80,21 +80,21 @@ void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b)
   pid_pst->antiWindup_b = value_b;
 }
 
-void PidSetDeltaTime(PidControllerSt * pid_pst, double value_d)
+void PidSetDeltaTime(PidControllerSt * pid_pst, float value_f)
 {
-  pid_pst->deltaTime_d = value_d;
+  pid_pst->deltaTime_f = value_f;
 }
 
-void PidSetReference(PidControllerSt * pid_pst, double value_d)
+void PidSetReference(PidControllerSt * pid_pst, float value_f)
 {
-  pid_pst->reference_d = value_d;
+  pid_pst->reference_f = value_f;
 }
 
-void PidSetCoefficients(PidControllerSt * pid_pst, double kp_d, double ki_d, double kd_d)
+void PidSetCoefficients(PidControllerSt * pid_pst, float kp_f, float ki_f, float kd_f)
 {
-  pid_pst->kp_d = kp_d;
-  pid_pst->ki_d = ki_d;
-  pid_pst->kd_d = kd_d;
+  pid_pst->kp_f = kp_f;
+  pid_pst->ki_f = ki_f;
+  pid_pst->kd_f = kd_f;
 }
 
 bool PidGetEnable(PidControllerSt * pid_pst)
@@ -102,35 +102,35 @@ bool PidGetEnable(PidControllerSt * pid_pst)
   return pid_pst->enable_b;
 }
 
-double PidGetDeltaTime(PidControllerSt * pid_pst)
+float PidGetDeltaTime(PidControllerSt * pid_pst)
 {
-  return pid_pst->deltaTime_d;
+  return pid_pst->deltaTime_f;
 }
 
-double PidGetError(PidControllerSt * pid_pst)
+float PidGetError(PidControllerSt * pid_pst)
 {
-  return pid_pst->error_d;
+  return pid_pst->error_f;
 }
 
-double PidGetProportionnal(PidControllerSt * pid_pst)
+float PidGetProportionnal(PidControllerSt * pid_pst)
 {
-  return (pid_pst->kp_d * pid_pst->error_d);
+  return (pid_pst->kp_f * pid_pst->error_f);
 }
 
-double PidGetIntegral(PidControllerSt * pid_pst)
+float PidGetIntegral(PidControllerSt * pid_pst)
 {
-  return (pid_pst->ki_d * pid_pst->integral_d);
+  return (pid_pst->ki_f * pid_pst->integral_f);
 }
 
-double PidGetDerivative(PidControllerSt * pid_pst)
+float PidGetDerivative(PidControllerSt * pid_pst)
 {
-  return (pid_pst->kd_d * pid_pst->derivative_d);
+  return (pid_pst->kd_f * pid_pst->derivative_f);
 }
 
 
 
 
-double PidUpdate(PidControllerSt * pid_pst, double mesure_d, bool timeMeasure_b)
+float PidUpdate(PidControllerSt * pid_pst, float mesure_f, bool timeMeasure_b)
 {
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
@@ -140,55 +140,55 @@ double PidUpdate(PidControllerSt * pid_pst, double mesure_d, bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   /* Calculer l’erreur */
-  pid_pst->error_d = pid_pst->reference_d - mesure_d;
+  pid_pst->error_f = pid_pst->reference_f - mesure_f;
 
   /* Calculer l’intégrale */
-  if ( (pid_pst->antiWindup_b == true) && ( (pid_pst->output_d > 255.0) || (pid_pst->output_d < -255.0) ) )
+  if ( (pid_pst->antiWindup_b == true) && ( (pid_pst->output_f > 255.0) || (pid_pst->output_f < -255.0) ) )
   {
-    pid_pst->integral_d = pid_pst->integral_d;
+    pid_pst->integral_f = pid_pst->integral_f;
   }
   else
   {
-    if (( pid_pst->ki_d >= 0.0001 ) || (pid_pst->ki_d <= -0.0001))
+    if (( pid_pst->ki_f >= 0.0001 ) || (pid_pst->ki_f <= -0.0001))
     {
-      pid_pst->integral_d = pid_pst->integral_d + pid_pst->error_d * pid_pst->deltaTime_d;
+      pid_pst->integral_f = pid_pst->integral_f + pid_pst->error_f * pid_pst->deltaTime_f;
     }
     else
     {
-      pid_pst->integral_d = 0.0;
+      pid_pst->integral_f = 0.0;
     }
   }
 
   /* Calculer le dérivée */
-  if (( pid_pst->kd_d >= 0.0001 ) || (pid_pst->kd_d <= -0.0001))
+  if (( pid_pst->kd_f >= 0.0001 ) || (pid_pst->kd_f <= -0.0001))
   {
-    pid_pst->derivative_d = (pid_pst->error_d - pid_pst->previousError_d) / pid_pst->deltaTime_d;
-    pid_pst->previousError_d = pid_pst->error_d;
+    pid_pst->derivative_f = (pid_pst->error_f - pid_pst->previousError_f) / pid_pst->deltaTime_f;
+    pid_pst->previousError_f = pid_pst->error_f;
 
   }
   else
   {
-    pid_pst->derivative_d = 0.0;
+    pid_pst->derivative_f = 0.0;
   }
 
   /* Calculer la commande à appliquer */
   if (pid_pst->enable_b == true)
   {
-    pid_pst->output_d = pid_pst->kp_d * pid_pst->error_d + pid_pst->ki_d * pid_pst->integral_d + pid_pst->kd_d * pid_pst->derivative_d;
+    pid_pst->output_f = pid_pst->kp_f * pid_pst->error_f + pid_pst->ki_f * pid_pst->integral_f + pid_pst->kd_f * pid_pst->derivative_f;
   }
   else
   {
-    pid_pst->output_d = 0.0;
+    pid_pst->output_f = 0.0;
   }
 
   /* Saturate output */
-  if (pid_pst->output_d > PID_DISTANCE_OUPTUT_SATURATION)
+  if (pid_pst->output_f > PID_DISTANCE_OUPTUT_SATURATION)
   {
-    pid_pst->output_d = PID_DISTANCE_OUPTUT_SATURATION;
+    pid_pst->output_f = PID_DISTANCE_OUPTUT_SATURATION;
   }
-  if (pid_pst->output_d < -PID_DISTANCE_OUPTUT_SATURATION)
+  if (pid_pst->output_f < -PID_DISTANCE_OUPTUT_SATURATION)
   {
-    pid_pst->output_d = -PID_DISTANCE_OUPTUT_SATURATION;
+    pid_pst->output_f = -PID_DISTANCE_OUPTUT_SATURATION;
   }
 
   if (timeMeasure_b == true)
@@ -199,5 +199,5 @@ double PidUpdate(PidControllerSt * pid_pst, double mesure_d, bool timeMeasure_b)
     Serial.print(" us, ");
   }
 
-  return pid_pst->output_d;
+  return pid_pst->output_f;
 }

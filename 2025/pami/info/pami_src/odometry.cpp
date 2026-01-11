@@ -39,7 +39,7 @@ int32_t orient_init_i32_g = 0.0;
 /* Pose of the robot in tops and radians*/
 int32_t odometryXTop_i32_g;
 int32_t odometryYTop_i32_g;
-double odometryThetaRad_d_g;
+float odometryThetaRad_f_g;
 /* Distance and orientation of the robot in tops */
 int32_t odometryDistanceTop_i32_g;
 int32_t odometryOrientationTop_i32_g;
@@ -72,7 +72,7 @@ void OdometryInit()
   odometryYTop_i32_g = 0L;
   odometryDistanceTop_i32_g = 0L;
   odometryOrientationTop_i32_g = 0L;
-  odometryThetaRad_d_g = 0.0;
+  odometryThetaRad_f_g = 0.0;
 }
 
 int32_t OdometryGetLeftDistanceTop()
@@ -105,36 +105,36 @@ int32_t OdometryGetYTop()
   return odometryYTop_i32_g;
 }
 
-double OdometryGetXMilliMeter()
+float OdometryGetXMilliMeter()
 {
   return TopToMilliMeter((double)odometryXTop_i32_g);
 }
 
-double OdometryGetYMilliMeter()
+float OdometryGetYMilliMeter()
 {
   return TopToMilliMeter((double)odometryYTop_i32_g);
 }
 
-double OdometryGetThetaRad()
+float OdometryGetThetaRad()
 {
-  return odometryThetaRad_d_g;
+  return odometryThetaRad_f_g;
 }
 
-void OdometrySetXMilliMeter(double xMm_d)
+void OdometrySetXMilliMeter(float xMm_f)
 {
-  odometryXTop_i32_g = (int32_t)MilliMeterToTop(xMm_d);
+  odometryXTop_i32_g = (int32_t)MilliMeterToTop(xMm_f);
 }
 
-void OdometrySetYMilliMeter(double yMm_d)
+void OdometrySetYMilliMeter(float yMm_f)
 {
-  odometryYTop_i32_g = (int32_t)MilliMeterToTop(yMm_d);
+  odometryYTop_i32_g = (int32_t)MilliMeterToTop(yMm_f);
 }
 
-void OdometrySetThetaDeg(double thetaDeg_d)
+void OdometrySetThetaDeg(float thetaDeg_f)
 {
-  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                    // compute the target theta in top
-  double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;       // compute the error between actual and target
-  orient_init_i32_g -= thetaErrorTop_d;                                     // rotates the init orient from the error
+  float thetaTop_f = RadToTop(thetaDeg_f * PI / 180.0);                    // compute the target theta in top
+  float thetaErrorTop_f = odometryOrientationTop_i32_g - thetaTop_f;       // compute the error between actual and target
+  orient_init_i32_g -= thetaErrorTop_f;                                     // rotates the init orient from the error
   orient_i32 = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g);  // updates internal variables
   orient_precedente_i32 = orient_i32;
   OdometryUpdate(false);
@@ -155,14 +155,14 @@ void OdometryUpdate(bool timeMeasure_b)
 
   static int32_t distance_precedente;
 
-  int32_t delta_d;
+  int32_t delta_f;
   int32_t delta_orient;
 
-  double orient_moy_radian;
-  double delta_orient_radian;
-  double K;
-  double dx;
-  double dy;
+  float orient_moy_radian;
+  float delta_orient_radian;
+  float K;
+  float dx;
+  float dy;
 
   if (timeMeasure_b == true)
     durationMeasureStart_u32 = micros();
@@ -179,13 +179,13 @@ void OdometryUpdate(bool timeMeasure_b)
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
   orient_i32 = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
-  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
+  delta_f = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient_i32 - orient_precedente_i32; // correspond à Dqn mais en pas
 
   odometryOrientationTop_i32_g = (orient_i32 + orient_precedente_i32) / 2; // correspond à qmoy en pas
 
-  delta_orient_radian = TopToRad((double)delta_orient); // correspond à Dqn en rd
-  odometryThetaRad_d_g = TopToRad((double)odometryOrientationTop_i32_g); // correspond à qmoy en rd
+  delta_orient_radian = TopToRad((float)delta_orient); // correspond à Dqn en rd
+  odometryThetaRad_f_g = TopToRad((float)odometryOrientationTop_i32_g); // correspond à qmoy en rd
 
   if (delta_orient == 0) // Pour éviter la division par zéro
   {
@@ -196,8 +196,8 @@ void OdometryUpdate(bool timeMeasure_b)
     K = ( sin(delta_orient_radian / 2)) / (delta_orient_radian / 2);
   }
 
-  dx = K * (double)delta_d * cos(odometryThetaRad_d_g);
-  dy = K * (double)delta_d * sin(odometryThetaRad_d_g);
+  dx = K * (float)delta_f * cos(odometryThetaRad_f_g);
+  dy = K * (float)delta_f * sin(odometryThetaRad_f_g);
 
   odometryXTop_i32_g = odometryXTop_i32_g + (int32_t)dx; // valeurs exprimées dans le système d’unité robot
   odometryYTop_i32_g = odometryYTop_i32_g + (int32_t)dy;
@@ -246,34 +246,34 @@ void OdometryEncoderTest()
   Serial.println();
 }
 
-double MilliMeterToTop(double millimeter_d)
+float MilliMeterToTop(float millimeter_f)
 {
-  double nTop_d = 0;
+  float nTop_f = 0;
   //nTop = meter * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL * PI);
-  nTop_d = millimeter_d * MILLIMETER_TO_TOP;
-  return nTop_d;
+  nTop_f = millimeter_f * MILLIMETER_TO_TOP;
+  return nTop_f;
 }
 
-double TopToMilliMeter(double top_d)
+float TopToMilliMeter(float top_f)
 {
-  double millimeter_d = 0.0;
+  float millimeter_f = 0.0;
   //meter = top * (DIAMETER_WHEEL * PI) / N_TOP_PER_WHEEL_TURN;
-  millimeter_d = top_d / MILLIMETER_TO_TOP;
-  return millimeter_d;
+  millimeter_f = top_f / MILLIMETER_TO_TOP;
+  return millimeter_f;
 }
 
-double TopToRad(double nTop_d)
+float TopToRad(float nTop_f)
 {
-  double radian_d = 0.0;
+  float radian_f = 0.0;
   //radian = (nTop / N_TOP_PER_WHEEL_TURN) * (DIAMETER_WHEEL / DIAMETER_ROBOT ) * 2.0 * PI;
-  radian_d = nTop_d / RAD_TO_TOP;
-  return radian_d;
+  radian_f = nTop_f / RAD_TO_TOP;
+  return radian_f;
 }
 
-double RadToTop(double radian_d)
+float RadToTop(float radian_f)
 {
-  double nTop_d = 0.0;
+  float nTop_f = 0.0;
   //nTop = radian * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL / DIAMETER_ROBOT ) / 2.0 / PI;
-  nTop_d = radian_d * RAD_TO_TOP;
-  return nTop_d;
+  nTop_f = radian_f * RAD_TO_TOP;
+  return nTop_f;
 }

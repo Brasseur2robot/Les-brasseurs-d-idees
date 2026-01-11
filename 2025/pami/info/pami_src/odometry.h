@@ -11,19 +11,19 @@ int32_t OdometryGetXTop();
 int32_t OdometryGetYTop();
 int32_t OdometryGetDistanceTop();
 int32_t OdometryGetOrientationTop();
-double OdometryGetXMilliMeter();
-double OdometryGetYMilliMeter();
-double OdometryGetThetaRad();
-void OdometrySetXMilliMeter(double xMm_d);
-void OdometrySetYMilliMeter(double xMm_d);
-void OdometrySetThetaDeg(double thetaDeg_d);
+float OdometryGetXMilliMeter();
+float OdometryGetYMilliMeter();
+float OdometryGetThetaRad();
+void OdometrySetXMilliMeter(float xMm_f);
+void OdometrySetYMilliMeter(float xMm_f);
+void OdometrySetThetaDeg(float thetaDeg_f);
 
 void OdometryUpdate(bool timeMeasure_b);
 void OdometryEncoderTest();
 
-double MilliMeterToTop(double millimeter_d);
-double TopToMilliMeter(double top_d);
-double TopToRad(double nTop_d);
-double RadToTop(double radian_d);
+float MilliMeterToTop(float millimeter_f);
+float TopToMilliMeter(float top_f);
+float TopToRad(float nTop_f);
+float RadToTop(float radian_f);
 
 #endif

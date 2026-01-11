@@ -63,11 +63,10 @@ void setup() {
   PositionMgrInit();
   SensorInit();
   TrajectoryMgrInit();
-  //CustomTimerInit();
 }
 
 void loop() {
-//  MotorTest(MOTOR_DEADZONE);
+//  MotorTest(255);
 //  OdometryEncoderTest();
   ActuatorUpdate(DEBUG_TIME);
   IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms, now on esp32 26ms */

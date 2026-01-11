@@ -137,8 +137,8 @@ void PositionMgrUpdate(bool timeMeasure_b)
     uint32_t durationMeasureStart_u32 = 0;
     uint32_t durationMeasure_u32 = 0;
 
-    double consigneDistance_d = 0.0;
-    double consigneOrientation_d = 0.0;
+    float consigneDistance_f = 0.0;
+    float consigneOrientation_f = 0.0;
 
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
@@ -167,20 +167,20 @@ void PositionMgrUpdate(bool timeMeasure_b)
       case MVT_TYPE_DISTANCE:
         /* Should keep the orientation, and ramps in distance */
         RampUpdate(&rampDistance_st_g, currentTime_u32 - lastExecutionTime_u32, DEBUG_TIME);
-        consigneDistance_d = startDistance_i32_g + RampGetDistance(&rampDistance_st_g);
-        consigneOrientation_d = startOrientation_i32_g;
+        consigneDistance_f = startDistance_i32_g + RampGetDistance(&rampDistance_st_g);
+        consigneOrientation_f = startOrientation_i32_g;
         break;
 
       case MVT_TYPE_ORIENTATION:
         /* Should keep the distance and ramps in orientation */
         RampUpdate(&rampOrientation_st_g, currentTime_u32 - lastExecutionTime_u32, DEBUG_TIME);
-        consigneDistance_d = startDistance_i32_g;
-        consigneOrientation_d = startOrientation_i32_g + RampGetDistance(&rampOrientation_st_g);
+        consigneDistance_f = startDistance_i32_g;
+        consigneOrientation_f = startOrientation_i32_g + RampGetDistance(&rampOrientation_st_g);
         break;
 
       default:
-        consigneDistance_d = 0.0;
-        consigneOrientation_d = 0.0;
+        consigneDistance_f = 0.0;
+        consigneOrientation_f = 0.0;
         break;
     }
     // Serial.println(1.2 * TopToMilliMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) ) );
@@ -207,7 +207,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
             //Serial.print(", ");
 
             /* if both pid error < acceptable range -> stopped */
-            if ( (abs(pidDistance_st_g.error_d) < 5) && (abs(pidOrientation_st_g.error_d) < 5) ) {
+            if ( (abs(pidDistance_st_g.error_f) < 5) && (abs(pidOrientation_st_g.error_f) < 5) ) {
               positionMgrState_en_g = POSITION_STATE_STOPPED;
               //Serial.print("Position reached, ");
             }
@@ -248,21 +248,21 @@ void PositionMgrUpdate(bool timeMeasure_b)
 
 
     /* Sets the new reference on the pids */
-    PidSetReference(&pidDistance_st_g, consigneDistance_d);
-    PidSetReference(&pidOrientation_st_g, consigneOrientation_d);
+    PidSetReference(&pidDistance_st_g, consigneDistance_f);
+    PidSetReference(&pidOrientation_st_g, consigneOrientation_f);
 
     /* Gets the current distance and orientation of the robot */
-    double mesureDistance_d = OdometryGetDistanceTop();
-    double mesureOrientation_d = OdometryGetOrientationTop();
+    float mesureDistance_f = OdometryGetDistanceTop();
+    float mesureOrientation_f = OdometryGetOrientationTop();
 
     /* Sets the current distance and orientation in the pids, they compute the outputs for the motors */
-    double commandeDistance_d = PidUpdate(&pidDistance_st_g, mesureDistance_d, DEBUG_TIME);
-    double commandeOrientation_d = PidUpdate(&pidOrientation_st_g, mesureOrientation_d, DEBUG_TIME);
+    float commandeDistance_f = PidUpdate(&pidDistance_st_g, mesureDistance_f, DEBUG_TIME);
+    float commandeOrientation_f = PidUpdate(&pidOrientation_st_g, mesureOrientation_f, DEBUG_TIME);
 
     /* Sends the pids outputs to the motors, only if the module is started */
     if (positionMgrEnable_b == true) {
-      MotorLeftSetSpeed(commandeDistance_d - commandeOrientation_d);
-      MotorRightSetSpeed(commandeDistance_d + commandeOrientation_d);
+      MotorLeftSetSpeed(commandeDistance_f - commandeOrientation_f);
+      MotorRightSetSpeed(commandeDistance_f + commandeOrientation_f);
     }
 
     /* Store the last execution time */
@@ -271,84 +271,84 @@ void PositionMgrUpdate(bool timeMeasure_b)
     if (PID_DISTANCE_DEBUG)
     {
       //Serial.print("PidDistance : ");
-      Serial.print(pidDistance_st_g.reference_d);
+      Serial.print(pidDistance_st_g.reference_f);
       Serial.print(", ");
-      Serial.print(mesureDistance_d);
+      Serial.print(mesureDistance_f);
       Serial.print(", ");
-      Serial.print(pidDistance_st_g.error_d);
+      Serial.print(pidDistance_st_g.error_f);
       //    Serial.print(", ");
-      //    Serial.print(pidDistance_st_g.previousError_d);
+      //    Serial.print(pidDistance_st_g.previousError_f);
       //    Serial.print(", ");
-      //    Serial.print(pidDistance_st_g.kp_d);
+      //    Serial.print(pidDistance_st_g.kp_f);
       //    Serial.print(", ");
-      //    Serial.print(pidDistance_st_g.ki_d);
+      //    Serial.print(pidDistance_st_g.ki_f);
       //    Serial.print(", ");
-      //    Serial.print(pidDistance_st_g.kd_d);
+      //    Serial.print(pidDistance_st_g.kd_f);
       //    Serial.print(", ");
-      //    Serial.print(pidDistance_st_g.integral_d);
+      //    Serial.print(pidDistance_st_g.integral_f);
       //    Serial.print(", ");
-      //    Serial.print(pidDistance_st_g.derivative_d);
+      //    Serial.print(pidDistance_st_g.derivative_f);
       Serial.print(", ");
-      Serial.print(pidDistance_st_g.output_d);
+      Serial.print(pidDistance_st_g.output_f);
       Serial.println();
     }
 
     if (PID_DISTANCE_CURVE_DEBUG) {
-      Serial.print(pidDistance_st_g.reference_d);
+      Serial.print(pidDistance_st_g.reference_f);
       Serial.print("\t");
-      Serial.print(mesureDistance_d);  // Mesure
+      Serial.print(mesureDistance_f);  // Mesure
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.error_d);
+      Serial.print(pidDistance_st_g.error_f);
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.kp_d * pidDistance_st_g.error_d);
+      Serial.print(pidDistance_st_g.kp_f * pidDistance_st_g.error_f);
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.ki_d * pidDistance_st_g.integral_d);
+      Serial.print(pidDistance_st_g.ki_f * pidDistance_st_g.integral_f);
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.kd_d * pidDistance_st_g.derivative_d);
+      Serial.print(pidDistance_st_g.kd_f * pidDistance_st_g.derivative_f);
       Serial.print("\t");
-      Serial.print(pidDistance_st_g.output_d);
+      Serial.print(pidDistance_st_g.output_f);
       Serial.println();
     }
 
     if (PID_ORIENTATION_DEBUG)
     {
       //Serial.print("PidOrientation : ");
-      Serial.print(pidOrientation_st_g.reference_d);
+      Serial.print(pidOrientation_st_g.reference_f);
       Serial.print(", ");
-      Serial.print(mesureOrientation_d);
+      Serial.print(mesureOrientation_f);
       Serial.print(", ");
-      Serial.print(pidOrientation_st_g.error_d);
+      Serial.print(pidOrientation_st_g.error_f);
       //    Serial.print(", ");
-      //    Serial.print(pidOrientation_st_g.previousError_d);
+      //    Serial.print(pidOrientation_st_g.previousError_f);
       //    Serial.print(", ");
-      //    Serial.print(pidOrientation_st_g.kp_d);
+      //    Serial.print(pidOrientation_st_g.kp_f);
       //    Serial.print(", ");
-      //    Serial.print(pidOrientation_st_g.ki_d);
+      //    Serial.print(pidOrientation_st_g.ki_f);
       //    Serial.print(", ");
-      //    Serial.print(pidOrientation_st_g.kd_d);
+      //    Serial.print(pidOrientation_st_g.kd_f);
       //    Serial.print(", ");
-      //    Serial.print(pidOrientation_st_g.integral_d);
+      //    Serial.print(pidOrientation_st_g.integral_f);
       //    Serial.print(", ");
-      //    Serial.print(pidOrientation_st_g.derivative_d);
+      //    Serial.print(pidOrientation_st_g.derivative_f);
       Serial.print(", ");
-      Serial.print(pidOrientation_st_g.output_d);
+      Serial.print(pidOrientation_st_g.output_f);
       Serial.println();
     }
 
     if (PID_ORIENTATION_CURVE_DEBUG) {
-      Serial.print(pidOrientation_st_g.reference_d);
+      Serial.print(pidOrientation_st_g.reference_f);
       Serial.print("\t");
-      Serial.print(mesureOrientation_d);  // Mesure
+      Serial.print(mesureOrientation_f);  // Mesure
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.error_d);
+      Serial.print(pidOrientation_st_g.error_f);
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.kp_d * pidOrientation_st_g.error_d);
+      Serial.print(pidOrientation_st_g.kp_f * pidOrientation_st_g.error_f);
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.ki_d * pidOrientation_st_g.integral_d);
+      Serial.print(pidOrientation_st_g.ki_f * pidOrientation_st_g.integral_f);
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.kd_d * pidOrientation_st_g.derivative_d);
+      Serial.print(pidOrientation_st_g.kd_f * pidOrientation_st_g.derivative_f);
       Serial.print("\t");
-      Serial.print(pidOrientation_st_g.output_d);
+      Serial.print(pidOrientation_st_g.output_f);
       Serial.println();
     }
 
@@ -363,21 +363,21 @@ void PositionMgrUpdate(bool timeMeasure_b)
       Serial.print(", theta [rad] : ");
       Serial.print(OdometryGetThetaRad());
       //Serial.print(", ConsDistance [top] : ");
-      //Serial.print(consigneDistance_d);
+      //Serial.print(consigneDistance_f);
       //Serial.print(", distance [top] : ");
-      //Serial.print(mesureDistance_d);
+      //Serial.print(mesureDistance_f);
       //Serial.print(", ConsOrientation [top] : ");
-      //Serial.print(consigneOrientation_d);
+      //Serial.print(consigneOrientation_f);
       //Serial.print(", orientation [top] : ");
-      //Serial.print(mesureOrientation_d);
+      //Serial.print(mesureOrientation_f);
       //Serial.print(", commande Distance : ");
-      //Serial.print(commandeDistance_d);
+      //Serial.print(commandeDistance_f);
       //Serial.print(", commande Orientation : ");
-      //Serial.print(commandeOrientation_d);
+      //Serial.print(commandeOrientation_f);
       Serial.print(", commande gauche : ");
-      Serial.print(commandeDistance_d - commandeOrientation_d);
+      Serial.print(commandeDistance_f - commandeOrientation_f);
       Serial.print(", commande droite : ");
-      Serial.print(commandeDistance_d + commandeOrientation_d);
+      Serial.print(commandeDistance_f + commandeOrientation_f);
       Serial.println();
     }
 
@@ -400,7 +400,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
               theta_deg   : target theta corrdinate in degrees
 
 */
-void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
+void PositionMgrGotoXYTheta(float x_m, float y_m, float theta_deg)
 {
   IhmStop();
   positionMgrState_en_g = POSITION_STATE_MOVING;
@@ -415,7 +415,7 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
    @result    none
 
 */
-void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b)
+void PositionMgrGotoDistanceMilliMeter(float distance_m, bool braking_b)
 {
   IhmStop();
   //positionMgrStatus_u8_g = 0;
@@ -441,11 +441,11 @@ void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b)
    @result    none
 
 */
-void PositionMgrGotoOrientationDegree(double theta_deg)
+void PositionMgrGotoOrientationDegree(float theta_deg)
 {
   IhmStop();
   //positionMgrStatus_u8_g = 0;
-  //Serial.println(theta_deg);
+  //Serial.println(theta_feg);
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_ORIENTATION;
 
@@ -533,9 +533,9 @@ bool PositionMgrGetOrientationControl()
 #define POSITION_BLOCKING_COUNT_MAX 200.0
 #define POSITION_BLOCKING_DEBUG true
 
-void PositionMgrBlockingDetection(double distance_d, double orientation_d, double commandeDistance_d, double commandeOrientation_d) {
-  static double distanceLast_d;
-  static double orientationLast_d;
+void PositionMgrBlockingDetection(float distance_f, float orientation_f, float commandeDistance_f, float commandeOrientation_f) {
+  static float distanceLast_f;
+  static float orientationLast_f;
   static unsigned long distanceLastTime_ul;
   static unsigned long orientationLastTime_ul;
   uint8_t distanceBlockingCount_u8;
@@ -545,7 +545,7 @@ void PositionMgrBlockingDetection(double distance_d, double orientation_d, doubl
     Serial.print("Position blocking : ");
 
   // if command is non nill and if robot is not moving enough
-  if ((commandeDistance_d > 50.0) && ((distance_d - distanceLast_d) < POSITION_BLOCKING_THRESHOLD)) {
+  if ((commandeDistance_f > 50.0) && ((distance_f - distanceLast_f) < POSITION_BLOCKING_THRESHOLD)) {
     if (distanceBlockingCount_u8 < POSITION_BLOCKING_COUNT_MAX) {
       if (POSITION_BLOCKING_DEBUG) {
         distanceBlockingCount_u8++;
@@ -568,8 +568,8 @@ void PositionMgrBlockingDetection(double distance_d, double orientation_d, doubl
     Serial.println("");
   }
 
-  distanceLast_d = distance_d;
-  orientationLast_d = orientation_d;
+  distanceLast_f = distance_f;
+  orientationLast_f = orientation_f;
 }
 /******************************************************************************
    Private functions definitions

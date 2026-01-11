@@ -62,7 +62,7 @@ void ComWifiInit() {
   /* Init ESPNow with a fallback logic */
   ComWifiInitESPNow();
   /* Once ESPNow is successfully Init, we will register for recv CB to get recv packer info. */
-  esp_now_register_recv_cb(ComWifiOnDataRecv);
+  //esp_now_register_recv_cb(ComWifiOnDataRecv);
 
 }
 
