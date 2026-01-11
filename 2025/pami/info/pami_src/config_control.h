@@ -40,10 +40,10 @@
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 
-#define VITESSE_SLOW        0.4 //1.0  /* [m.s-1] */
-#define ACCELERATION_SLOW   0.4   /* [m.s-2] */
-#define VITESSE_MAX         0.4 //1.0   /* [m.s-1] */
-#define ACCELERATION_MAX    0.4   /* [m.s-2] */
+#define VITESSE_SLOW        400.0     /* [mm.s-1] */
+#define ACCELERATION_SLOW   400.0     /* [mm.s-2] */
+#define VITESSE_MAX         300.0     /* [mm.s-1] */
+#define ACCELERATION_MAX    400.0     /* [mm.s-2] */
 
 #endif
 
@@ -60,10 +60,10 @@
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 
-#define VITESSE_SLOW        0.4  /* [m.s-1] */
-#define ACCELERATION_SLOW   0.4   /* [m.s-2] */
-#define VITESSE_MAX         0.3   /* [m.s-1] */
-#define ACCELERATION_MAX    0.4   /* [m.s-2] */
+#define VITESSE_SLOW        400.0     /* [mm.s-1] */
+#define ACCELERATION_SLOW   400.0     /* [mm.s-2] */
+#define VITESSE_MAX         300.0     /* [mm.s-1] */
+#define ACCELERATION_MAX    400.0     /* [mm.s-2] */
 
 #endif
 
@@ -80,10 +80,49 @@
 #define KI_ORIENTATION      0.0
 #define KD_ORIENTATION      0.0 // 0.0005
 
-#define VITESSE_SLOW        0.4   /* [m.s-1] */
-#define ACCELERATION_SLOW   0.4   /* [m.s-2] */
-#define VITESSE_MAX         0.3   /* [m.s-1] */
-#define ACCELERATION_MAX    0.4   /* [m.s-2] */
+#define VITESSE_SLOW        400.0     /* [mm.s-1] */
+#define ACCELERATION_SLOW   400.0     /* [mm.s-2] */
+#define VITESSE_MAX         300.0     /* [mm.s-1] */
+#define ACCELERATION_MAX    400.0     /* [mm.s-2] */
+
+#endif
+/******************************************************************************
+   This is the mechanical configuration of the PAMI 4=5
+ ******************************************************************************/
+#ifdef PAMI_5
+
+#define KP_DISTANCE         0.6
+#define KI_DISTANCE         0.0
+#define KD_DISTANCE         0.0 // 0.0005
+
+#define KP_ORIENTATION      1.0
+#define KI_ORIENTATION      0.0
+#define KD_ORIENTATION      0.0 // 0.0005
+
+#define VITESSE_SLOW        400.0     /* [mm.s-1] */
+#define ACCELERATION_SLOW   400.0     /* [mm.s-2] */
+#define VITESSE_MAX         300.0     /* [mm.s-1] */
+#define ACCELERATION_MAX    400.0     /* [mm.s-2] */
+
+#endif
+
+/******************************************************************************
+   This is the mechanical configuration of the PAMI 6
+ ******************************************************************************/
+#ifdef PAMI_6
+
+#define KP_DISTANCE         0.6
+#define KI_DISTANCE         0.0
+#define KD_DISTANCE         0.0 // 0.0005
+
+#define KP_ORIENTATION      1.0
+#define KI_ORIENTATION      0.0
+#define KD_ORIENTATION      0.0 // 0.0005
+
+#define VITESSE_SLOW        400.0     /* [mm.s-1] */
+#define ACCELERATION_SLOW   400.0     /* [mm.s-2] */
+#define VITESSE_MAX         300.0     /* [mm.s-1] */
+#define ACCELERATION_MAX    400.0     /* [mm.s-2] */
 
 #endif
 

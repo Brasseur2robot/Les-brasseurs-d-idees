@@ -6,6 +6,8 @@
 //#define PAMI_2
 //#define PAMI_3
 //#define PAMI_4
+//#define PAMI_5
+//#define PAMI_6
 
 
 #include "config_control.h"
