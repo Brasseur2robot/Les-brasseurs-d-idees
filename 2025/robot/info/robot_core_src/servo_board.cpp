@@ -112,7 +112,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
       RampUpdate(&servoCtrlRamp_tst[index], elapsedTime, DEBUG_TIME);
       if (RampGetState(&servoCtrlRamp_tst[index]) != RAMP_STATE_FINISHED)
       {
-        ServoBoardSet(index , (servoCtrl_tst[index].angleCurrent_d + RampGetDistance(&servoCtrlRamp_tst[index]))*10.0 );
+        ServoBoardSet(index , (servoCtrl_tst[index].angleCurrent_f + RampGetDistance(&servoCtrlRamp_tst[index])) / 10.0 );
       }
       else
       {
