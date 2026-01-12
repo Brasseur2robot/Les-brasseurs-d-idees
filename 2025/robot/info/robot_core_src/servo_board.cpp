@@ -5,13 +5,15 @@
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include "config.h"
+#include "ramp.h"
 #include "servo_board.h"
 
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define SERVO_BOARD_DEBUG                       true
-#define SERVO_BOARD_UPDATE_PERIOD               0.1   /* Refresh rate of the display 1/0.1 = 10fps */
+#define SERVO_BOARD_DEBUG                       false
+#define SERVO_BOARD_DEBUG_RAMP                  false
+#define SERVO_BOARD_UPDATE_PERIOD               0.01   /* Refresh rate 1/0.01 = 100fps */
 
 /******************************************************************************
   Types declarations
@@ -30,6 +32,7 @@
  ******************************************************************************/
 Adafruit_PWMServoDriver servoBoard = Adafruit_PWMServoDriver(SERVO_BOARD_ADDRESS, Wire);
 ServoControllerSt servoCtrl_tst[SERVO_BOARD_NB_SERVO_CONTROLLER];
+RampParametersSt servoCtrlRamp_tst[SERVO_BOARD_NB_SERVO_CONTROLLER];
 
 /******************************************************************************
    Functions Definitions
@@ -71,11 +74,17 @@ void ServoBoardInit()
 #endif
 
   /* Init of all servo controllers */
-  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_SPEED);
-  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_SPEED);
-  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_SPEED);
-  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_SPEED);
-  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_SPEED);
+  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_RETRACTED, SERVO_BOARD_ARM_LEFT_SPEED, SERVO_BOARD_ARM_LEFT_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_RETRACTED, SERVO_BOARD_ARM_RIGHT_SPEED, SERVO_BOARD_ARM_RIGHT_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_RETRACTED, SERVO_BOARD_SLOPE_SPEED, SERVO_BOARD_SLOPE_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_EXTENDED, SERVO_BOARD_SELECTOR_SPEED, SERVO_BOARD_SELECTOR_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_EXTENDED, SERVO_BOARD_STOPPER_SPEED, SERVO_BOARD_STOPPER_ACCEL);
+
+  /* Init of all ramps */
+  for (uint8_t idx = 0; idx < SERVO_BOARD_NB_SERVO_CONTROLLER; idx++)
+  {
+    RampInit(servoCtrlRamp_tst);
+  }
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)
@@ -89,6 +98,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (SERVO_BOARD_UPDATE_PERIOD * 1000.0) )
   {
+    uint32_t elapsedTime = currentTime_u32 - lastExecutionTime_u32;
     /* Store the last execution time */
     lastExecutionTime_u32 = currentTime_u32;
 
@@ -99,7 +109,42 @@ void ServoBoardUpdate(bool timeMeasure_b)
     /* Actual Code */
     for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
     {
-      ServoControllerUpdate(&servoCtrl_tst[index]);
+      RampUpdate(&servoCtrlRamp_tst[index], elapsedTime, DEBUG_TIME);
+      if (RampGetState(&servoCtrlRamp_tst[index]) != RAMP_STATE_FINISHED)
+      {
+        ServoBoardSet(index , (servoCtrl_tst[index].angleCurrent_d + RampGetDistance(&servoCtrlRamp_tst[index]))*10.0 );
+      }
+      else
+      {
+        /* Ramp finished, register target as current angle and should be finished */
+        servoCtrl_tst[index].angleCurrent_d = servoCtrl_tst[index].angleTarget_d;
+        servoCtrl_tst[index].isFinished_b = true;
+      }
+      
+      /* Display ramps if needed, only when axis moving */
+      if (SERVO_BOARD_DEBUG_RAMP)
+      {
+        if ((servoCtrl_tst[0].isFinished_b == false) ||  (servoCtrl_tst[1].isFinished_b == false) || (servoCtrl_tst[2].isFinished_b == false) || (servoCtrl_tst[3].isFinished_b == false) || (servoCtrl_tst[4].isFinished_b == false) )
+        {
+          if(index == 0)
+          {
+            Serial.print("Time : ");
+            Serial.print(currentTime_u32);
+          }
+          Serial.print("| idx : ");
+          Serial.print(index);
+          Serial.print(", ramp : ");
+          Serial.print(servoCtrlRamp_tst[index].rampState_en);
+          Serial.print(", rampSpd : ");
+          Serial.print(servoCtrlRamp_tst[index].speedCurrentTopPerS_i32);
+          Serial.print(", rampDist : ");
+          Serial.print(RampGetDistance(&servoCtrlRamp_tst[index]));
+          if( index == (SERVO_BOARD_NB_SERVO_CONTROLLER - 1) )
+          {
+            Serial.println();
+          }
+        }
+      }
     }
 
     /* Measure execution time if needed */
@@ -128,7 +173,7 @@ void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d)
 
   if (SERVO_BOARD_DEBUG)
   {
-    Serial.print("Servo Id ");
+    Serial.print("ServoBrd|Servo Id ");
     Serial.print(servoId_u8);
     Serial.print(" set to ");
     Serial.print(servoAngle_d);
@@ -158,18 +203,19 @@ void ServoBoardTest(uint8_t servoId_u8)
   }
 }
 
-void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double speed_d)
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double angleCurrent_d, double speed_d, double accel_d)
 {
   servoController_st->enable_b = false;
   servoController_st->id_u8 = id_u8;
   servoController_st->isFinished_b = false;
   servoController_st->speed_d = speed_d;
+  servoController_st->accelMax_d = accel_d;
   servoController_st->startTime_u32 = 0;
   servoController_st->duration_u32 = 0;
   servoController_st->angleMin_d = angleMin_d;
   servoController_st->angleMax_d = angleMax_d;
-  servoController_st->angleTarget_d = 0.0;
-  servoController_st->angleCurrent_d = 0.0;
+  servoController_st->angleTarget_d = angleCurrent_d;
+  servoController_st->angleCurrent_d = angleCurrent_d;
 }
 
 void ServoControllerGotoStart(ServoControllerSt * servoController_st)
@@ -188,15 +234,6 @@ void ServoControllerGotoEnd(ServoControllerSt * servoController_st)
   servoController_st->isFinished_b = false;
 }
 
-void ServoControllerUpdate(ServoControllerSt * servoController_st)
-{
-  /* Test id duration is elapsed */
-  if ( (millis() - servoController_st->startTime_u32) >= servoController_st->duration_u32)
-  {
-    servoController_st->isFinished_b = true;
-  }
-}
-
 bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t delaySuppMs_u32)
 {
   bool result_b = false;
@@ -208,13 +245,15 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dela
     servoCtrl_tst[id_u8].angleTarget_d = angleTarget_d;
 
     /* Compute duration based on a registered servo speed */
-    double angleToMove_d = abs(servoCtrl_tst[id_u8].angleTarget_d - servoCtrl_tst[id_u8].angleCurrent_d);
+    double angleToMove_d = servoCtrl_tst[id_u8].angleTarget_d - servoCtrl_tst[id_u8].angleCurrent_d;
     /* Speed is given in [s/60°], hence the * 1000 / 60 to have a duration in [ms] */
-    servoCtrl_tst[id_u8].duration_u32 = (uint32_t)angleToMove_d * servoCtrl_tst[id_u8].speed_d * 1000.0 / 60.0;
+    servoCtrl_tst[id_u8].duration_u32 = (uint32_t)abs(angleToMove_d) * servoCtrl_tst[id_u8].speed_d * 1000.0 / 60.0;
 
     if (SERVO_BOARD_DEBUG)
     {
-      Serial.print("ServoBoard|Actual : ");
+      Serial.print("ServoBoard|Idx : ");
+      Serial.print(id_u8);
+      Serial.print(", actual : ");
       Serial.print(servoCtrl_tst[id_u8].angleCurrent_d);
       Serial.print(", target");
       Serial.print(angleTarget_d);
@@ -231,11 +270,12 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dela
     /* Add the supplementary delay to the duration */
     servoCtrl_tst[id_u8].duration_u32 += delaySuppMs_u32;
 
-    /* Launches the registered action */
-    ServoBoardSet(id_u8 , servoCtrl_tst[id_u8].angleTarget_d);
+    /* Sets up the ramp, values are * 10.0 to get a computation in m° */
+    RampNew(&servoCtrlRamp_tst[id_u8], (int32_t)(angleToMove_d * 10.0), 0, (int32_t)(servoCtrl_tst[id_u8].speed_d * 10.0), (int32_t)(servoCtrl_tst[id_u8].accelMax_d) * 10.0);
+
+    /* Registers startTime and updates the finished flag */
     servoCtrl_tst[id_u8].startTime_u32 = millis();
     servoCtrl_tst[id_u8].isFinished_b = false;
-    servoCtrl_tst[id_u8].angleCurrent_d = servoCtrl_tst[id_u8].angleTarget_d;
 
     /* Target possible */
     result_b = true;

@@ -14,35 +14,40 @@
 #define SERVO_BOARD_NB_SERVO_CONTROLLER         5
 
 #define SERVO_BOARD_ARM_LEFT_ID                 0
-#define SERVO_BOARD_ARM_LEFT_SPEED              0.192 /* [s/60°] */
+#define SERVO_BOARD_ARM_LEFT_SPEED              300.0 /* [°/s] rounded from 0.192 [s/60°] */
+#define SERVO_BOARD_ARM_LEFT_ACCEL              1500.0
 #define SERVO_BOARD_ARM_LEFT_MIN                0.0
 #define SERVO_BOARD_ARM_LEFT_MAX                145.0
 #define SERVO_BOARD_ARM_LEFT_RETRACTED          SERVO_BOARD_ARM_LEFT_MAX
 #define SERVO_BOARD_ARM_LEFT_EXTENDED           SERVO_BOARD_ARM_LEFT_MIN
 
 #define SERVO_BOARD_ARM_RIGHT_ID                1
-#define SERVO_BOARD_ARM_RIGHT_SPEED             0.192 /* [s/60°] */
+#define SERVO_BOARD_ARM_RIGHT_SPEED             300.0 /* [°/s] rounded from 0.192 [s/60°] */
+#define SERVO_BOARD_ARM_RIGHT_ACCEL             1500.0
 #define SERVO_BOARD_ARM_RIGHT_MIN               0.0
 #define SERVO_BOARD_ARM_RIGHT_MAX               145.0
 #define SERVO_BOARD_ARM_RIGHT_RETRACTED         SERVO_BOARD_ARM_RIGHT_MIN
 #define SERVO_BOARD_ARM_RIGHT_EXTENDED          SERVO_BOARD_ARM_RIGHT_MAX
 
 #define SERVO_BOARD_SLOPE_ID                    2
-#define SERVO_BOARD_SLOPE_SPEED                 0.192 /* [s/60°] */
+#define SERVO_BOARD_SLOPE_SPEED                 300.0 /* [°/s] rounded from 0.192 [s/60°] */
+#define SERVO_BOARD_SLOPE_ACCEL                 1500.0
 #define SERVO_BOARD_SLOPE_MIN                   4.0
 #define SERVO_BOARD_SLOPE_MAX                   44.0
 #define SERVO_BOARD_SLOPE_RETRACTED             SERVO_BOARD_SLOPE_MIN
 #define SERVO_BOARD_SLOPE_EXTENDED              44.0
 
 #define SERVO_BOARD_SELECTOR_ID                 3
-#define SERVO_BOARD_SELECTOR_SPEED              0.083 /* [s/60°] */
+#define SERVO_BOARD_SELECTOR_SPEED              700.0 /* [°/s] rounded from 0.083 [s/60°] */
+#define SERVO_BOARD_SELECTOR_ACCEL              3500.0
 #define SERVO_BOARD_SELECTOR_MIN                30.0
 #define SERVO_BOARD_SELECTOR_MAX                125.0
 #define SERVO_BOARD_SELECTOR_RETRACTED          SERVO_BOARD_SELECTOR_MIN
 #define SERVO_BOARD_SELECTOR_EXTENDED           125.0
 
 #define SERVO_BOARD_STOPPER_ID                  4
-#define SERVO_BOARD_STOPPER_SPEED               0.083 /* [s/60°] */
+#define SERVO_BOARD_STOPPER_SPEED               700.0 /* [°/s] rounded from 0.083 [s/60°] */
+#define SERVO_BOARD_STOPPER_ACCEL               3500.0
 #define SERVO_BOARD_STOPPER_MIN                 55.0
 #define SERVO_BOARD_STOPPER_MAX                 90.0
 #define SERVO_BOARD_STOPPER_RETRACTED           71.0
@@ -57,6 +62,7 @@ typedef struct
   uint8_t id_u8;
   bool isFinished_b;
   double speed_d;
+  double accelMax_d;
   uint32_t startTime_u32;
   uint32_t duration_u32;
   double angleMin_d;
@@ -73,10 +79,9 @@ void ServoBoardUpdate(bool timeeasure_b);
 void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d);
 void ServoBoardTest(uint8_t servoId_u8);
 
-void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double speed_d);
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double angleCurrent_d, double speed_d, double accel_d);
 void ServoControllerGotoStart(ServoControllerSt * servoController_st);
 void ServoControllerGotoEnd(ServoControllerSt * servoController_st);
-void ServoControllerUpdate(ServoControllerSt * servoController_st);
 bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t delaySuppMs_u32);
 double ServoControllerGetAngleMin(uint8_t id_u8);
 double ServoControllerGetAngleMax(uint8_t id_u8);
