@@ -247,7 +247,7 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dela
     /* Compute duration based on a registered servo speed */
     double angleToMove_d = servoCtrl_tst[id_u8].angleTarget_d - servoCtrl_tst[id_u8].angleCurrent_d;
     /* Speed is given in [s/60°], hence the * 1000 / 60 to have a duration in [ms] */
-    servoCtrl_tst[id_u8].duration_u32 = (uint32_t)abs(angleToMove_d) * servoCtrl_tst[id_u8].speed_d * 1000.0 / 60.0;
+    servoCtrl_tst[id_u8].duration_u32 = (uint32_t)(abs(angleToMove_f) / servoCtrl_tst[id_u8].speed_f);
 
     if (SERVO_BOARD_DEBUG)
     {
