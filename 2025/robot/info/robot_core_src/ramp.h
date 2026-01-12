@@ -24,6 +24,8 @@ typedef struct
   uint32_t timeStartMs_u32;
   uint32_t timeCurrentMs_u32;
 
+  int8_t direction_g_i8;
+
   int32_t distanceCurrentTop_i32;
   int32_t distanceTotalTop_i32;
   int32_t distanceBrakeTop_i32;
