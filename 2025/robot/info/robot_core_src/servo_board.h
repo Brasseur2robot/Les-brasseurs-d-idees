@@ -61,14 +61,14 @@ typedef struct
   bool enable_b;
   uint8_t id_u8;
   bool isFinished_b;
-  double speed_d;
-  double accelMax_d;
+  float speed_f;
+  float accelMax_f;
   uint32_t startTime_u32;
   uint32_t duration_u32;
-  double angleMin_d;
-  double angleMax_d;
-  double angleCurrent_d;
-  double angleTarget_d;
+  float angleMin_f;
+  float angleMax_f;
+  float angleCurrent_f;
+  float angleTarget_f;
 } ServoControllerSt; /* typedef for ramp parameters */
 
 /******************************************************************************
@@ -76,15 +76,15 @@ typedef struct
  ******************************************************************************/
 void ServoBoardInit();
 void ServoBoardUpdate(bool timeeasure_b);
-void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d);
+void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f);
 void ServoBoardTest(uint8_t servoId_u8);
 
-void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double angleCurrent_d, double speed_d, double accel_d);
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, float angleMin_f, float angleMax_f, float angleCurrent_f, float speed_f, float accel_f);
 void ServoControllerGotoStart(ServoControllerSt * servoController_st);
 void ServoControllerGotoEnd(ServoControllerSt * servoController_st);
-bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t delaySuppMs_u32);
-double ServoControllerGetAngleMin(uint8_t id_u8);
-double ServoControllerGetAngleMax(uint8_t id_u8);
+bool ServoControllerSetTarget(uint8_t id_u8, float angleTarget_f, uint32_t delaySuppMs_u32);
+float ServoControllerGetAngleMin(uint8_t id_u8);
+float ServoControllerGetAngleMax(uint8_t id_u8);
 bool ServoControllerIsFinished(uint8_t id_u8);
 
 #endif

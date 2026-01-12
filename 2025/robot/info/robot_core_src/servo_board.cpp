@@ -1,3 +1,5 @@
+/* perf comparison, with doubles 330us when computing tajectories */
+
 /******************************************************************************
    Included Files
  ******************************************************************************/
@@ -98,7 +100,8 @@ void ServoBoardUpdate(bool timeMeasure_b)
   /* Manages the update loop every update period */
   if ( ( currentTime_u32 - lastExecutionTime_u32 ) >= (SERVO_BOARD_UPDATE_PERIOD * 1000.0) )
   {
-    uint32_t elapsedTime = currentTime_u32 - lastExecutionTime_u32;
+    uint32_t elapsedTime_u32 = currentTime_u32 - lastExecutionTime_u32;
+    
     /* Store the last execution time */
     lastExecutionTime_u32 = currentTime_u32;
 
@@ -109,7 +112,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
     /* Actual Code */
     for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
     {
-      RampUpdate(&servoCtrlRamp_tst[index], elapsedTime, DEBUG_TIME);
+      RampUpdate(&servoCtrlRamp_tst[index], elapsedTime_u32, DEBUG_TIME);
       if (RampGetState(&servoCtrlRamp_tst[index]) != RAMP_STATE_FINISHED)
       {
         ServoBoardSet(index , (servoCtrl_tst[index].angleCurrent_f + RampGetDistance(&servoCtrlRamp_tst[index])) / 10.0 );
@@ -117,7 +120,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
       else
       {
         /* Ramp finished, register target as current angle and should be finished */
-        servoCtrl_tst[index].angleCurrent_d = servoCtrl_tst[index].angleTarget_d;
+        servoCtrl_tst[index].angleCurrent_f = servoCtrl_tst[index].angleTarget_f;
         servoCtrl_tst[index].isFinished_b = true;
       }
       
@@ -158,16 +161,16 @@ void ServoBoardUpdate(bool timeMeasure_b)
   }
 }
 
-void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d)
+void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
 {
-  uint16_t pulselength = map(servoAngle_d, 0, 180, SERVOMIN, SERVOMAX);
+  uint16_t pulselength = map(servoAngle_f, 0, 180, SERVOMIN, SERVOMAX);
 #if DEBUG_SIMULATION == false
   servoBoard.setPWM(servoId_u8, 0, pulselength);
 #else
   Serial.print("ServoBoard|Simulated move of servo ");
   Serial.print(servoId_u8);
   Serial.print(" to ");
-  Serial.print(servoAngle_d);
+  Serial.print(servoAngle_f);
   Serial.println("°.");
 #endif
 
@@ -176,7 +179,7 @@ void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d)
     Serial.print("ServoBrd|Servo Id ");
     Serial.print(servoId_u8);
     Serial.print(" set to ");
-    Serial.print(servoAngle_d);
+    Serial.print(servoAngle_f);
     Serial.print("°, pulseLength :");
     Serial.print(pulselength);
     Serial.println();
@@ -185,43 +188,43 @@ void ServoBoardSet(uint8_t servoId_u8, double servoAngle_d)
 
 void ServoBoardTest(uint8_t servoId_u8)
 {
-  for (double servoAngle_d = 0.0; servoAngle_d <= 180.0; servoAngle_d += 10.0)
+  for (float servoAngle_f = 0.0; servoAngle_f <= 180.0; servoAngle_f += 10.0)
   {
     Serial.print("Servo angle test : ");
-    Serial.print(servoAngle_d);
+    Serial.print(servoAngle_f);
     Serial.println();
-    ServoBoardSet(servoId_u8, servoAngle_d);
+    ServoBoardSet(servoId_u8, servoAngle_f);
     delay(500);
   }
-  for (double servoAngle_d = 180.0; servoAngle_d >= 0.0; servoAngle_d -= 10.0)
+  for (float servoAngle_f = 180.0; servoAngle_f >= 0.0; servoAngle_f -= 10.0)
   {
     Serial.print("Servo angle test : ");
-    Serial.print(servoAngle_d);
+    Serial.print(servoAngle_f);
     Serial.println();
-    ServoBoardSet(servoId_u8, servoAngle_d);
+    ServoBoardSet(servoId_u8, servoAngle_f);
     delay(500);
   }
 }
 
-void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, double angleMin_d, double angleMax_d, double angleCurrent_d, double speed_d, double accel_d)
+void ServoControllerInit(ServoControllerSt * servoController_st, uint8_t id_u8, float angleMin_f, float angleMax_f, float angleCurrent_f, float speed_f, float accel_f)
 {
   servoController_st->enable_b = false;
   servoController_st->id_u8 = id_u8;
   servoController_st->isFinished_b = false;
-  servoController_st->speed_d = speed_d;
-  servoController_st->accelMax_d = accel_d;
+  servoController_st->speed_f = speed_f;
+  servoController_st->accelMax_f = accel_f;
   servoController_st->startTime_u32 = 0;
   servoController_st->duration_u32 = 0;
-  servoController_st->angleMin_d = angleMin_d;
-  servoController_st->angleMax_d = angleMax_d;
-  servoController_st->angleTarget_d = angleCurrent_d;
-  servoController_st->angleCurrent_d = angleCurrent_d;
+  servoController_st->angleMin_f = angleMin_f;
+  servoController_st->angleMax_f = angleMax_f;
+  servoController_st->angleTarget_f = angleCurrent_f;
+  servoController_st->angleCurrent_f = angleCurrent_f;
 }
 
 void ServoControllerGotoStart(ServoControllerSt * servoController_st)
 {
   /* Does the registered action */
-  ServoBoardSet(servoController_st->id_u8 , servoController_st->angleMin_d);
+  ServoBoardSet(servoController_st->id_u8 , servoController_st->angleMin_f);
   servoController_st->startTime_u32 = millis();
   servoController_st->isFinished_b = false;
 }
@@ -229,23 +232,23 @@ void ServoControllerGotoStart(ServoControllerSt * servoController_st)
 void ServoControllerGotoEnd(ServoControllerSt * servoController_st)
 {
   /* Does the registered action */
-  ServoBoardSet(servoController_st->id_u8 , servoController_st->angleMax_d);
+  ServoBoardSet(servoController_st->id_u8 , servoController_st->angleMax_f);
   servoController_st->startTime_u32 = millis();
   servoController_st->isFinished_b = false;
 }
 
-bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t delaySuppMs_u32)
+bool ServoControllerSetTarget(uint8_t id_u8, float angleTarget_f, uint32_t delaySuppMs_u32)
 {
   bool result_b = false;
 
   /* Verification that the target angle is between min and max authorized */
-  if ( (angleTarget_d >= servoCtrl_tst[id_u8].angleMin_d) && (angleTarget_d <= servoCtrl_tst[id_u8].angleMax_d) )
+  if ( (angleTarget_f >= servoCtrl_tst[id_u8].angleMin_f) && (angleTarget_f <= servoCtrl_tst[id_u8].angleMax_f) )
   {
     /* TODO Should verify that crtl.isFinished is true, to know that the previous move is finished? */
-    servoCtrl_tst[id_u8].angleTarget_d = angleTarget_d;
+    servoCtrl_tst[id_u8].angleTarget_f = angleTarget_f;
 
     /* Compute duration based on a registered servo speed */
-    double angleToMove_d = servoCtrl_tst[id_u8].angleTarget_d - servoCtrl_tst[id_u8].angleCurrent_d;
+    float angleToMove_f = servoCtrl_tst[id_u8].angleTarget_f - servoCtrl_tst[id_u8].angleCurrent_f;
     /* Speed is given in [s/60°], hence the * 1000 / 60 to have a duration in [ms] */
     servoCtrl_tst[id_u8].duration_u32 = (uint32_t)(abs(angleToMove_f) / servoCtrl_tst[id_u8].speed_f);
 
@@ -254,11 +257,11 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dela
       Serial.print("ServoBoard|Idx : ");
       Serial.print(id_u8);
       Serial.print(", actual : ");
-      Serial.print(servoCtrl_tst[id_u8].angleCurrent_d);
+      Serial.print(servoCtrl_tst[id_u8].angleCurrent_f);
       Serial.print(", target");
-      Serial.print(angleTarget_d);
+      Serial.print(angleTarget_f);
       Serial.print(", angleToMove : ");
-      Serial.print(angleToMove_d);
+      Serial.print(angleToMove_f);
       Serial.print(", which lasts : ");
       Serial.print(servoCtrl_tst[id_u8].duration_u32);
       Serial.print(" ms");
@@ -271,7 +274,7 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dela
     servoCtrl_tst[id_u8].duration_u32 += delaySuppMs_u32;
 
     /* Sets up the ramp, values are * 10.0 to get a computation in m° */
-    RampNew(&servoCtrlRamp_tst[id_u8], (int32_t)(angleToMove_d * 10.0), 0, (int32_t)(servoCtrl_tst[id_u8].speed_d * 10.0), (int32_t)(servoCtrl_tst[id_u8].accelMax_d) * 10.0);
+    RampNew(&servoCtrlRamp_tst[id_u8], (int32_t)(angleToMove_f * 10.0), 0, (int32_t)(servoCtrl_tst[id_u8].speed_f * 10.0), (int32_t)(servoCtrl_tst[id_u8].accelMax_f) * 10.0);
 
     /* Registers startTime and updates the finished flag */
     servoCtrl_tst[id_u8].startTime_u32 = millis();
@@ -289,14 +292,14 @@ bool ServoControllerSetTarget(uint8_t id_u8, double angleTarget_d, uint32_t dela
   return result_b;
 }
 
-double ServoControllerGetAngleMin(uint8_t id_u8)
+float ServoControllerGetAngleMin(uint8_t id_u8)
 {
-  return servoCtrl_tst[id_u8].angleMin_d;
+  return servoCtrl_tst[id_u8].angleMin_f;
 }
 
-double ServoControllerGetAngleMax(uint8_t id_u8)
+float ServoControllerGetAngleMax(uint8_t id_u8)
 {
-  return servoCtrl_tst[id_u8].angleMax_d;
+  return servoCtrl_tst[id_u8].angleMax_f;
 }
 
 bool ServoControllerIsFinished(uint8_t id_u8)
