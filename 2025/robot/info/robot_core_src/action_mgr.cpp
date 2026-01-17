@@ -9,6 +9,7 @@
 #include "config.h"
 #include "action_mgr.h"
 #include "servo_board.h"
+#include "sound.h"
 #include "actuator_dxl.h"
 
 /******************************************************************************
@@ -349,6 +350,7 @@ bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
         break;
     
       case ACTION_MGR_ID_GRAB_BOXES:
+        SoundPlay(SOUND_LOADING);
         actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
         actionMgrCurrentActionId_u8_g = actionId_u8;
         actionMgrCurrentStep_u8_g = 0;
@@ -357,6 +359,7 @@ bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
         break;
     
       case ACTION_MGR_ID_SORT_EJECT:
+        SoundPlay(SOUND_UNLOADING);
         actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
         actionMgrCurrentActionId_u8_g = actionId_u8;
         actionMgrCurrentStep_u8_g = 0;
@@ -365,6 +368,7 @@ bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
         break;
 
       case ACTION_MGR_ID_SORT_EJECT_INVERT:
+        SoundPlay(SOUND_UNLOADING);
         actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
         actionMgrCurrentActionId_u8_g = actionId_u8;
         actionMgrCurrentStep_u8_g = 0;

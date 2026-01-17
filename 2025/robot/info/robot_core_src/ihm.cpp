@@ -26,6 +26,7 @@
 #include "motor.h"
 #include "match_mgr.h"
 #include "servo_board.h"
+#include "sound.h"
 
 /******************************************************************************
    Constants and Macros
@@ -69,6 +70,9 @@ uint16_t colorYellow_u16 = 0;
 bool measureAsked_b = false;
 
 int selectedServoId = 0;
+
+int selectedVolume = SOUND_VOLUME;
+
 void changeColor()
 {
   /* Set color to none */
@@ -194,6 +198,47 @@ MENU_SCREEN(ActionScreen, ActionItems,
             })
             );
 
+MENU_SCREEN(SoundScreen, SoundItems,
+            ITEM_RANGE_REF<int>(
+              "Vol", selectedVolume, -1, 0, 30, [](const Ref<int> value) {
+                //Serial.print("Dxl Id : ");
+                //Serial.println(value.value);
+                SoundSetVolume(selectedVolume);
+            },"%d"),
+            ITEM_COMMAND("Play start", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_START);
+            }),
+            ITEM_COMMAND("Play walking", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_WALKING);
+            }),
+            ITEM_COMMAND("Play obstacle", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_OBSTACLE);
+            }),
+            ITEM_COMMAND("Play loading", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_LOADING);
+            }),
+            ITEM_COMMAND("Play unloading", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_UNLOADING);
+            }),
+            ITEM_COMMAND("Play explosion", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_EXPLOSION);
+            }),
+            ITEM_COMMAND("Play winner", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_WINNER);
+            }),
+            ITEM_COMMAND("Play game over", []() {
+              /* Launch action Ready */
+              SoundPlay(SOUND_GAME_OVER);
+            })
+            );
+            
 /* TODO Submenu with files detected to add in the menu */
 MENU_SCREEN(SDFilesScreen, SDFilesItems,
             ITEM_LABEL("Files"),
@@ -230,6 +275,8 @@ MENU_SCREEN(mainScreen, mainItems,
             ITEM_SUBMENU("Color Sensor", ColorSensorScreen),
 
             ITEM_SUBMENU("Action", ActionScreen),
+
+            ITEM_SUBMENU("Play sound", SoundScreen),
 
             ITEM_SUBMENU("Motor Cfg", MotorCfgScreen),
 
