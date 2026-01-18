@@ -163,17 +163,10 @@ void ServoBoardUpdate(bool timeMeasure_b)
 
 void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
 {
-  uint16_t pulselength = map(servoAngle_f, 0, 180, SERVOMIN, SERVOMAX);
 #if DEBUG_SIMULATION == false
+  uint16_t pulselength = map(servoAngle_f, 0, 180, SERVOMIN, SERVOMAX);
   servoBoard.setPWM(servoId_u8, 0, pulselength);
-#else
-  Serial.print("ServoBoard|Simulated move of servo ");
-  Serial.print(servoId_u8);
-  Serial.print(" to ");
-  Serial.print(servoAngle_f);
-  Serial.println("°.");
-#endif
-
+  
   if (SERVO_BOARD_DEBUG)
   {
     Serial.print("ServoBrd|Servo Id ");
@@ -184,6 +177,16 @@ void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
     Serial.print(pulselength);
     Serial.println();
   }
+#
+  if (SERVO_BOARD_DEBUG)
+  {
+    Serial.print("ServoBoard|Simulated move of servo ");
+    Serial.print(servoId_u8);
+    Serial.print(" to ");
+    Serial.print(servoAngle_f);
+    Serial.println("°.");
+  }
+#endif  
 }
 
 void ServoBoardTest(uint8_t servoId_u8)

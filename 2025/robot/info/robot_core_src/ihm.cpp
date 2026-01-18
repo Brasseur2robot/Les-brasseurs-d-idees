@@ -92,16 +92,17 @@ void changeColor()
     MatchMgrChangeColor(MATCH_COLOR_YELLOW);
   }
 }
-
+float targetR;
+float targetL;
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
-            ITEM_RANGE<double>("ArmL", SERVO_BOARD_ARM_LEFT_MIN, -5.0, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, value, NODELAY))
-              {
-                Serial.println("Target impossible.");
-              }
-            }, "%0.1f"),
-            ITEM_RANGE<double>("ArmR", SERVO_BOARD_ARM_RIGHT_MAX, -5.0, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, [](const double value) {
-              if(!ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, value, NODELAY))
+            ITEM_RANGE<double>("Arm", SERVO_BOARD_ARM_LEFT_MIN, -5.0, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, [](const double value) {
+              targetR = value;
+              targetL = SERVO_BOARD_ARM_RIGHT_MAX - (targetR - SERVO_BOARD_ARM_RIGHT_MIN);
+              Serial.print("TargetL : ");
+              Serial.print(targetL);
+              Serial.print(", TargetR : ");
+              Serial.println(targetR);
+              if( !ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, targetL, NODELAY) || !ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, targetR, NODELAY) )
               {
                 Serial.println("Target impossible.");
               }
@@ -238,7 +239,7 @@ MENU_SCREEN(SoundScreen, SoundItems,
               SoundPlay(SOUND_GAME_OVER);
             })
             );
-            
+
 /* TODO Submenu with files detected to add in the menu */
 MENU_SCREEN(SDFilesScreen, SDFilesItems,
             ITEM_LABEL("Files"),
@@ -246,7 +247,11 @@ MENU_SCREEN(SDFilesScreen, SDFilesItems,
             );
 
 MENU_SCREEN(mainScreen, mainItems,
-            ITEM_BASIC("Robot Core Brd"),
+#if DEBUG_SIMULATION
+            ITEM_BASIC("Robot Setup SIM"),
+#else
+            ITEM_BASIC("Robot Setup"),
+#endif
             ITEM_LIST_REF("Color", colors, [](const Ref<uint8_t> color) {
               Serial.println(colors[color.value]);
               changeColor();
