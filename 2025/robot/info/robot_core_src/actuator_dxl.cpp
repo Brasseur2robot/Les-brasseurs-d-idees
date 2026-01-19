@@ -104,29 +104,38 @@ void ActuatorDxlControllerInit(DxlControllerSt * dxlController_st, uint8_t id_u8
   dxlController_st->angleTarget_d = 0.0;
   dxlController_st->angleCurrent_d = 0.0;
 
+#if DEBUG_SIMULATION == false
   /* Turn off torque when configuring items in EEPROM area */
   dxl.torqueOff(id_u8);
   dxl.setOperatingMode(id_u8, OP_POSITION);
   dxl.setGoalVelocity(id_u8, speed_d/0.111, UNIT_RAW);    /* unit is 0.111 rpm approx. */
   dxl.torqueOn(id_u8);
+#endif
 }
 
 void ActuatorDxlControllerUpdate(DxlControllerSt * dxlController_st)
 {
+  int errorCodeF;
   static uint16_t isMoving = 0;
   //static uint16_t present_speed = 0;
 
+#if DEBUG_SIMULATION == false
   /* Read the isMoving property */
   dxl.read(dxlController_st->id_u8, 46, 1, (uint8_t*)&isMoving, sizeof(isMoving), ACTUATOR_DXL_TIMEOUT);
-  int errorCodeF = dxl.getLastLibErrCode();
+  errorCodeF = dxl.getLastLibErrCode();
   // dxl.read(dxlController_st->id_u8, 38, 2, (uint8_t*)&present_speed, sizeof(present_speed), ACTUATOR_DXL_TIMEOUT);
   // int errorCodeS = dxl.getLastLibErrCode();
+#else
+  isMoving = 0;
+#endif
 
   if (isMoving == 0)
   {
     dxlController_st->isFinished_b = true;
+#if DEBUG_SIMULATION == false    
     /* If not moving, turn off Led */
     ActuatorDxlSetLed(dxlController_st->id_u8, false);
+#endif
   }
   else
   {
@@ -216,11 +225,16 @@ void ActuatorDxlSetLed(uint8_t id, bool state) {
 }
 
 bool ActuatorDxlSetGoalPosition(uint8_t id, float value) {
+  bool result_b;
+#if DEBUG_SIMULATION == false 
   /* Turn Led on of moving dxl */
   ActuatorDxlSetLed(id, true);
   /* Send the position command */
-  bool result_b;
   result_b = dxl.setGoalPosition(id, value, UNIT_DEGREE);
+#else
+  result_b = true;
+#endif
+
   return result_b;
 }
 
