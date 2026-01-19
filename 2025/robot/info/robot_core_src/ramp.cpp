@@ -14,7 +14,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define RAMP_NEW_DEBUG          false
+#define RAMP_NEW_DEBUG          true
 #define RAMP_UPDATE_DEBUG       false
 #define RAMP_EMERGENCY_DEBUG    false
 
@@ -88,18 +88,18 @@ void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t 
   ramp_pst->timeCurrentMs_u32 = 0;
 
   ramp_pst->distanceCurrentTop_i32 = 0;
-  ramp_pst->distanceTotalTop_i32 = distanceTotalTop_i32;
+  ramp_pst->distanceTotalTop_i32 = 10 * distanceTotalTop_i32;
   ramp_pst->distanceBrakeTop_i32 = 0;
 
   if ( speedTotalTopPerS_i32 == 0)  /* Should reset speed */
     ramp_pst->speedCurrentTopPerS_i32 = 0;
 
-  ramp_pst->speedTotalTopPerS_i32 = ramp_pst->direction_g_i8 * speedTotalTopPerS_i32;
+  ramp_pst->speedTotalTopPerS_i32 = ramp_pst->direction_g_i8 * speedTotalTopPerS_i32 * 10;
 
   /* If we start a move from scratch, acceleration should be accelerationMaxTopPerS_i32 */
   if (ramp_pst->speedCurrentTopPerS_i32 == 0)
   {
-    ramp_pst->accelerationCurrentTopPerS_i32 = ramp_pst->direction_g_i8 * accelerationMaxTopPerS_i32;
+    ramp_pst->accelerationCurrentTopPerS_i32 = ramp_pst->direction_g_i8 * accelerationMaxTopPerS_i32 * 10;
     ramp_pst->rampState_en = RAMP_STATE_RAMPUP;
   }
   else /* But if its another stretch on top of a non-braking move, acceleration should be null */
@@ -177,10 +177,10 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
       }
     }
     /* if speed is already speedMax, ramp continuous */
-    if ( (abs(ramp_pst->speedCurrentTopPerS_i32) > abs(ramp_pst->speedMaxTopPerS_i32)) && (ramp_pst->rampState_en == RAMP_STATE_RAMPUP) )
+    if ( (abs(ramp_pst->speedCurrentTopPerS_i32) >= abs(ramp_pst->speedMaxTopPerS_i32)) && (ramp_pst->rampState_en == RAMP_STATE_RAMPUP) )
     {
       /* saturate speed */
-      ramp_pst->speedCurrentTopPerS_i32 = ramp_pst->speedMaxTopPerS_i32;
+      //ramp_pst->speedCurrentTopPerS_i32 = ramp_pst->speedMaxTopPerS_i32;
       ramp_pst->accelerationCurrentTopPerS_i32 = 0;
       ramp_pst->rampState_en = RAMP_STATE_CONTINUOUS;
     }
@@ -243,7 +243,7 @@ void RampEmergencyStop(RampParametersSt * ramp_pst)
   ramp_pst->rampState_en = RAMP_STATE_RAMPDOWN;
 
   /* Update the acceleration */
-  ramp_pst->accelerationMaxTopPerS_i32 = (int32_t)MilliMeterToTop(ACCELERATION_MAX);
+  ramp_pst->accelerationMaxTopPerS_i32 = (int32_t)MilliMeterToTop(ACCELERATION_MAX) * 10;
   ramp_pst->accelerationCurrentTopPerS_i32 = - ramp_pst->accelerationMaxTopPerS_i32;
 
   /* Compute the breaking distance, from the actual speed */
@@ -269,18 +269,18 @@ void RampEmergencyStop(RampParametersSt * ramp_pst)
 
 int32_t RampGetSpeed(RampParametersSt * ramp_pst)
 {
-  return ramp_pst->speedCurrentTopPerS_i32;
+  return ramp_pst->speedCurrentTopPerS_i32 / 10;
 }
 
 
 int32_t RampGetDistance(RampParametersSt * ramp_pst)
 {
-  return ramp_pst->distanceCurrentTop_i32;
+  return ramp_pst->distanceCurrentTop_i32 / 10;
 }
 
 int32_t RampGetDistanceBrake(RampParametersSt * ramp_pst)
 {
-  return ramp_pst->distanceBrakeTop_i32;
+  return ramp_pst->distanceBrakeTop_i32 / 10;
 }
 
 RampStateEn RampGetState(RampParametersSt * ramp_pst)

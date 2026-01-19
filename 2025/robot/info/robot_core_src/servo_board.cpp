@@ -13,7 +13,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define SERVO_BOARD_DEBUG                       false
+#define SERVO_BOARD_DEBUG                       true
 #define SERVO_BOARD_DEBUG_RAMP                  false
 #define SERVO_BOARD_UPDATE_PERIOD               0.01   /* Refresh rate 1/0.01 = 100fps */
 
@@ -76,11 +76,11 @@ void ServoBoardInit()
 #endif
 
   /* Init of all servo controllers */
-  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_RETRACTED, SERVO_BOARD_ARM_LEFT_SPEED, SERVO_BOARD_ARM_LEFT_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_RETRACTED, SERVO_BOARD_ARM_RIGHT_SPEED, SERVO_BOARD_ARM_RIGHT_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_RETRACTED, SERVO_BOARD_SLOPE_SPEED, SERVO_BOARD_SLOPE_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_EXTENDED, SERVO_BOARD_SELECTOR_SPEED, SERVO_BOARD_SELECTOR_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_EXTENDED, SERVO_BOARD_STOPPER_SPEED, SERVO_BOARD_STOPPER_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_RETRACTED - 1.0, SERVO_BOARD_ARM_LEFT_SPEED, SERVO_BOARD_ARM_LEFT_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_RETRACTED + 1.0, SERVO_BOARD_ARM_RIGHT_SPEED, SERVO_BOARD_ARM_RIGHT_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_RETRACTED + 1.0, SERVO_BOARD_SLOPE_SPEED, SERVO_BOARD_SLOPE_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_EXTENDED - 1.0, SERVO_BOARD_SELECTOR_SPEED, SERVO_BOARD_SELECTOR_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_EXTENDED + 1.0, SERVO_BOARD_STOPPER_SPEED, SERVO_BOARD_STOPPER_ACCEL);
 
   /* Init of all ramps */
   for (uint8_t idx = 0; idx < SERVO_BOARD_NB_SERVO_CONTROLLER; idx++)
@@ -115,7 +115,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
       RampUpdate(&servoCtrlRamp_tst[index], elapsedTime_u32, DEBUG_TIME);
       if (RampGetState(&servoCtrlRamp_tst[index]) != RAMP_STATE_FINISHED)
       {
-        ServoBoardSet(index , (servoCtrl_tst[index].angleCurrent_f + RampGetDistance(&servoCtrlRamp_tst[index])) / 10.0 );
+        ServoBoardSet(index , servoCtrl_tst[index].angleCurrent_f + RampGetDistance(&servoCtrlRamp_tst[index]) / 10.0 );
       }
       else
       {
@@ -133,11 +133,15 @@ void ServoBoardUpdate(bool timeMeasure_b)
           {
             Serial.print("Time : ");
             Serial.print(currentTime_u32);
+            Serial.print(", elapsed : ");
+            Serial.print(servoCtrlRamp_tst[index].timeCurrentMs_u32);
           }
           Serial.print("| idx : ");
           Serial.print(index);
           Serial.print(", ramp : ");
           Serial.print(servoCtrlRamp_tst[index].rampState_en);
+          Serial.print(", rampAcc : ");
+          Serial.print(servoCtrlRamp_tst[index].accelerationCurrentTopPerS_i32);
           Serial.print(", rampSpd : ");
           Serial.print(servoCtrlRamp_tst[index].speedCurrentTopPerS_i32);
           Serial.print(", rampDist : ");
@@ -177,7 +181,7 @@ void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
     Serial.print(pulselength);
     Serial.println();
   }
-#
+#else
   if (SERVO_BOARD_DEBUG)
   {
     Serial.print("ServoBoard|Simulated move of servo ");

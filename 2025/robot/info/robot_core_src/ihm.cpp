@@ -96,12 +96,8 @@ float targetR;
 float targetL;
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
             ITEM_RANGE<double>("Arm", SERVO_BOARD_ARM_LEFT_MIN, -5.0, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, [](const double value) {
-              targetR = value;
-              targetL = SERVO_BOARD_ARM_RIGHT_MAX - (targetR - SERVO_BOARD_ARM_RIGHT_MIN);
-              Serial.print("TargetL : ");
-              Serial.print(targetL);
-              Serial.print(", TargetR : ");
-              Serial.println(targetR);
+              float targetR = value;
+              float targetL = SERVO_BOARD_ARM_RIGHT_MAX - (targetR - SERVO_BOARD_ARM_RIGHT_MIN);
               if( !ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, targetL, NODELAY) || !ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, targetR, NODELAY) )
               {
                 Serial.println("Target impossible.");
