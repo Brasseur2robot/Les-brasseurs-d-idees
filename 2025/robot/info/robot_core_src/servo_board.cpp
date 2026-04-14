@@ -13,7 +13,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define SERVO_BOARD_DEBUG                       true
+#define SERVO_BOARD_DEBUG                       false
 #define SERVO_BOARD_DEBUG_RAMP                  false
 #define SERVO_BOARD_UPDATE_PERIOD               0.01   /* Refresh rate 1/0.01 = 100fps */
 
@@ -168,7 +168,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
 void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
 {
 #if DEBUG_SIMULATION == false
-  uint16_t pulselength = map(servoAngle_f, 0, 180, SERVOMIN, SERVOMAX);
+  uint16_t pulselength = map(servoAngle_f, 0.0, 180.0, SERVOMIN, SERVOMAX);
   servoBoard.setPWM(servoId_u8, 0, pulselength);
   
   if (SERVO_BOARD_DEBUG)

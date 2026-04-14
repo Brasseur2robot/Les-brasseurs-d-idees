@@ -97,7 +97,7 @@ float targetL;
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
             ITEM_RANGE<double>("Arm", SERVO_BOARD_ARM_LEFT_MIN, -5.0, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, [](const double value) {
               float targetR = value;
-              float targetL = SERVO_BOARD_ARM_RIGHT_MAX - (targetR - SERVO_BOARD_ARM_RIGHT_MIN);
+              float targetL = 245.0 - (targetR);
               if( !ServoControllerSetTarget(SERVO_BOARD_ARM_LEFT_ID, targetL, NODELAY) || !ServoControllerSetTarget(SERVO_BOARD_ARM_RIGHT_ID, targetR, NODELAY) )
               {
                 Serial.println("Target impossible.");
@@ -184,6 +184,10 @@ MENU_SCREEN(ActionScreen, ActionItems,
             ITEM_COMMAND("Do GRAB BOXES", []() {
               /* Launch action Ready */
               ActionMgrSetNextAction(ACTION_MGR_ID_GRAB_BOXES, WAIT);
+            }),
+            ITEM_COMMAND("Do TRANSPORT", []() {
+              /* Launch action Ready */
+              ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
             }),
             ITEM_COMMAND("Do EJECT", []() {
               /* Launch action Ready */

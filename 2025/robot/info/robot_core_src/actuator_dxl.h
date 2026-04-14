@@ -8,12 +8,12 @@
 
 #define ACTUATOR_DXL_GRABBER_ID                 10
 #define ACTUATOR_DXL_GRABBER_SPEED_MAX          59    /* [rpm] */
-#define ACTUATOR_DXL_GRABBER_SPEED              10    /* [rpm] */
+#define ACTUATOR_DXL_GRABBER_SPEED              50    /* [rpm] */
 #define ACTUATOR_DXL_GRABBER_MIN                135.0
 #define ACTUATOR_DXL_GRABBER_MAX                190.0
 #define ACTUATOR_DXL_GRABBER_START              160.0
-#define ACTUATOR_DXL_GRABBER_RETRACTED          145.0
-#define ACTUATOR_DXL_GRABBER_EXTENDED           ACTUATOR_DXL_GRABBER_MAX
+#define ACTUATOR_DXL_GRABBER_RETRACTED          140.0
+#define ACTUATOR_DXL_GRABBER_EXTENDED           190.0
 
 /******************************************************************************
    Types declarations

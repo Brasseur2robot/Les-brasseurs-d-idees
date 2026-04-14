@@ -5,53 +5,54 @@
    Constants and Macros
  ******************************************************************************/
 #define SERVO_BOARD_ADDRESS       0x40
-#define SERVOMIN                  150 // This is the 'minimum' pulse length count (out of 4096)
-#define SERVOMAX                  600 // This is the 'maximum' pulse length count (out of 4096)
-#define USMIN                     600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150
-#define USMAX                     2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600
-#define SERVO_FREQ                50 // Analog servos run at ~50 Hz updates
+#define SERVOMIN                  103 // This is the 'minimum' pulse length count (out of 4096) 500us on 20ms
+#define SERVOMAX                  512 // This is the 'maximum' pulse length count (out of 4096) 2500us on 20ms
+#define SERVO_FREQ                50  // Analog servos run at ~50 Hz updates
 
 #define SERVO_BOARD_NB_SERVO_CONTROLLER         5
 
 #define SERVO_BOARD_ARM_LEFT_ID                 0
-#define SERVO_BOARD_ARM_LEFT_SPEED              300.0 /* [°/s] rounded from 0.192 [s/60°] */
-#define SERVO_BOARD_ARM_LEFT_ACCEL              1500.0
+#define SERVO_BOARD_ARM_LEFT_SPEED              600.0 /* 300 max [°/s] rounded from 0.192 [s/60°] */
+#define SERVO_BOARD_ARM_LEFT_ACCEL              300.0
 #define SERVO_BOARD_ARM_LEFT_MIN                0.0
-#define SERVO_BOARD_ARM_LEFT_MAX                145.0
-#define SERVO_BOARD_ARM_LEFT_RETRACTED          SERVO_BOARD_ARM_LEFT_MAX
-#define SERVO_BOARD_ARM_LEFT_EXTENDED           SERVO_BOARD_ARM_LEFT_MIN
+#define SERVO_BOARD_ARM_LEFT_MAX                (270.0 / 1.5) // Divided by 1.5 to accomodate the servo board which handles 180° servos
+#define SERVO_BOARD_ARM_LEFT_RETRACTED          ((245.0 - 5.0) / 1.5) //218.0 / 1.5 //145.0
+#define SERVO_BOARD_ARM_LEFT_MIDSTOP            ((0.0 + 155.0 ) / 1.5)  //7.0 + 35.0
+#define SERVO_BOARD_ARM_LEFT_EXTENDED           ((0.0 + 80.0) / 1.5) //7.0
 
 #define SERVO_BOARD_ARM_RIGHT_ID                1
-#define SERVO_BOARD_ARM_RIGHT_SPEED             300.0 /* [°/s] rounded from 0.192 [s/60°] */
-#define SERVO_BOARD_ARM_RIGHT_ACCEL             1500.0
+#define SERVO_BOARD_ARM_RIGHT_SPEED             600.0 /* [°/s] rounded from 0.192 [s/60°] */
+#define SERVO_BOARD_ARM_RIGHT_ACCEL             300.0
 #define SERVO_BOARD_ARM_RIGHT_MIN               0.0
-#define SERVO_BOARD_ARM_RIGHT_MAX               145.0
-#define SERVO_BOARD_ARM_RIGHT_RETRACTED         SERVO_BOARD_ARM_RIGHT_MIN
-#define SERVO_BOARD_ARM_RIGHT_EXTENDED          SERVO_BOARD_ARM_RIGHT_MAX
+#define SERVO_BOARD_ARM_RIGHT_MAX               (270.0 / 1.5) // Divided by 1.5 to accomodate the servo board which handles 180° servos
+#define SERVO_BOARD_ARM_RIGHT_RETRACTED         ((0.0 + 5.0 ) / 1.5) //7.0
+#define SERVO_BOARD_ARM_RIGHT_MIDSTOP           ((245.0 - 155.0) / 1.5) //145.0 - 35.0
+#define SERVO_BOARD_ARM_RIGHT_EXTENDED          ((245.0 - 80.0) / 1.5) // 218.0 / 1.5 //114.0
 
 #define SERVO_BOARD_SLOPE_ID                    2
-#define SERVO_BOARD_SLOPE_SPEED                 300.0 /* [°/s] rounded from 0.192 [s/60°] */
-#define SERVO_BOARD_SLOPE_ACCEL                 1500.0
+#define SERVO_BOARD_SLOPE_SPEED                 600.0 /* [°/s] rounded from 0.192 [s/60°] */
+#define SERVO_BOARD_SLOPE_ACCEL                 300.0
 #define SERVO_BOARD_SLOPE_MIN                   4.0
-#define SERVO_BOARD_SLOPE_MAX                   44.0
-#define SERVO_BOARD_SLOPE_RETRACTED             SERVO_BOARD_SLOPE_MIN
-#define SERVO_BOARD_SLOPE_EXTENDED              44.0
+#define SERVO_BOARD_SLOPE_MAX                   150.0
+#define SERVO_BOARD_SLOPE_RETRACTED             10.0
+#define SERVO_BOARD_SLOPE_EXTENDED              95.0 //58.0
+#define SERVO_BOARD_SLOPE_GRABBED               50.0
 
 #define SERVO_BOARD_SELECTOR_ID                 3
-#define SERVO_BOARD_SELECTOR_SPEED              700.0 /* [°/s] rounded from 0.083 [s/60°] */
-#define SERVO_BOARD_SELECTOR_ACCEL              3500.0
-#define SERVO_BOARD_SELECTOR_MIN                30.0
-#define SERVO_BOARD_SELECTOR_MAX                125.0
-#define SERVO_BOARD_SELECTOR_RETRACTED          SERVO_BOARD_SELECTOR_MIN
-#define SERVO_BOARD_SELECTOR_EXTENDED           125.0
+#define SERVO_BOARD_SELECTOR_SPEED              7000.0 /* [°/s] rounded from 0.083 [s/60°] */
+#define SERVO_BOARD_SELECTOR_ACCEL              70000.0
+#define SERVO_BOARD_SELECTOR_MIN                0.0
+#define SERVO_BOARD_SELECTOR_MAX                180.0
+#define SERVO_BOARD_SELECTOR_RETRACTED          60.0
+#define SERVO_BOARD_SELECTOR_EXTENDED           160.0
 
 #define SERVO_BOARD_STOPPER_ID                  4
-#define SERVO_BOARD_STOPPER_SPEED               700.0 /* [°/s] rounded from 0.083 [s/60°] */
-#define SERVO_BOARD_STOPPER_ACCEL               3500.0
-#define SERVO_BOARD_STOPPER_MIN                 55.0
-#define SERVO_BOARD_STOPPER_MAX                 90.0
-#define SERVO_BOARD_STOPPER_RETRACTED           71.0
-#define SERVO_BOARD_STOPPER_EXTENDED            SERVO_BOARD_STOPPER_MIN
+#define SERVO_BOARD_STOPPER_SPEED               7000.0 /* [°/s] rounded from 0.083 [s/60°] */
+#define SERVO_BOARD_STOPPER_ACCEL               70000.0
+#define SERVO_BOARD_STOPPER_MIN                 0.0
+#define SERVO_BOARD_STOPPER_MAX                 180.0
+#define SERVO_BOARD_STOPPER_RETRACTED           105.0
+#define SERVO_BOARD_STOPPER_EXTENDED            75.0
 
 /******************************************************************************
    Types declarations
