@@ -178,10 +178,20 @@ void MotorTest(int16_t speed) {
   Serial.print("Left : ");
   Serial.print(speed);
   Serial.print(", Right : ");
-  Serial.print(speed);
+  Serial.print(0);
   Serial.println();
 
   MotorLeftSetSpeed(speed);
+  MotorRightSetSpeed(0);
+  delay(3000);
+
+  Serial.print("Left : ");
+  Serial.print(0);
+  Serial.print(", Right : ");
+  Serial.print(speed);
+  Serial.println();
+
+  MotorLeftSetSpeed(0);
   MotorRightSetSpeed(speed);
   delay(3000);
 
@@ -189,10 +199,10 @@ void MotorTest(int16_t speed) {
   Serial.println("Speed 0, motor stop (free rolling)");
   delay(3000);
 
-  Serial.print("Left : -");
-  Serial.print(speed);
-  Serial.print(", Right : -");
-  Serial.print(speed);
+  Serial.print("Left :");
+  Serial.print(-speed);
+  Serial.print(", Right :");
+  Serial.print(-speed);
   Serial.println();
   MotorLeftSetSpeed(-speed);
   MotorRightSetSpeed(-speed);
