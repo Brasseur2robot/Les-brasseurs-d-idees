@@ -283,6 +283,7 @@ MENU_SCREEN(mainScreen, mainItems,
                 /* Disable autonomous mode */
                 //TODO replace with an elegant PositionMgrStop()
                 PositionMgrStop();
+                ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
                 /* Enable controller mode */
                 controllerEnable(true);
               }
