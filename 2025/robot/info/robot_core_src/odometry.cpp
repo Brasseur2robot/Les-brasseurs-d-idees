@@ -251,7 +251,7 @@ void OdometryUpdate(bool timeMeasure_b)
     durationMeasure_u32 = micros() - durationMeasureStart_u32;
     Serial.print("Odometry lasted ");
     Serial.print(durationMeasure_u32);
-    Serial.print(" us, ");
+    Serial.println(" us, ");
   }
 }
 

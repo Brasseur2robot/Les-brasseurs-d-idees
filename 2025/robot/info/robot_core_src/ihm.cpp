@@ -182,21 +182,33 @@ MENU_SCREEN(ActionScreen, ActionItems,
               ActionMgrSetNextAction(ACTION_MGR_ID_READY, WAIT);
             }),
             ITEM_COMMAND("Do GRAB BOXES", []() {
-              /* Launch action Ready */
+              /* Launch action Grab boxes */
               ActionMgrSetNextAction(ACTION_MGR_ID_GRAB_BOXES, WAIT);
             }),
             ITEM_COMMAND("Do TRANSPORT", []() {
-              /* Launch action Ready */
+              /* Launch action Transport mode */
               ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
             }),
+            ITEM_COMMAND("Do SORT ALL", []() {
+              /* Launch action Sort All */
+              ActionMgrSetNextAction(ACTION_MGR_ID_SORT_ALL, WAIT);
+            }),
             ITEM_COMMAND("Do EJECT", []() {
-              /* Launch action Ready */
+              /* Launch action Eject */
               ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT, WAIT);
             }),
             ITEM_COMMAND("Do EJECT INVERT", []() {
-              /* Launch action Ready */
+              /* Launch action Eject inverted */
               ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT_INVERT, WAIT);
-            })
+            }),
+            ITEM_COMMAND("Do DISCARD", []() {
+              /* Launch action Discard */
+              ActionMgrSetNextAction(ACTION_MGR_ID_DISCARD, WAIT);
+            }),
+            ITEM_COMMAND("Do SHUTDOWN", []() {
+              /* Launch action Discard */
+              ActionMgrSetNextAction(ACTION_MGR_ID_SHUTDOWN, WAIT);
+            })            
             );
 
 MENU_SCREEN(SoundScreen, SoundItems,

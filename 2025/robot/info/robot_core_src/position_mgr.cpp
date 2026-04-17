@@ -209,6 +209,12 @@ void PositionMgrUpdate(bool timeMeasure_b) {
             positionMgrState_en_g = POSITION_STATE_STOPPED;
             timeOutCount_u8 = 0;
             //Serial.print("Timeout reached");
+            /* Both ramp should finish, robot should stay controlled at current pos */
+            RampInit(&rampDistance_st_g);
+            RampInit(&rampOrientation_st_g);
+            consigneDistance_d = OdometryGetDistanceTop();
+            consigneOrientation_d = OdometryGetOrientationTop();
+
           }
         } else {
           //Serial.println("State Moving");

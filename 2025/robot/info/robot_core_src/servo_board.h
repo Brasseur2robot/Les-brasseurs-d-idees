@@ -43,8 +43,9 @@
 #define SERVO_BOARD_SELECTOR_ACCEL              70000.0
 #define SERVO_BOARD_SELECTOR_MIN                0.0
 #define SERVO_BOARD_SELECTOR_MAX                180.0
-#define SERVO_BOARD_SELECTOR_RETRACTED          60.0
-#define SERVO_BOARD_SELECTOR_EXTENDED           160.0
+#define SERVO_BOARD_SELECTOR_RETRACTED          160.0
+#define SERVO_BOARD_SELECTOR_EXTENDED           60.0
+#define SERVO_BOARD_SELECTOR_CHOOSE             -1.0
 
 #define SERVO_BOARD_STOPPER_ID                  4
 #define SERVO_BOARD_STOPPER_SPEED               7000.0 /* [°/s] rounded from 0.083 [s/60°] */
@@ -87,5 +88,7 @@ bool ServoControllerSetTarget(uint8_t id_u8, float angleTarget_f, uint32_t delay
 float ServoControllerGetAngleMin(uint8_t id_u8);
 float ServoControllerGetAngleMax(uint8_t id_u8);
 bool ServoControllerIsFinished(uint8_t id_u8);
+void ServoControllerSetEnable(ServoControllerSt * servoController_st, bool enable_b);
+bool ServoControllerGetEnable(ServoControllerSt * servoController_st);
 
 #endif

@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
+#include "action_mgr.h"
 #include "com_wifi.h"
 #include "led.h"
 #include "match_mgr.h"
@@ -39,6 +40,7 @@ MatchMgrColorEn matchMgrColor_en_g;
 
 uint32_t matchMgrWaitingTimerDuration_u32_g;
 uint32_t matchMgrWaitingTimerStartTime_u32_g;
+MatchMgrStateEn matchMgrWaitingTimerReturnState_en_g;
 
 bool matchMgrEventGotoWaitforend_b;
 bool matchMgrEventGotoEndzone_b;
@@ -133,6 +135,7 @@ void MatchMgrUpdate(bool timeMeasure_b)
         //          Serial.println("End");
         PositionMgrSetDistanceControl(false);     /* Sets the robot free of control loop */
         PositionMgrSetOrientationControl(false);
+        ActionMgrSetNextAction(ACTION_MGR_ID_SHUTDOWN, WAIT);
         //ActuatorServoStart();                   /* Headbang start! */
         break;
 
@@ -168,7 +171,10 @@ void MatchMgrSwitchState()
     /* if color selection is done, launches the preparation, if not not, nothing to do */
     if ((matchMgrColor_en_g != MATCH_COLOR_NONE) && (matchMgrState_en_g == MATCH_STATE_COLOR_SELECTION) )
     {
+      /* Set in transport mode */
+      ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
       matchMgrState_en_g = MATCH_STATE_BORDER_ADJUST;
+      MatchMgrSetWaitingTimer(3000);
       ObstacleSensorStop();
     }
   }
@@ -296,6 +302,8 @@ void MatchMgrResetEventEndzoneState()
 
 void MatchMgrSetWaitingTimer(uint32_t waitingPeriodMs_u32)
 {
+  /* Record the state in which we were */
+  matchMgrWaitingTimerReturnState_en_g = matchMgrState_en_g;
   /* Set the match manager to on_waiting */
   /* This should be done only if robot is not moving !!! */
   matchMgrState_en_g = MATCH_STATE_ON_WAITING;
@@ -321,7 +329,8 @@ void MatchMgrUpdateWaitingTimer()
 
   if ( elapsedWaitingTime_u32 >= matchMgrWaitingTimerDuration_u32_g )
   {
-    matchMgrState_en_g = MATCH_STATE_ON_MOVING;
+    /* Return to the state we were before timer */
+    matchMgrState_en_g = matchMgrWaitingTimerReturnState_en_g;
 
     if (MATCH_MGR_DEBUG)
     {

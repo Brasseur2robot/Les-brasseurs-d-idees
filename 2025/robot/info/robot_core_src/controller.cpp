@@ -5,6 +5,8 @@
 #include <BLEGamepadClient.h>
 #include "controller.h"
 #include "config.h"
+#include "action_mgr.h"
+#include "ihm.h"
 #include "match_mgr.h"
 #include "motor.h"
 
@@ -80,16 +82,46 @@ void ControllerUpdate(bool timeMeasure_b) {
         MotorRightSetSpeed(vitesseD);
 
         /* Take care of buttons */
-        if (e.stickButton == true) {
+        if (e.selectButton == true) {
           /* Change color */
           if (MatchMgrGetColor() == MATCH_COLOR_BLUE)
           {
+            IhmSetColor(255, 255, 0);
             MatchMgrChangeColor(MATCH_COLOR_YELLOW);
           }
           else
           {
+            IhmSetColor(0, 0, 255);
             MatchMgrChangeColor(MATCH_COLOR_BLUE);
           }
+        }
+
+        if (e.buttonA)
+        {
+          /* Grab boxes */
+          ActionMgrSetNextAction(ACTION_MGR_ID_GRAB_BOXES, WAIT);
+        }
+
+        if (e.buttonB)
+        {
+          ActionMgrSetNextAction(ACTION_MGR_ID_DISCARD, WAIT);
+        }
+
+        if (e.buttonX)
+        {
+          ActionMgrSetNextAction(ACTION_MGR_ID_SORT_ALL, WAIT);
+        }
+
+        if (e.leftBumper)
+        {
+          /* Eject normal */
+          ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT, WAIT);
+        }
+
+        if (e.rightBumper)
+        {
+          /* Eject inverted */
+          ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT_INVERT, WAIT);
         }
 
         if (CONTROLLER_DEBUG) {

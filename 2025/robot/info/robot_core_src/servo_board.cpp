@@ -78,15 +78,22 @@ void ServoBoardInit()
   /* Init of all servo controllers */
   ServoControllerInit(&servoCtrl_tst[0], SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_MIN, SERVO_BOARD_ARM_LEFT_MAX, SERVO_BOARD_ARM_LEFT_RETRACTED - 1.0, SERVO_BOARD_ARM_LEFT_SPEED, SERVO_BOARD_ARM_LEFT_ACCEL);
   ServoControllerInit(&servoCtrl_tst[1], SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_MIN, SERVO_BOARD_ARM_RIGHT_MAX, SERVO_BOARD_ARM_RIGHT_RETRACTED + 1.0, SERVO_BOARD_ARM_RIGHT_SPEED, SERVO_BOARD_ARM_RIGHT_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_RETRACTED + 1.0, SERVO_BOARD_SLOPE_SPEED, SERVO_BOARD_SLOPE_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_EXTENDED - 1.0, SERVO_BOARD_SELECTOR_SPEED, SERVO_BOARD_SELECTOR_ACCEL);
-  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_EXTENDED + 1.0, SERVO_BOARD_STOPPER_SPEED, SERVO_BOARD_STOPPER_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_EXTENDED - 1.0, SERVO_BOARD_SLOPE_SPEED, SERVO_BOARD_SLOPE_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_RETRACTED - 10.0, SERVO_BOARD_SELECTOR_SPEED, SERVO_BOARD_SELECTOR_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_EXTENDED - 10.0, SERVO_BOARD_STOPPER_SPEED, SERVO_BOARD_STOPPER_ACCEL);
 
   /* Init of all ramps */
   for (uint8_t idx = 0; idx < SERVO_BOARD_NB_SERVO_CONTROLLER; idx++)
   {
     RampInit(servoCtrlRamp_tst);
   }
+
+  /* Enable all servo controller */
+  ServoControllerSetEnable(&servoCtrl_tst[0], true);
+  ServoControllerSetEnable(&servoCtrl_tst[1], true);
+  ServoControllerSetEnable(&servoCtrl_tst[2], true);
+  ServoControllerSetEnable(&servoCtrl_tst[3], true);
+  ServoControllerSetEnable(&servoCtrl_tst[4], true);
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)
@@ -112,45 +119,52 @@ void ServoBoardUpdate(bool timeMeasure_b)
     /* Actual Code */
     for (uint8_t index=0; index < SERVO_BOARD_NB_SERVO_CONTROLLER; index++)
     {
-      RampUpdate(&servoCtrlRamp_tst[index], elapsedTime_u32, DEBUG_TIME);
-      if (RampGetState(&servoCtrlRamp_tst[index]) != RAMP_STATE_FINISHED)
+      if (ServoControllerGetEnable(&servoCtrl_tst[index]) == true )
       {
-        ServoBoardSet(index , servoCtrl_tst[index].angleCurrent_f + RampGetDistance(&servoCtrlRamp_tst[index]) / 10.0 );
+        RampUpdate(&servoCtrlRamp_tst[index], elapsedTime_u32, DEBUG_TIME);
+        if (RampGetState(&servoCtrlRamp_tst[index]) != RAMP_STATE_FINISHED)
+        {
+          ServoBoardSet(index , servoCtrl_tst[index].angleCurrent_f + RampGetDistance(&servoCtrlRamp_tst[index]) / 10.0 );
+        }
+        else
+        {
+          /* Ramp finished, register target as current angle and should be finished */
+          servoCtrl_tst[index].angleCurrent_f = servoCtrl_tst[index].angleTarget_f;
+          servoCtrl_tst[index].isFinished_b = true;
+        }
+      
+        /* Display ramps if needed, only when axis moving */
+        if (SERVO_BOARD_DEBUG_RAMP)
+        {
+          if ((servoCtrl_tst[0].isFinished_b == false) ||  (servoCtrl_tst[1].isFinished_b == false) || (servoCtrl_tst[2].isFinished_b == false) || (servoCtrl_tst[3].isFinished_b == false) || (servoCtrl_tst[4].isFinished_b == false) )
+          {
+            if(index == 0)
+            {
+              Serial.print("Time : ");
+              Serial.print(currentTime_u32);
+              Serial.print(", elapsed : ");
+              Serial.print(servoCtrlRamp_tst[index].timeCurrentMs_u32);
+            }
+            Serial.print("| idx : ");
+            Serial.print(index);
+            Serial.print(", ramp : ");
+            Serial.print(servoCtrlRamp_tst[index].rampState_en);
+            Serial.print(", rampAcc : ");
+            Serial.print(servoCtrlRamp_tst[index].accelerationCurrentTopPerS_i32);
+            Serial.print(", rampSpd : ");
+            Serial.print(servoCtrlRamp_tst[index].speedCurrentTopPerS_i32);
+            Serial.print(", rampDist : ");
+            Serial.print(RampGetDistance(&servoCtrlRamp_tst[index]));
+            if( index == (SERVO_BOARD_NB_SERVO_CONTROLLER - 1) )
+            {
+              Serial.println();
+            }
+          }
+        }
       }
       else
       {
-        /* Ramp finished, register target as current angle and should be finished */
-        servoCtrl_tst[index].angleCurrent_f = servoCtrl_tst[index].angleTarget_f;
-        servoCtrl_tst[index].isFinished_b = true;
-      }
-      
-      /* Display ramps if needed, only when axis moving */
-      if (SERVO_BOARD_DEBUG_RAMP)
-      {
-        if ((servoCtrl_tst[0].isFinished_b == false) ||  (servoCtrl_tst[1].isFinished_b == false) || (servoCtrl_tst[2].isFinished_b == false) || (servoCtrl_tst[3].isFinished_b == false) || (servoCtrl_tst[4].isFinished_b == false) )
-        {
-          if(index == 0)
-          {
-            Serial.print("Time : ");
-            Serial.print(currentTime_u32);
-            Serial.print(", elapsed : ");
-            Serial.print(servoCtrlRamp_tst[index].timeCurrentMs_u32);
-          }
-          Serial.print("| idx : ");
-          Serial.print(index);
-          Serial.print(", ramp : ");
-          Serial.print(servoCtrlRamp_tst[index].rampState_en);
-          Serial.print(", rampAcc : ");
-          Serial.print(servoCtrlRamp_tst[index].accelerationCurrentTopPerS_i32);
-          Serial.print(", rampSpd : ");
-          Serial.print(servoCtrlRamp_tst[index].speedCurrentTopPerS_i32);
-          Serial.print(", rampDist : ");
-          Serial.print(RampGetDistance(&servoCtrlRamp_tst[index]));
-          if( index == (SERVO_BOARD_NB_SERVO_CONTROLLER - 1) )
-          {
-            Serial.println();
-          }
-        }
+        ServoBoardSet(index , -1);
       }
     }
 
@@ -167,9 +181,30 @@ void ServoBoardUpdate(bool timeMeasure_b)
 
 void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
 {
+  uint16_t pulselength_u16 = 0.0;
+
 #if DEBUG_SIMULATION == false
-  uint16_t pulselength = map(servoAngle_f, 0.0, 180.0, SERVOMIN, SERVOMAX);
-  servoBoard.setPWM(servoId_u8, 0, pulselength);
+  if ( (servoAngle_f >= 0.0) && (servoAngle_f <= 180.0) )
+  {
+    pulselength_u16 = map(servoAngle_f, 0.0, 180.0, SERVOMIN, SERVOMAX);
+    servoBoard.setPWM(servoId_u8, 0, pulselength_u16);
+  }
+  else if (servoAngle_f == -1)
+  {
+    servoBoard.setPWM(servoId_u8, 0, 0);
+    if (SERVO_BOARD_DEBUG)
+    {
+      Serial.print("ServoBrd|Shutdown of servo ");
+      Serial.print(servoId_u8);
+      Serial.println();
+    }
+  }
+  else
+  {
+    Serial.print("ServoBrd|Overlimit servo ");
+    Serial.print(servoId_u8);
+    Serial.println();
+  }
   
   if (SERVO_BOARD_DEBUG)
   {
@@ -178,7 +213,7 @@ void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
     Serial.print(" set to ");
     Serial.print(servoAngle_f);
     Serial.print("°, pulseLength :");
-    Serial.print(pulselength);
+    Serial.print(pulselength_u16);
     Serial.println();
   }
 #else
@@ -290,6 +325,12 @@ bool ServoControllerSetTarget(uint8_t id_u8, float angleTarget_f, uint32_t delay
     /* Target possible */
     result_b = true;
   }
+  else if (angleTarget_f == -1)
+  {
+    /* Disable the servo */
+    ServoControllerSetEnable( &servoCtrl_tst[id_u8], false);
+    result_b = true;
+  }
   else
   {
     /* Target impossible */
@@ -312,4 +353,14 @@ float ServoControllerGetAngleMax(uint8_t id_u8)
 bool ServoControllerIsFinished(uint8_t id_u8)
 {
   return servoCtrl_tst[id_u8].isFinished_b;
+}
+
+void ServoControllerSetEnable(ServoControllerSt * servoController_st, bool enable_b)
+{
+  servoController_st->enable_b = enable_b;
+}
+
+bool ServoControllerGetEnable(ServoControllerSt * servoController_st)
+{
+  return servoController_st->enable_b;
 }
