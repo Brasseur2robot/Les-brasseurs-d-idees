@@ -5,6 +5,6 @@
  * Function Declarations
  ******************************************************************************/
 void IoExpanderInit();
-void IoExpanderSet(int pin, bool state);
-
+void IoExpanderSet(uint8_t pin, bool state);
+bool IoExpanderGet(uint8_t pin);
 #endif
