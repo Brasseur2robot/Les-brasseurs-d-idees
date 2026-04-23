@@ -40,20 +40,36 @@ Dynamixel2Arduino dxl(SerialDynamixel, DYNAMIXEL_CTRL);
 
 DxlControllerSt dxlController_tst[ACTUATOR_DXL_NB_DXL_CONTROLLER];
 
+bool actuatorDxlEnable_b_g;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
 void ActuatorDxlInit() {
+  actuatorDxlEnable_b_g = false;
   /* Start the serial port where the dynamixel adapter is connected */
   SerialDynamixel.begin(ACTUATOR_DXL_BAUDRATE, SERIAL_8N1, DYNAMIXEL_RX, DYNAMIXEL_TX);
   /* Configure the protocol for the dynamixels*/
   dxl.setPortProtocolVersion((float)ACTUATOR_DXL_PROTOCOL);
   dxl.begin(ACTUATOR_DXL_BAUDRATE);
 
+  Serial.print("Actuator Dxl|Init : ");
+#if DEBUG_SIMULATION == false
+  if (!dxl.ping(ACTUATOR_DXL_GRABBER_ID))
+  {
+    Serial.println("Failed");
+  } else {
+    Serial.println("OK");
+    actuatorDxlEnable_b_g = true;
+  }
+#else
+    Serial.println("Simulation, no dxl connected.");
+#endif
+
   /* Init every dxl controller structure*/
   ActuatorDxlControllerInit(&dxlController_tst[0], ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_MIN, ACTUATOR_DXL_GRABBER_MAX, ACTUATOR_DXL_GRABBER_SPEED);
   /* Go to start position */
-  ActuatorDxlSetGoalPosition(ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_START);
+  //ActuatorDxlSetGoalPosition(ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_START);
 }
 
 void ActuatorDxlUpdate(bool timeMeasure_b)
@@ -105,11 +121,14 @@ void ActuatorDxlControllerInit(DxlControllerSt * dxlController_st, uint8_t id_u8
   dxlController_st->angleCurrent_d = 0.0;
 
 #if DEBUG_SIMULATION == false
-  /* Turn off torque when configuring items in EEPROM area */
-  dxl.torqueOff(id_u8);
-  dxl.setOperatingMode(id_u8, OP_POSITION);
-  dxl.setGoalVelocity(id_u8, speed_d/0.111, UNIT_RAW);    /* unit is 0.111 rpm approx. */
-  dxl.torqueOn(id_u8);
+  if (actuatorDxlEnable_b_g == true)
+  {
+    /* Turn off torque when configuring items in EEPROM area */
+    dxl.torqueOff(id_u8);
+    dxl.setOperatingMode(id_u8, OP_POSITION);
+    dxl.setGoalVelocity(id_u8, speed_d/0.111, UNIT_RAW);    /* unit is 0.111 rpm approx. */
+    dxl.torqueOn(id_u8);
+  }
 #endif
 }
 
@@ -120,11 +139,14 @@ void ActuatorDxlControllerUpdate(DxlControllerSt * dxlController_st)
   //static uint16_t present_speed = 0;
 
 #if DEBUG_SIMULATION == false
-  /* Read the isMoving property */
-  dxl.read(dxlController_st->id_u8, 46, 1, (uint8_t*)&isMoving, sizeof(isMoving), ACTUATOR_DXL_TIMEOUT);
-  errorCodeF = dxl.getLastLibErrCode();
-  // dxl.read(dxlController_st->id_u8, 38, 2, (uint8_t*)&present_speed, sizeof(present_speed), ACTUATOR_DXL_TIMEOUT);
-  // int errorCodeS = dxl.getLastLibErrCode();
+  if (actuatorDxlEnable_b_g == true)
+  {
+    /* Read the isMoving property */
+    dxl.read(dxlController_st->id_u8, 46, 1, (uint8_t*)&isMoving, sizeof(isMoving), ACTUATOR_DXL_TIMEOUT);
+    errorCodeF = dxl.getLastLibErrCode();
+    // dxl.read(dxlController_st->id_u8, 38, 2, (uint8_t*)&present_speed, sizeof(present_speed), ACTUATOR_DXL_TIMEOUT);
+    // int errorCodeS = dxl.getLastLibErrCode();
+  }
 #else
   isMoving = 0;
 #endif
@@ -132,7 +154,7 @@ void ActuatorDxlControllerUpdate(DxlControllerSt * dxlController_st)
   if (isMoving == 0)
   {
     dxlController_st->isFinished_b = true;
-#if DEBUG_SIMULATION == false    
+#if DEBUG_SIMULATION == false
     /* If not moving, turn off Led */
     ActuatorDxlSetLed(dxlController_st->id_u8, false);
 #endif
@@ -218,19 +240,30 @@ void ActuatorDxlScan() {
 }
 
 void ActuatorDxlSetLed(uint8_t id, bool state) {
-  if (state)
-    dxl.ledOn(id);
-  else
-    dxl.ledOff(id);
+  if (actuatorDxlEnable_b_g == true)
+  {
+    if (state)
+      dxl.ledOn(id);
+    else
+      dxl.ledOff(id);
+  }
 }
 
 bool ActuatorDxlSetGoalPosition(uint8_t id, float value) {
   bool result_b;
-#if DEBUG_SIMULATION == false 
-  /* Turn Led on of moving dxl */
-  ActuatorDxlSetLed(id, true);
-  /* Send the position command */
-  result_b = dxl.setGoalPosition(id, value, UNIT_DEGREE);
+#if DEBUG_SIMULATION == false
+  if (actuatorDxlEnable_b_g == true)
+  {
+    /* Turn Led on of moving dxl */
+    ActuatorDxlSetLed(id, true);
+    /* Send the position command */
+    result_b = dxl.setGoalPosition(id, value, UNIT_DEGREE);
+  }
+  else
+  {
+    Serial.println("Actuator Dxl|Disabled");
+    result_b = true;
+  }
 #else
   result_b = true;
 #endif
@@ -239,25 +272,55 @@ bool ActuatorDxlSetGoalPosition(uint8_t id, float value) {
 }
 
 float ActuatorDxlGetPresentPosition(uint8_t id) {
-  float value = dxl.getPresentPosition(id, UNIT_DEGREE);
+  float value;
+  if (actuatorDxlEnable_b_g == true)
+  {
+    value = dxl.getPresentPosition(id, UNIT_DEGREE);
+  }
+  else
+  {
+    value = 0.0;
+  }
   return value;
 }
 
 void ActuatorDxlSetGoalVelocity(uint8_t id, float value) {
-  dxl.setGoalVelocity(id, value, UNIT_RPM);
+  if (actuatorDxlEnable_b_g == true)
+  {
+    dxl.setGoalVelocity(id, value, UNIT_RPM);
+  }
 }
 
 float ActuatorDxlGetPresentVelocity(uint8_t id) {
-  float value = dxl.getPresentVelocity(id, UNIT_RPM);
+  float value;
+  if (actuatorDxlEnable_b_g == true)
+  {
+    value = dxl.getPresentVelocity(id, UNIT_RPM);
+  }
+  else
+  {
+    value = 0.0;
+  }
   return value;
 }
 
 void ActuatorDxlSetGoalCurrent(uint8_t id, float value) {
-  dxl.setGoalVelocity(id, value, UNIT_MILLI_AMPERE);
+  if (actuatorDxlEnable_b_g == true)
+  {
+    dxl.setGoalVelocity(id, value, UNIT_MILLI_AMPERE);
+  }
 }
 
 float ActuatorDxlGetGoalCurrent(uint8_t id) {
-  float value = dxl.getPresentVelocity(id, UNIT_MILLI_AMPERE);
+  float value;
+  if (actuatorDxlEnable_b_g == true)
+  {
+    value = dxl.getPresentVelocity(id, UNIT_MILLI_AMPERE);
+  }
+  else
+  {
+    value = 0.0;
+  }
   return value;
 }
 

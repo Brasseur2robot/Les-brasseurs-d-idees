@@ -35,12 +35,15 @@
 Adafruit_PWMServoDriver servoBoard = Adafruit_PWMServoDriver(SERVO_BOARD_ADDRESS, Wire);
 ServoControllerSt servoCtrl_tst[SERVO_BOARD_NB_SERVO_CONTROLLER];
 RampParametersSt servoCtrlRamp_tst[SERVO_BOARD_NB_SERVO_CONTROLLER];
+bool servoBoardEnable_b_g;
 
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
 void ServoBoardInit()
 {
+  servoBoardEnable_b_g = false;
+
   Serial.print("ServoBrd|Init : ");
 #if DEBUG_SIMULATION == false
   if (!servoBoard.begin())
@@ -49,6 +52,7 @@ void ServoBoardInit()
   }
   else
   {
+    servoBoardEnable_b_g = true;
     Serial.println("OK");
   }
 #else
@@ -71,8 +75,11 @@ void ServoBoardInit()
      Failure to correctly set the int.osc value will cause unexpected PWM results
   */
 #if DEBUG_SIMULATION == false
-  servoBoard.setOscillatorFrequency(27000000);
-  servoBoard.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
+  if (servoBoardEnable_b_g == true)
+  {
+    servoBoard.setOscillatorFrequency(27000000);
+    servoBoard.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates
+  }
 #endif
 
   /* Init of all servo controllers */
@@ -164,6 +171,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
       }
       else
       {
+        /* Servo should be disabled */
         ServoBoardSet(index , -1);
       }
     }
@@ -187,11 +195,25 @@ void ServoBoardSet(uint8_t servoId_u8, float servoAngle_f)
   if ( (servoAngle_f >= 0.0) && (servoAngle_f <= 180.0) )
   {
     pulselength_u16 = map(servoAngle_f, 0.0, 180.0, SERVOMIN, SERVOMAX);
-    servoBoard.setPWM(servoId_u8, 0, pulselength_u16);
+    if (servoBoardEnable_b_g == true)
+    {
+      servoBoard.setPWM(servoId_u8, 0, pulselength_u16);
+    }
+    else
+    {
+      Serial.println("ServoBrd|Disabled.");
+    }
   }
   else if (servoAngle_f == -1)
   {
-    servoBoard.setPWM(servoId_u8, 0, 0);
+    if (servoBoardEnable_b_g == true)
+    {
+      servoBoard.setPWM(servoId_u8, 0, 0);
+    }
+    else
+    {
+      Serial.println("ServoBrd|Disabled.");
+    }
     if (SERVO_BOARD_DEBUG)
     {
       Serial.print("ServoBrd|Shutdown of servo ");
