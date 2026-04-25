@@ -72,6 +72,8 @@ void PositionMgrInit() {
   positionMgrMvtType_en_g = MVT_TYPE_NONE;
   //positionMgrStatus_u8_g = 1;
   positionMgrState_en_g = POSITION_STATE_NONE;
+  startDistance_i32_g = 0;
+  startOrientation_i32_g = 0;
 
   /* init pid submodule */
   PidInit(&pidDistance_st_g);
@@ -96,6 +98,12 @@ void PositionMgrInit() {
 
 void PositionMgrStart() {
   positionMgrEnable_b = true;
+  /* Some sort of Goto/Stay at actaul position */
+  positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
+  startDistance_i32_g = OdometryGetDistanceTop();
+  startOrientation_i32_g = OdometryGetOrientationTop();
+  RampInit(&rampDistance_st_g);
+  RampInit(&rampOrientation_st_g);
 }
 
 void PositionMgrStop() {
@@ -212,8 +220,10 @@ void PositionMgrUpdate(bool timeMeasure_b) {
             /* Both ramp should finish, robot should stay controlled at current pos */
             RampInit(&rampDistance_st_g);
             RampInit(&rampOrientation_st_g);
-            consigneDistance_d = OdometryGetDistanceTop();
-            consigneOrientation_d = OdometryGetOrientationTop();
+            startDistance_i32_g = OdometryGetDistanceTop();
+            startOrientation_i32_g = OdometryGetOrientationTop();
+            consigneDistance_d = startDistance_i32_g;
+            consigneOrientation_d = startOrientation_i32_g;
 
           }
         } else {
