@@ -205,6 +205,18 @@ MENU_SCREEN(ActionScreen, ActionItems,
               /* Launch action Discard */
               ActionMgrSetNextAction(ACTION_MGR_ID_DISCARD, WAIT);
             }),
+            ITEM_COMMAND("Do CURSOR LEFT", []() {
+              /* Launch action Cursor Left */
+              ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_LEFT, WAIT);
+            }),
+            ITEM_COMMAND("Do CURSOR RIGHT", []() {
+              /* Launch action Cursor Right */
+              ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_RIGHT, WAIT);
+            }),
+            ITEM_COMMAND("Do CURSOR RETRACT", []() {
+              /* Launch action Cursor Retract */
+              ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_RETRACT, WAIT);
+            }),
             ITEM_COMMAND("Do SHUTDOWN", []() {
               /* Launch action Discard */
               ActionMgrSetNextAction(ACTION_MGR_ID_SHUTDOWN, WAIT);

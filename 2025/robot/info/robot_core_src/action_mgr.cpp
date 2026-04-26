@@ -51,13 +51,15 @@ static actionProgram_t actionProgramTest_st = {
   ACTION_MGR_ID_READY, WAIT
 };
 
-#define ACTION_MGR_READY_NBSTEPS  6
+#define ACTION_MGR_READY_NBSTEPS  8
 static actionStep_t actionStepReady_st[ACTION_MGR_READY_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_LEFT_ID, SERVO_BOARD_ARM_LEFT_RETRACTED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_ARM_RIGHT_ID, SERVO_BOARD_ARM_RIGHT_RETRACTED, NODELAY, NOWAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_EXTENDED, NODELAY, WAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_RETRACTED, NODELAY, WAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, WAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_LEFT_ID, SERVO_BOARD_CURSOR_LEFT_RETRACTED, NODELAY, WAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_RIGHT_ID, SERVO_BOARD_CURSOR_RIGHT_RETRACTED, NODELAY, WAIT},
   /* Grabber opens */
   {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, NOWAIT}
 };
@@ -97,14 +99,14 @@ static actionStep_t actionStepTransport_st[ACTION_MGR_TRANSPORT_NBSTEPS] = {
 
 #define ACTION_MGR_SORT_ALL_NBSTEPS  8
 static actionStep_t actionStepSortAll_st[ACTION_MGR_SORT_ALL_NBSTEPS] = {
-  /* Stopper in place and grabber opens */
+  /* Stopper in place */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, WAIT},
-  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, WAIT},
   /* Color Sensor Step, that should change the selector position */
   {ACTION_SENSOR_TYPE_COLOR, SENSOR_COLOR_ID, COLOR_VALUE, NODELAY, WAIT},
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_CHOOSE, NODELAY, WAIT},
-  /* Stopper lets one box eject */
+  /* Grabber opens and stopper lets one box eject */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_RETRACTED, NODELAY, WAIT},
+  {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_MINI_OPEN, NODELAY, NOWAIT},
   /* Stopper blocks next box and grabber grabs */
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_EXTENDED, NODELAY, WAIT},
   {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_RETRACTED, NODELAY, WAIT},
@@ -153,6 +155,25 @@ static actionStep_t actionStepDiscard_st[ACTION_MGR_DISCARD_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_EXTENDED, NODELAY, WAIT},
 };
 
+#define ACTION_MGR_CURSOR_LEFT_EXTEND_NBSTEPS  1
+static actionStep_t actionStepCursorLeftExtended_st[ACTION_MGR_CURSOR_LEFT_EXTEND_NBSTEPS] = {
+  /* Extends cursor Left */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_LEFT_ID, SERVO_BOARD_CURSOR_LEFT_EXTENDED, NODELAY, WAIT},
+};
+
+#define ACTION_MGR_CURSOR_RIGHT_EXTEND_NBSTEPS  1
+static actionStep_t actionStepCursorRightExtended_st[ACTION_MGR_CURSOR_RIGHT_EXTEND_NBSTEPS] = {
+  /* Extends cursor Right */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_RIGHT_ID, SERVO_BOARD_CURSOR_RIGHT_EXTENDED, NODELAY, WAIT},
+};
+
+#define ACTION_MGR_CURSOR_RETRACT_NBSTEPS  2
+static actionStep_t actionStepCursorLRRetracted_st[ACTION_MGR_CURSOR_RETRACT_NBSTEPS] = {
+  /* Retract both cursors */
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_LEFT_ID, SERVO_BOARD_CURSOR_LEFT_RETRACTED, NODELAY, NOWAIT},
+  {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_RIGHT_ID, SERVO_BOARD_CURSOR_RIGHT_RETRACTED, NODELAY, WAIT},
+};
+
 #define ACTION_MGR_SHUTDOWN_NBSTEPS  6
 static actionStep_t actionStepShutdown_st[ACTION_MGR_SHUTDOWN_NBSTEPS] = {
   /* Grabber opens */
@@ -165,7 +186,7 @@ static actionStep_t actionStepShutdown_st[ACTION_MGR_SHUTDOWN_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_STOPPER_ID, -1, NODELAY, WAIT},
 };
 
-static actionCatalog_t actionMgrCatalog_st[10] = {
+static actionCatalog_t actionMgrCatalog_st[13] = {
   {ACTION_MGR_ID_NONE, NULL},
   {ACTION_MGR_ID_READY, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
   {ACTION_MGR_ID_ASSEMBLE_BOXES, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
@@ -175,7 +196,10 @@ static actionCatalog_t actionMgrCatalog_st[10] = {
   {ACTION_MGR_ID_SORT_EJECT, &actionStepSortEject_st[0], ACTION_MGR_SORT_EJECT_NBSTEPS},
   {ACTION_MGR_ID_SORT_EJECT_INVERT, &actionStepSortEjectInvert_st[0], ACTION_MGR_SORT_EJECT_INVERT_NBSTEPS},
   {ACTION_MGR_ID_DISCARD, &actionStepDiscard_st[0], ACTION_MGR_DISCARD_NBSTEPS},
-  {ACTION_MGR_ID_SHUTDOWN, &actionStepShutdown_st[0], ACTION_MGR_SHUTDOWN_NBSTEPS}
+  {ACTION_MGR_ID_CURSOR_LEFT, &actionStepCursorLeftExtended_st[0], ACTION_MGR_CURSOR_LEFT_EXTEND_NBSTEPS},
+  {ACTION_MGR_ID_CURSOR_RIGHT, &actionStepCursorRightExtended_st[0], ACTION_MGR_CURSOR_RIGHT_EXTEND_NBSTEPS},
+  {ACTION_MGR_ID_CURSOR_RETRACT, &actionStepCursorLRRetracted_st[0], ACTION_MGR_CURSOR_RETRACT_NBSTEPS},
+  {ACTION_MGR_ID_SHUTDOWN, &actionStepShutdown_st[0], ACTION_MGR_SHUTDOWN_NBSTEPS}  
 };
 
 /******************************************************************************
@@ -571,6 +595,33 @@ bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
       
       case ACTION_MGR_ID_DISCARD:
         SoundPlay(SOUND_UNLOADING);
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+      
+      case ACTION_MGR_ID_CURSOR_LEFT:
+        //SoundPlay(SOUND_UNLOADING);
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+
+      case ACTION_MGR_ID_CURSOR_RIGHT:
+        //SoundPlay(SOUND_UNLOADING);
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
+        break;
+
+      case ACTION_MGR_ID_CURSOR_RETRACT:
+        //SoundPlay(SOUND_UNLOADING);
         actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
         actionMgrCurrentActionId_u8_g = actionId_u8;
         actionMgrCurrentStep_u8_g = 0;

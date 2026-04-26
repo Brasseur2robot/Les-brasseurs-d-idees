@@ -9,7 +9,7 @@
 #define SERVOMAX                  512 // This is the 'maximum' pulse length count (out of 4096) 2500us on 20ms
 #define SERVO_FREQ                50  // Analog servos run at ~50 Hz updates
 
-#define SERVO_BOARD_NB_SERVO_CONTROLLER         5
+#define SERVO_BOARD_NB_SERVO_CONTROLLER         7
 
 #define SERVO_BOARD_ARM_LEFT_ID                 0
 #define SERVO_BOARD_ARM_LEFT_SPEED              600.0 /* 300 max [°/s] rounded from 0.192 [s/60°] */
@@ -54,6 +54,22 @@
 #define SERVO_BOARD_STOPPER_MAX                 180.0
 #define SERVO_BOARD_STOPPER_RETRACTED           105.0
 #define SERVO_BOARD_STOPPER_EXTENDED            75.0
+
+#define SERVO_BOARD_CURSOR_LEFT_ID              5
+#define SERVO_BOARD_CURSOR_LEFT_SPEED           7000.0 /* [°/s] rounded from 0.083 [s/60°] */
+#define SERVO_BOARD_CURSOR_LEFT_ACCEL           70000.0
+#define SERVO_BOARD_CURSOR_LEFT_MIN             0.0
+#define SERVO_BOARD_CURSOR_LEFT_MAX             180.0
+#define SERVO_BOARD_CURSOR_LEFT_RETRACTED       90.0
+#define SERVO_BOARD_CURSOR_LEFT_EXTENDED        45.0
+
+#define SERVO_BOARD_CURSOR_RIGHT_ID             6
+#define SERVO_BOARD_CURSOR_RIGHT_SPEED          7000.0 /* [°/s] rounded from 0.083 [s/60°] */
+#define SERVO_BOARD_CURSOR_RIGHT_ACCEL          70000.0
+#define SERVO_BOARD_CURSOR_RIGHT_MIN            0.0
+#define SERVO_BOARD_CURSOR_RIGHT_MAX            180.0
+#define SERVO_BOARD_CURSOR_RIGHT_RETRACTED      90.0
+#define SERVO_BOARD_CURSOR_RIGHT_EXTENDED       135.0
 
 /******************************************************************************
    Types declarations

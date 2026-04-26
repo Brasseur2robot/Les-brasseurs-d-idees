@@ -88,6 +88,8 @@ void ServoBoardInit()
   ServoControllerInit(&servoCtrl_tst[2], SERVO_BOARD_SLOPE_ID, SERVO_BOARD_SLOPE_MIN, SERVO_BOARD_SLOPE_MAX, SERVO_BOARD_SLOPE_EXTENDED - 1.0, SERVO_BOARD_SLOPE_SPEED, SERVO_BOARD_SLOPE_ACCEL);
   ServoControllerInit(&servoCtrl_tst[3], SERVO_BOARD_SELECTOR_ID, SERVO_BOARD_SELECTOR_MIN, SERVO_BOARD_SELECTOR_MAX, SERVO_BOARD_SELECTOR_RETRACTED - 10.0, SERVO_BOARD_SELECTOR_SPEED, SERVO_BOARD_SELECTOR_ACCEL);
   ServoControllerInit(&servoCtrl_tst[4], SERVO_BOARD_STOPPER_ID, SERVO_BOARD_STOPPER_MIN, SERVO_BOARD_STOPPER_MAX, SERVO_BOARD_STOPPER_EXTENDED - 10.0, SERVO_BOARD_STOPPER_SPEED, SERVO_BOARD_STOPPER_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[5], SERVO_BOARD_CURSOR_LEFT_ID, SERVO_BOARD_CURSOR_LEFT_MIN, SERVO_BOARD_CURSOR_LEFT_MAX, SERVO_BOARD_CURSOR_LEFT_RETRACTED - 10.0, SERVO_BOARD_CURSOR_LEFT_SPEED, SERVO_BOARD_CURSOR_LEFT_ACCEL);
+  ServoControllerInit(&servoCtrl_tst[6], SERVO_BOARD_CURSOR_RIGHT_ID, SERVO_BOARD_CURSOR_RIGHT_MIN, SERVO_BOARD_CURSOR_RIGHT_MAX, SERVO_BOARD_CURSOR_RIGHT_RETRACTED - 10.0, SERVO_BOARD_CURSOR_RIGHT_SPEED, SERVO_BOARD_CURSOR_RIGHT_ACCEL);
 
   /* Init of all ramps */
   for (uint8_t idx = 0; idx < SERVO_BOARD_NB_SERVO_CONTROLLER; idx++)
@@ -101,6 +103,8 @@ void ServoBoardInit()
   ServoControllerSetEnable(&servoCtrl_tst[2], true);
   ServoControllerSetEnable(&servoCtrl_tst[3], true);
   ServoControllerSetEnable(&servoCtrl_tst[4], true);
+  ServoControllerSetEnable(&servoCtrl_tst[5], true);
+  ServoControllerSetEnable(&servoCtrl_tst[6], true);
 }
 
 void ServoBoardUpdate(bool timeMeasure_b)
@@ -143,7 +147,7 @@ void ServoBoardUpdate(bool timeMeasure_b)
         /* Display ramps if needed, only when axis moving */
         if (SERVO_BOARD_DEBUG_RAMP)
         {
-          if ((servoCtrl_tst[0].isFinished_b == false) ||  (servoCtrl_tst[1].isFinished_b == false) || (servoCtrl_tst[2].isFinished_b == false) || (servoCtrl_tst[3].isFinished_b == false) || (servoCtrl_tst[4].isFinished_b == false) )
+          if ((servoCtrl_tst[0].isFinished_b == false) ||  (servoCtrl_tst[1].isFinished_b == false) || (servoCtrl_tst[2].isFinished_b == false) || (servoCtrl_tst[3].isFinished_b == false) || (servoCtrl_tst[4].isFinished_b == false) || (servoCtrl_tst[5].isFinished_b == false) || (servoCtrl_tst[6].isFinished_b == false) )
           {
             if(index == 0)
             {

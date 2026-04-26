@@ -31,7 +31,10 @@ typedef enum
   ACTION_MGR_ID_SORT_EJECT = 6u,        /* Move arm to back and sort the boxes while ejecting them */
   ACTION_MGR_ID_SORT_EJECT_INVERT = 7u, /* Move arm to back and sort the boxes while ejecting them */
   ACTION_MGR_ID_DISCARD = 8u,           /* Move arm to back and discards the boxes outside */
-  ACTION_MGR_ID_SHUTDOWN = 9u,          /* Shutwdown every actuator */
+  ACTION_MGR_ID_CURSOR_LEFT = 9u,       /* Extend cursor left */
+  ACTION_MGR_ID_CURSOR_RIGHT = 10u,     /* Extend cursor right */
+  ACTION_MGR_ID_CURSOR_RETRACT = 11u,   /* Retract both cursor */
+  ACTION_MGR_ID_SHUTDOWN = 12u,         /* Shutwdown every actuator */
 } ActionMgrIdEn;                        /* Enumeration used to select the action Id */
 
 typedef enum
