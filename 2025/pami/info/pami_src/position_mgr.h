@@ -38,10 +38,10 @@ void PositionMgrInit();
 void PositionMgrStart();
 void PositionMgrStop();
 void PositionMgrUpdate(bool timeMeasure_b);
-void PositionMgrGotoXYTheta(float x_m, float y_m, float theta_deg);
+void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg);
 void PositionMgrGotoPose(pose_t pose);
-void PositionMgrGotoDistanceMilliMeter(float distance_m, bool braking_b);
-void PositionMgrGotoOrientationDegree(float theta_deg);
+void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b);
+void PositionMgrGotoOrientationDegree(double theta_deg);
 PositionManagerStateEn PositionMgrGetState();
 PositionManagerStateEmergencyEn PositionMgrGetEmergencyState();
 void PositionMgrSetEmergencyState(PositionManagerStateEmergencyEn state);
@@ -50,6 +50,5 @@ void PositionMgrSetDistanceControl(bool state_b);
 void PositionMgrSetOrientationControl(bool state_b);
 bool PositionMgrGetDistanceControl();
 bool PositionMgrGetOrientationControl();
-void PositionMgrBlockingDetection(float distance_f, float orientation_f, float commandeDistance_f, float commandeOrientation_f);
-
+void PositionMgrBlockingDetection(double distance_d, double orientation_d, double commandeDistance_d, double commandeOrientation_d);
 #endif
