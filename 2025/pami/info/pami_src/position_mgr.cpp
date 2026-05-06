@@ -38,12 +38,11 @@ typedef enum
 /******************************************************************************
    Global Variables Declarations
  ******************************************************************************/
-//uint8_t positionMgrStatus_u8_g;
 int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
 PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 PositionManagerStateEn positionMgrState_en_g;
-PositionManagerStateEmergencyEn positionMgrEmergencyState_en_g;
+bool emergencyActivated_b_g;
 
 PidControllerSt pidDistance_st_g;
 PidControllerSt pidOrientation_st_g;
@@ -72,10 +71,10 @@ bool positionMgrEnable_b;
 void PositionMgrInit()
 {
   positionMgrMvtType_en_g = MVT_TYPE_NONE;
-  //positionMgrStatus_u8_g = 1;
   positionMgrState_en_g = POSITION_STATE_NONE;
   startDistance_i32_g = 0;
   startOrientation_i32_g = 0;
+  emergencyActivated_b_g = false;
 
   /* init pid submodule */
   PidInit(&pidDistance_st_g);
@@ -127,7 +126,6 @@ void PositionMgrStop() {
 void PositionMgrUpdate(bool timeMeasure_b)
 {
   uint32_t currentTime_u32 = 0;
-  static bool emergencyActivated_b = false;
 
   currentTime_u32 = millis();
   static uint32_t lastExecutionTime_u32 = currentTime_u32;  /* Quick fix to not have a big time calculated at first execution */
@@ -157,9 +155,9 @@ void PositionMgrUpdate(bool timeMeasure_b)
     /* Looks for obstacle detection, only if currently moving */
     if (positionMgrState_en_g == POSITION_STATE_MOVING)
     {
-      if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b == false) )
+      if ( (ObstacleSensorDetected() == true) && (emergencyActivated_b_g == false) )
       {
-        emergencyActivated_b = true;
+        emergencyActivated_b_g = true;
         RampEmergencyStop(&rampDistance_st_g);
         RampEmergencyStop(&rampOrientation_st_g);
         LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
@@ -196,67 +194,49 @@ void PositionMgrUpdate(bool timeMeasure_b)
     ObstacleSensorSetThreshold( (uint16_t)( 2.0 * TopToMilliMeter(RampGetDistanceBrake(&rampDistance_st_g)) ) );
     //Serial.println(ObstacleSensorDetected());
 
-    /* If no emergency activation (no obstacle in sight) */
-    if (emergencyActivated_b == false) {
-      /* if Ramp init, then stopped */
-      if ((RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) {
-        positionMgrState_en_g = POSITION_STATE_STOPPED;
-        //Serial.print("Ramp init, state stopped, ");
-      } else {
-        /* if one of both ramp finished */
-        if (((positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED))
-            || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
-          //Serial.print("Ramp finished, ");
-          /* count tiemout detection */
-          if (timeOutCount_u8 < 20) {
-            timeOutCount_u8 += 1;
-            positionMgrState_en_g = POSITION_STATE_MOVING;
-            //Serial.print("Incrementing timeout, ");
-            //Serial.print(timeOutCount_u8);
-            //Serial.print(", ");
+    /* if Ramp init, then stopped */
+    if ((RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) {
+      positionMgrState_en_g = POSITION_STATE_STOPPED;
+      //Serial.print("Ramp init, state stopped, ");
+    } else {
+      /* if one of both ramp finished */
+      if (((positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED))
+          || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
+        //Serial.print("Ramp finished, ");
+        /* count tiemout detection */
+        if (timeOutCount_u8 < 20) {
+          timeOutCount_u8 += 1;
+          positionMgrState_en_g = POSITION_STATE_MOVING;
+          //Serial.print("Incrementing timeout, ");
+          //Serial.print(timeOutCount_u8);
+          //Serial.print(", ");
 
-            /* if both pid error < acceptable range -> stopped */
-            if ( (abs(pidDistance_st_g.error_f) < 5) && (abs(pidOrientation_st_g.error_f) < 5) ) {
-              positionMgrState_en_g = POSITION_STATE_STOPPED;
-              //Serial.print("Position reached, ");
-            }
-          } else {
+          /* if both pid error < acceptable range -> stopped */
+          if ( (abs(pidDistance_st_g.error_f) < 5) && (abs(pidOrientation_st_g.error_f) < 5) ) {
             positionMgrState_en_g = POSITION_STATE_STOPPED;
-            timeOutCount_u8 = 0;
-            //Serial.print("Timeout reached");
-            //Serial.print("Timeout reached");
-            /* Both ramp should finish, robot should stay controlled at current pos */
-            RampInit(&rampDistance_st_g);
-            RampInit(&rampOrientation_st_g);
-            startDistance_i32_g = OdometryGetDistanceTop();
-            startOrientation_i32_g = OdometryGetOrientationTop();
-            consigneDistance_d = startDistance_i32_g;
-            consigneOrientation_d = startOrientation_i32_g;
+            //Serial.print("Position reached, ");
           }
         } else {
-          //Serial.println("State Moving");
+          positionMgrState_en_g = POSITION_STATE_STOPPED;
           timeOutCount_u8 = 0;
-          /* else still moving */
-          positionMgrState_en_g = POSITION_STATE_MOVING;
+          //Serial.print("Timeout reached");
+          //Serial.print("Timeout reached");
+          /* Both ramp should finish, robot should stay controlled at current pos */
+          RampInit(&rampDistance_st_g);
+          RampInit(&rampOrientation_st_g);
+          startDistance_i32_g = OdometryGetDistanceTop();
+          startOrientation_i32_g = OdometryGetOrientationTop();
+          consigneDistance_d = startDistance_i32_g;
+          consigneOrientation_d = startOrientation_i32_g;
         }
-      }
-    } else /* if obstacle detected */
-    {
-      positionMgrState_en_g = POSITION_STATE_EMERGENCY_ACTIVATED;
-      if (positionMgrEmergencyState_en_g == POSITION_STATE_EMERGENCY_END) {
-        //Serial.println("POSITION_STATE_EMERGENCY_END in position_mgr");
-        positionMgrState_en_g = POSITION_STATE_STOPPED;
-        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_NONE;
-        emergencyActivated_b = false;
-        //Serial.println(emergencyActivated_b);
-      } else if (((RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT)) && ((RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT) || (RampGetState(&rampOrientation_st_g) == RAMP_STATE_RAMPDOWN))) {
-        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_STOPPED;
-        //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_STOPPED");
       } else {
-        positionMgrEmergencyState_en_g = POSITION_STATE_EMERGENCY_MOVING;
-        //Serial.println("PositionMgrEmergencyState switch to POSITION_STATE_EMERGENCY_MOVING");
+        //Serial.println("State Moving");
+        timeOutCount_u8 = 0;
+        /* else still moving */
+        positionMgrState_en_g = POSITION_STATE_MOVING;
       }
     }
+
     // if (positionMgrState_en_g == POSITION_STATE_STOPPED)
     // {
     //   IhmStart();
@@ -435,7 +415,6 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg)
 void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b)
 {
   IhmStop();
-  //positionMgrStatus_u8_g = 0;
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
 
@@ -461,7 +440,6 @@ void PositionMgrGotoDistanceMilliMeter(double distance_m, bool braking_b)
 void PositionMgrGotoOrientationDegree(double theta_deg)
 {
   IhmStop();
-  //positionMgrStatus_u8_g = 0;
   //Serial.println(theta_feg);
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_ORIENTATION;
@@ -478,24 +456,32 @@ void PositionMgrGotoOrientationDegree(double theta_deg)
 
    @param
 
-   @result    positionMgrStatus_u8_g
+   @result    positionMgrState_en_g
 
 */
 PositionManagerStateEn PositionMgrGetState()
 {
-  //return positionMgrStatus_u8_g;
   return positionMgrState_en_g;
 }
 
-PositionManagerStateEmergencyEn PositionMgrGetEmergencyState()
+bool PositionMgrGetEmergencyState()
 {
-  return positionMgrEmergencyState_en_g;
+  return emergencyActivated_b_g;
 }
 
-void PositionMgrSetEmergencyState(PositionManagerStateEmergencyEn state)
+void PositionMgrSetEmergencyState(bool state)
 {
-  //return positionMgrStatus_u8_g;
-  positionMgrEmergencyState_en_g = state;
+  if (state == false)
+  {
+    LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
+    LedSetBlinkNb(LED4_ID, 1);
+  }
+  else
+  {
+    LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
+    LedSetBlinkNb(LED4_ID, 2);
+  }
+  emergencyActivated_b_g = state;
 }
 
 /**
