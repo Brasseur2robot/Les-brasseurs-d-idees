@@ -29,6 +29,7 @@ typedef enum
   TRAJECTORY_WAYPOINT_AIM = 1u,       /* First aim towards waypoint */
   TRAJECTORY_WAYPOINT_GO_TO = 2u,     /* Then go to waypoint */
   TRAJECTORY_WAYPOINT_ROTATION = 3u,  /* Then final orientation */
+  TRAJECTORY_WAYPOINT_SUPP_DELAY = 4u,/* If wanted, wait on destination */
 } TrajectoryMgrWaypointState;         /* Enumeration used to select the mvt type */
 
 /******************************************************************************
@@ -144,6 +145,9 @@ uint8_t Trajectory(double colorSide)
         break;
       case TRAJECTORY_WAYPOINT_ROTATION:
         Serial.print("Fin Rot");
+        break;
+      case TRAJECTORY_WAYPOINT_SUPP_DELAY:
+        Serial.print("Attente finale");
         break;
       default:
         Serial.print("default");
@@ -289,13 +293,8 @@ uint8_t Trajectory(double colorSide)
         }
         else
         {
-          /* Set the next waypoint in the trajectory */
-          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
-          /* Test if it needs to wait */
-          if (waitingTimeMs_u32 != 0)
-          {
-            MatchMgrSetWaitingTimer(waitingTimeMs_u32);
-          }
+          /* Set waiting state */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_SUPP_DELAY;
           trajectoryIndex_u8++;
 
           if (DEBUG_SIMULATION)
@@ -315,13 +314,9 @@ uint8_t Trajectory(double colorSide)
         }
         /* Do the Rotation */
         PositionMgrGotoOrientationDegree(orientationFinalToGoDeg_d);
-        /* Set the next waypoint in the trajectory */
-        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
-        /* Test if it needs to wait */
-        if (waitingTimeMs_u32 != 0)
-        {
-          MatchMgrSetWaitingTimer(waitingTimeMs_u32);
-        }
+        /* Set waiting state */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_SUPP_DELAY;
+        
         trajectoryIndex_u8++;
 
         if (DEBUG_SIMULATION)
@@ -330,6 +325,16 @@ uint8_t Trajectory(double colorSide)
           OdometrySetYMilliMeter(yMilliMeterWaypoint);
           OdometrySetThetaDeg(thetaDegWaypoint);
         }
+        break;
+
+      case TRAJECTORY_WAYPOINT_SUPP_DELAY:
+        /* Test if it needs to wait */
+        if (waitingTimeMs_u32 != 0)
+        {
+          MatchMgrSetWaitingTimer(waitingTimeMs_u32);
+        }
+        /* Set the state to next point */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
         break;
 
       default:
