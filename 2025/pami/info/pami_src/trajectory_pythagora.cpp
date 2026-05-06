@@ -16,7 +16,7 @@ double pythagoraCalculation(double x1, double y1, double x2, double y2, bool len
   }
   else {
     // Calculate the angle between base and hypothenuse if lengthChoice is false
-    pythagoraResult = atan(height / length) * RAD_TO_DEG;
+    pythagoraResult = atan2(height, length) * RAD_TO_DEG;
   }
 
   return pythagoraResult;
