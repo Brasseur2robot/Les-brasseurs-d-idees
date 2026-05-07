@@ -19,6 +19,12 @@
 #define COLOR_DEBUG                 false
 #define TRAJECTORY_UPDATE_PERIOD_S  0.1
 
+#define TRAJECTORY_EMERGENCY_WAIT_TIME_MS       1000
+#define TRAJECTORY_EMERGENCY_1ST_ROTATION_DEG   90.0
+#define TRAJECTORY_EMERGENCY_1ST_TRANSLATION_MM 200.0
+#define TRAJECTORY_EMERGENCY_2ND_ROTATION_DEG   90.0
+#define TRAJECTORY_EMERGENCY_2ND_TRANSLATION_MM 200.0
+
 /******************************************************************************
    Types declarations
  ******************************************************************************/
@@ -30,10 +36,10 @@ typedef enum
   TRAJECTORY_WAYPOINT_ROTATION = 3u,          /* Then final orientation */
   TRAJECTORY_WAYPOINT_SUPP_DELAY = 4u,        /* If wanted, wait on destination */
   TRAJECTORY_EMERGENCY_WAIT = 5u,             /* Emergency wait */
-  TRAJECTORY_EMERGENCY_1ST_ROTATION = 6u,     /* First phase of an emergency */
-  TRAJECTORY_EMERGENCY_1ST_TRANSLATION = 7u,  /* Second phase of an emergency */
-  TRAJECTORY_EMERGENCY_2ND_ROTATION = 8u,     /* Third phase of an emergency */
-  TRAJECTORY_EMERGENCY_2ND_TRANSLATION = 9u,  /* Fourth phase of an emergency */
+  TRAJECTORY_EMERGENCY_1ST_ROTATION = 6u,     /* First rotation of an emergency */
+  TRAJECTORY_EMERGENCY_1ST_TRANSLATION = 7u,  /* First translation of an emergency */
+  TRAJECTORY_EMERGENCY_2ND_ROTATION = 8u,     /* Second rotation of an emergency */
+  TRAJECTORY_EMERGENCY_2ND_TRANSLATION = 9u,  /* Second translation of an emergency */
 } TrajectoryMgrWaypointState;         /* Enumeration used to select the mvt type */
 
 /******************************************************************************
@@ -400,8 +406,8 @@ uint8_t Trajectory(double colorSide)
         }
         /* Do not return in emergency */
         ObstacleSensorStop();
-        /* Rotation 90 degrees */
-        PositionMgrGotoOrientationDegree(colorSide * 90.0);
+        /* Rotation */
+        PositionMgrGotoOrientationDegree(colorSide * TRAJECTORY_EMERGENCY_1ST_ROTATION_DEG);
         /* Next state of emergency */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_1ST_TRANSLATION;
         break;
@@ -409,22 +415,22 @@ uint8_t Trajectory(double colorSide)
       case TRAJECTORY_EMERGENCY_1ST_TRANSLATION:
         /* Reenable */
         ObstacleSensorStart();
-        /* Translation 100 mm */
-        PositionMgrGotoDistanceMilliMeter(200.0, true);
+        /* Translation */
+        PositionMgrGotoDistanceMilliMeter(TRAJECTORY_EMERGENCY_1ST_TRANSLATION_MM, true);
         /* Return to load actual point */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_2ND_ROTATION;
         break;
 
       case TRAJECTORY_EMERGENCY_2ND_ROTATION:
-        /* Rotation 90 degrees */
-        PositionMgrGotoOrientationDegree(colorSide * (-90.0));
+        /* Rotation inverse */
+        PositionMgrGotoOrientationDegree(colorSide * (-TRAJECTORY_EMERGENCY_2ND_ROTATION_DEG));
         /* Next state of emergency */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_2ND_TRANSLATION;
         break;
 
       case TRAJECTORY_EMERGENCY_2ND_TRANSLATION:
-        /* Translation 100 mm */
-        PositionMgrGotoDistanceMilliMeter(200.0, true);
+        /* Translation */
+        PositionMgrGotoDistanceMilliMeter(TRAJECTORY_EMERGENCY_2ND_TRANSLATION_MM, true);
         /* Return to load actual point */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
         break;
@@ -601,21 +607,12 @@ void TrajectoryMgrMainTrajectory()
         Serial.println("Stopped Emergency!");
         ObstacleSensorStop();
         trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_WAIT;
-        MatchMgrSetWaitingTimer(1000);
+        MatchMgrSetWaitingTimer(TRAJECTORY_EMERGENCY_WAIT_TIME_MS);
         PositionMgrSetEmergencyState(false);
         ObstacleSensorStart();
       }
       Trajectory(colorSide);
       break;
-    // case POSITION_STATE_EMERGENCY_ACTIVATED:
-    //   /* What to do ?*/
-    //   Serial.println("Emergency in trajectory_mgr");
-    //   /* Set the state to trajectory emergency rotation */
-    //   trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_TRANSLATION;
-    //   /* Reset the position mgr */
-
-    //   //EvasionMgr(colorSide, trajectoryIndex_u8);
-    //   break;
     default:
       break;
   }
