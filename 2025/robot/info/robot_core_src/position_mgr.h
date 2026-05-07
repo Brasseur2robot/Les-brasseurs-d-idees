@@ -12,14 +12,6 @@ typedef enum
   POSITION_STATE_EMERGENCY_ACTIVATED = 3u, /* Position manager swap to the emergency trajectory */
 } PositionManagerStateEn;           /* Enumeration used to select the position manager state */
 
-typedef enum
-{
-  POSITION_STATE_EMERGENCY_NONE = 0u,         /* No state */
-  POSITION_STATE_EMERGENCY_STOPPED = 1u, /* Position manager is stopped in emergency */
-  POSITION_STATE_EMERGENCY_MOVING = 2u, /* Position manager is moving in emergency */
-  POSITION_STATE_EMERGENCY_END = 3u, /* Position manager is at the end of the emergency */
-} PositionManagerStateEmergencyEn;      /* Enumeration used to select the position manager emergency state */
-
 typedef struct PoseStruct {
     // Member definitions
     double x;                   // x [m]
@@ -45,8 +37,8 @@ void PositionMgrGotoPose(pose_t pose);
 void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b);
 void PositionMgrGotoOrientationDegree(double theta_deg);
 PositionManagerStateEn PositionMgrGetState();
-PositionManagerStateEmergencyEn PositionMgrGetEmergencyState();
-void PositionMgrSetEmergencyState(PositionManagerStateEmergencyEn state);
+bool PositionMgrGetEmergencyState();
+void PositionMgrSetEmergencyState(bool state);
 void PositionMgrGetPosition();
 void PositionMgrSetDistanceControl(bool state_b);
 void PositionMgrSetOrientationControl(bool state_b);

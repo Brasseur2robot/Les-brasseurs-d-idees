@@ -115,24 +115,24 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_ON_WAITING:
         /* In a wait timer */
-        //        if (MATCH_MGR_DEBUG)
-        //          Serial.println("Waiting");
+        if (MATCH_MGR_DEBUG)
+          Serial.println("Waiting");
         MatchMgrUpdateEndTimer();
         MatchMgrUpdateWaitingTimer();
         break;
 
       case MATCH_STATE_ON_MOVING:
         /* Moving */
-        //        if (MATCH_MGR_DEBUG)
-        //          Serial.println("Moving");
+        if (MATCH_MGR_DEBUG)
+          Serial.println("Moving");
         MatchMgrUpdateEventTimer();
         MatchMgrUpdateEndTimer();
         break;
 
       case MATCH_STATE_END:
         /* End of match */
-        //        if (MATCH_MGR_DEBUG)
-        //          Serial.println("End");
+        if (MATCH_MGR_DEBUG)
+          Serial.println("End");
         PositionMgrSetDistanceControl(false);     /* Sets the robot free of control loop */
         PositionMgrSetOrientationControl(false);
         ActionMgrSetNextAction(ACTION_MGR_ID_SHUTDOWN, WAIT);
@@ -189,6 +189,8 @@ void MatchMgrStartMatch()
 {
   /* Log the start time */
   matchMgrStartTimeMs_u32_g = millis();
+  /* Set the state to moving */
+  matchMgrState_en_g = MATCH_STATE_ON_MOVING;
   /* Set the start delay (use for a delayed Pami start) */
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
   /* Send the start signal to the PAMIs TODO : define at which condition this should happen */
@@ -316,7 +318,8 @@ void MatchMgrSetWaitingTimer(uint32_t waitingPeriodMs_u32)
   {
     Serial.print("Waiting period of : ");
     Serial.print(matchMgrWaitingTimerDuration_u32_g);
-    Serial.print(" set.");
+    Serial.print(" set. I should return to state : ");
+    Serial.print(matchMgrWaitingTimerReturnState_en_g);
     Serial.println();
   }
 }
