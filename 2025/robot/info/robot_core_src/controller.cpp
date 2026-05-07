@@ -13,7 +13,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define CONTROLLER_DEBUG true
+#define CONTROLLER_DEBUG false
 #define CONTROLLER_UPDATE_PERIOD 0.1 /* Refresh rate of the display 1/0.1 = 10fps */
 
 /******************************************************************************
@@ -48,6 +48,9 @@ void ControllerUpdate(bool timeMeasure_b) {
 
   uint32_t durationMeasureStart_u32 = 0;
   uint32_t durationMeasure_u32 = 0;
+
+  static bool robotCursorLeftState_b = false;
+  static bool robotCursorRightState_b = false;
 
   /* Manages the update loop every update period */
   if ((currentTime_u32 - lastExecutionTime_u32) >= (CONTROLLER_UPDATE_PERIOD * 1000.0)) {
@@ -112,16 +115,46 @@ void ControllerUpdate(bool timeMeasure_b) {
           ActionMgrSetNextAction(ACTION_MGR_ID_SORT_ALL, WAIT);
         }
 
-        if (e.leftBumper)
+        if (e.leftGripButton)
         {
           /* Eject normal */
           ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT, WAIT);
         }
 
-        if (e.rightBumper)
+        if (e.rightGripButton)
         {
           /* Eject inverted */
           ActionMgrSetNextAction(ACTION_MGR_ID_SORT_EJECT_INVERT, WAIT);
+        }
+
+        if (e.leftBumper )
+        {
+          if (robotCursorLeftState_b == false)
+          {
+            robotCursorLeftState_b = true;
+            ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_LEFT, WAIT);
+          }
+          else
+          {
+            /* Retract cursors */
+            robotCursorLeftState_b = false;
+            ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_RETRACT, WAIT);
+          }
+        }
+
+        if (e.rightBumper)
+        {
+          if (robotCursorRightState_b == false)
+          {
+            robotCursorRightState_b = true;
+            ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_RIGHT, WAIT);
+          }
+          else
+          {
+            /* Retract cursors */
+            robotCursorRightState_b = false;
+            ActionMgrSetNextAction(ACTION_MGR_ID_CURSOR_RETRACT, WAIT);
+          }
         }
 
         if (CONTROLLER_DEBUG) {
