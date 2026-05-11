@@ -52,15 +52,15 @@
 #define SERVO_BOARD_STOPPER_ACCEL               70000.0
 #define SERVO_BOARD_STOPPER_MIN                 0.0
 #define SERVO_BOARD_STOPPER_MAX                 180.0
-#define SERVO_BOARD_STOPPER_RETRACTED           105.0
-#define SERVO_BOARD_STOPPER_EXTENDED            75.0
+#define SERVO_BOARD_STOPPER_RETRACTED           100.0
+#define SERVO_BOARD_STOPPER_EXTENDED            63.0
 
 #define SERVO_BOARD_CURSOR_LEFT_ID              5
 #define SERVO_BOARD_CURSOR_LEFT_SPEED           7000.0 /* [°/s] rounded from 0.083 [s/60°] */
 #define SERVO_BOARD_CURSOR_LEFT_ACCEL           70000.0
 #define SERVO_BOARD_CURSOR_LEFT_MIN             0.0
 #define SERVO_BOARD_CURSOR_LEFT_MAX             180.0
-#define SERVO_BOARD_CURSOR_LEFT_RETRACTED       90.0
+#define SERVO_BOARD_CURSOR_LEFT_RETRACTED       80.0
 #define SERVO_BOARD_CURSOR_LEFT_EXTENDED        30.0
 
 #define SERVO_BOARD_CURSOR_RIGHT_ID             6
@@ -68,7 +68,7 @@
 #define SERVO_BOARD_CURSOR_RIGHT_ACCEL          70000.0
 #define SERVO_BOARD_CURSOR_RIGHT_MIN            0.0
 #define SERVO_BOARD_CURSOR_RIGHT_MAX            180.0
-#define SERVO_BOARD_CURSOR_RIGHT_RETRACTED      90.0
+#define SERVO_BOARD_CURSOR_RIGHT_RETRACTED      100.0
 #define SERVO_BOARD_CURSOR_RIGHT_EXTENDED       150.0
 
 /******************************************************************************

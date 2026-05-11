@@ -139,8 +139,9 @@ void ServoBoardUpdate(bool timeMeasure_b)
         }
         else
         {
-          /* Ramp finished, register target as current angle and should be finished */
+          /* Ramp finished, register target as current angle, set the servoboard to target and should be finished */
           servoCtrl_tst[index].angleCurrent_f = servoCtrl_tst[index].angleTarget_f;
+          ServoBoardSet(index , servoCtrl_tst[index].angleCurrent_f);
           servoCtrl_tst[index].isFinished_b = true;
         }
       
