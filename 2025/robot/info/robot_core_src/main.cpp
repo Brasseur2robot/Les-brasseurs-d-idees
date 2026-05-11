@@ -64,7 +64,7 @@ void setup() {
   Serial.println();
   Serial.println("Init Robot Core Brd");
   ActionMgrInit();
-  ActuatorInit();
+  //ActuatorInit();
   ComWifiInit(false);
   ControllerInit(false);
   ColorSensorInit();
@@ -78,7 +78,7 @@ void setup() {
   PositionMgrInit();
   SdcardInit();
   //  SensorInit();
-  SoundInit();
+  //SoundInit();
   TrajectoryMgrInit();
   RobotMgrInit();
   /* Set RGB color to green, signaling the robot init is finished */
@@ -89,7 +89,7 @@ void loop() {
   //  MotorTest(255);
   //  OdometryEncoderTest();
   ActionMgrUpdate(DEBUG_TIME);
-  ActuatorUpdate(DEBUG_TIME);
+  //  ActuatorUpdate(DEBUG_TIME);
   ActuatorDxlUpdate(DEBUG_TIME);
   ColorSensorUpdate(DEBUG_TIME);
   ControllerUpdate(DEBUG_TIME);

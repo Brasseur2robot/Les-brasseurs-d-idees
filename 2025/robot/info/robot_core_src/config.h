@@ -4,6 +4,7 @@
 /* Choose which robot is running the code */
 #define ROBOT_CORE
 //#define ROBOT_IHM
+#define ROBOT_USE_LIDAR       true
 
 #include "config_control.h"
 #include "config_match.h"
@@ -14,8 +15,8 @@
 #define SERIAL_SPEED          1000000
 
 #define DEBUG_TIME            false
-#define DEBUG_SIMULATION      true
-#define DEBUG_NO_OBS          true
+#define DEBUG_SIMULATION      false
+#define DEBUG_NO_OBS          false
 
 /* Addresses i2c */
 #define SERVOBOARD_ADD        0x40 // can be 0x41 etc...
