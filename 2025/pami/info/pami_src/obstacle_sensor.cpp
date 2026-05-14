@@ -60,7 +60,9 @@ void ObstacleSensorInit()
   }
   else
   {
+#ifndef PAMI_G
     LedSetAnim(LED4_ID, ANIM_STATE_ON);
+#endif
   }
 #else
     Serial.println("Simulation, no sensor connected");
@@ -73,15 +75,19 @@ void ObstacleSensorStart()
 {
   obstacleSensorEnable_b = true;
   /* Blinking once Led 4 to indicate sensor enabled */
+#ifndef PAMI_G
   LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
   LedSetBlinkNb(LED4_ID, 1);
+#endif
 }
 
 void ObstacleSensorStop()
 {
   obstacleSensorEnable_b = false;
+#ifndef PAMI_G
   /* Led full on to indicate sensor off */
   LedSetAnim(LED4_ID, ANIM_STATE_ON);
+#endif
 }
 
 /**

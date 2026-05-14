@@ -38,31 +38,31 @@
 #else
 
 /* Led pins */
-#define LED_NUMBER            1
+#define LED_NUMBER            3
 #define LED1_PIN              18
 
 /* Switch pins */
 #define SWITCH_REED_START_PIN 13
 #define SWITCH_COLOR_PIN      14
-#define SWITCH_MODE_PIN       D3
+#define SWITCH_MODE_PIN       4
 
 /* Motor pins */
-#define MOTOR_LEFT_PIN_INA1   16
-#define MOTOR_LEFT_PIN_INA2   17
-#define MOTOR_RIGHT_PIN_INA1  12
-#define MOTOR_RIGHT_PIN_INA2  15
+#define MOTOR_LEFT_PIN_INA1   23
+#define MOTOR_LEFT_PIN_INA2   19
+#define MOTOR_RIGHT_PIN_INA1  16
+#define MOTOR_RIGHT_PIN_INA2  17
 
 /* Encoder pins */
 #define ENCODER_LEFT_PIN_A    34
 #define ENCODER_LEFT_PIN_B    35
-#define ENCODER_RIGHT_PIN_A   36
-#define ENCODER_RIGHT_PIN_B   39
+#define ENCODER_RIGHT_PIN_A   39
+#define ENCODER_RIGHT_PIN_B   36
 
 /* Servo pins */
 #define SERVO_PIN             2
 
 /* Sensors */
-#define SENSOR_VBATT_PIN      A7
+#define SENSOR_VBATT_PIN      27
 
 /* Actuators */
 #define MOSFET1_PIN           25

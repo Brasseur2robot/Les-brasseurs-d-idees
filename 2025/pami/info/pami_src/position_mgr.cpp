@@ -160,8 +160,10 @@ void PositionMgrUpdate(bool timeMeasure_b)
         emergencyActivated_b_g = true;
         RampEmergencyStop(&rampDistance_st_g);
         RampEmergencyStop(&rampOrientation_st_g);
+#ifndef PAMI_G
         LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
         LedSetBlinkNb(LED4_ID, 2);
+#endif
         //Serial.println("Emergency");
       }
     }
@@ -204,7 +206,7 @@ void PositionMgrUpdate(bool timeMeasure_b)
           || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
         //Serial.print("Ramp finished, ");
         /* count tiemout detection */
-        if (timeOutCount_u8 < 20) {
+        if (timeOutCount_u8 < 40) {
           timeOutCount_u8 += 1;
           positionMgrState_en_g = POSITION_STATE_MOVING;
           //Serial.print("Incrementing timeout, ");
@@ -471,6 +473,7 @@ bool PositionMgrGetEmergencyState()
 
 void PositionMgrSetEmergencyState(bool state)
 {
+#ifndef PAMI_G
   if (state == false)
   {
     LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
@@ -481,6 +484,7 @@ void PositionMgrSetEmergencyState(bool state)
     LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
     LedSetBlinkNb(LED4_ID, 2);
   }
+#endif
   emergencyActivated_b_g = state;
 }
 

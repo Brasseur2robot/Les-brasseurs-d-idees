@@ -11,6 +11,7 @@ typedef enum
   POSITION_STATE_STOPPED = 2u,      /* Position manager finished his move, ready for antother one */
 } PositionManagerStateEn;           /* Enumeration used to select the position manager state */
 
+#ifndef PAMI_G
 typedef struct PoseStruct {
     // Member definitions
     float x;
@@ -21,7 +22,20 @@ typedef struct PoseStruct {
     bool obstacleSensorEnable;
     uint32_t waitingTimeMs_u32; // if non null, waitingTime after arriving at position
 } pose_t;
-
+#else
+typedef struct PoseStruct {
+    // Member definitions
+    float x;
+    float y;
+    float theta;
+    bool direction;
+    bool resetTheta;
+    bool obstacleSensorEnable;
+    uint32_t waitingTimeMs_u32; // if non null, waitingTime after arriving at position
+    uint8_t actionId_u8;
+    bool isWait_b;
+} pose_t;
+#endif
 /******************************************************************************
  * Function Declarations
  ******************************************************************************/

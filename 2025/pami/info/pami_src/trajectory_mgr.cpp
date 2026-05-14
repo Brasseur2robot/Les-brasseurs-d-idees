@@ -5,6 +5,9 @@
 #include "config.h"
 #include "config_match.h"
 //#include "led.h"
+#ifdef PAMI_G
+#include "action_mgr.h"
+#endif
 #include "match_mgr.h"
 #include "obstacle_sensor.h"
 #include "odometry.h"
@@ -40,6 +43,9 @@ typedef enum
   TRAJECTORY_EMERGENCY_1ST_TRANSLATION = 7u,  /* First translation of an emergency */
   TRAJECTORY_EMERGENCY_2ND_ROTATION = 8u,     /* Second rotation of an emergency */
   TRAJECTORY_EMERGENCY_2ND_TRANSLATION = 9u,  /* Second translation of an emergency */
+#ifdef PAMI_G
+  TRAJECTORY_WAYPOINT_ACTION = 10u,           /* Action to do if needed */
+#endif
 } TrajectoryMgrWaypointState;         /* Enumeration used to select the mvt type */
 
 /******************************************************************************
@@ -125,7 +131,10 @@ uint8_t Trajectory(double colorSide)
   static bool   directionWaypoint_b = true;
   static bool obstacleSensorEnable_b = true;
   static uint32_t waitingTimeMs_u32 = 0;
-
+#ifdef PAMI_G
+  static uint8_t actionId_u8 = 0;
+  static bool isWait_b = false;
+#endif
   static double orientationToGoDeg_d = 0.0;
   static double distanceToGoMm_d = 0.0;
   static double orientationFinalToGoDeg_d = 0.0;
@@ -175,6 +184,11 @@ uint8_t Trajectory(double colorSide)
       case TRAJECTORY_EMERGENCY_2ND_TRANSLATION:
         Serial.print("Em 2nd translation");
         break;
+#ifdef PAMI_G
+      case TRAJECTORY_WAYPOINT_ACTION:
+        Serial.print("Action to do");
+        break;
+#endif      
       default:
         Serial.print("default");
         break;
@@ -216,6 +230,10 @@ uint8_t Trajectory(double colorSide)
             directionWaypoint_b = trajectoryYellowPoseArray[trajectoryIndex_u8].direction;
             obstacleSensorEnable_b = trajectoryYellowPoseArray[trajectoryIndex_u8].obstacleSensorEnable;
             waitingTimeMs_u32 = trajectoryYellowPoseArray[trajectoryIndex_u8].waitingTimeMs_u32;
+#ifdef PAMI_G
+            actionId_u8 = trajectoryYellowPoseArray[trajectoryIndex_u8].actionId_u8;
+            isWait_b = trajectoryYellowPoseArray[trajectoryIndex_u8].isWait_b;
+#endif
             break;
 
           case MATCH_COLOR_BLUE:
@@ -225,6 +243,10 @@ uint8_t Trajectory(double colorSide)
             directionWaypoint_b = trajectoryBluePoseArray[trajectoryIndex_u8].direction;
             obstacleSensorEnable_b = trajectoryYellowPoseArray[trajectoryIndex_u8].obstacleSensorEnable;
             waitingTimeMs_u32 = trajectoryBluePoseArray[trajectoryIndex_u8].waitingTimeMs_u32;
+#ifdef PAMI_G
+            actionId_u8 = trajectoryBluePoseArray[trajectoryIndex_u8].actionId_u8;
+            isWait_b = trajectoryBluePoseArray[trajectoryIndex_u8].isWait_b;
+#endif
             break;
         }
 
@@ -307,6 +329,12 @@ uint8_t Trajectory(double colorSide)
           Serial.print(distanceToGoMm_d);
           Serial.print("mm and finally to rotate : ");
           Serial.print(orientationFinalToGoDeg_d);
+#ifdef PAMI_G
+          Serial.print(", and action to do : ");
+          Serial.print(actionId_u8);
+          Serial.print(" Should I wait :");
+          Serial.print(isWait_b);
+#endif
           Serial.println("°.");
         }
 
@@ -331,7 +359,7 @@ uint8_t Trajectory(double colorSide)
         }
         else
         {
-          /* Set waiting state */
+          /* else set waiting state */
           trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_SUPP_DELAY;
 
           if (DEBUG_SIMULATION)
@@ -372,11 +400,29 @@ uint8_t Trajectory(double colorSide)
         {
           MatchMgrSetWaitingTimer(waitingTimeMs_u32);
         }
+#ifdef PAMI_G
+        /* Set the state to action */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ACTION;
+#else
+        /* Set the state to next point */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+        trajectoryIndex_u8++;
+#endif
+        break;
+#ifdef PAMI_G
+      case TRAJECTORY_WAYPOINT_ACTION:
+        if (TRAJECTORY_DEBUG)
+        {
+          Serial.println("[Action to do?]");
+        }
+        /* Do the action with wait or not */
+        ActionMgrSetNextAction(actionId_u8, isWait_b);
         /* Set the state to next point */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
         trajectoryIndex_u8++;
         break;
-      
+#endif
+
       case TRAJECTORY_EMERGENCY_WAIT:
         if (TRAJECTORY_DEBUG)
         {
@@ -394,8 +440,13 @@ uint8_t Trajectory(double colorSide)
         }
         else
         {
+#ifdef PAMI_G
+          /* Only wait */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_WAIT;
+#else
           /* Still here, next state of emergency */
           trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_1ST_ROTATION;
+#endif
         }
         break;
 
@@ -532,7 +583,7 @@ void TrajectoryMgrCalibTrajectory()
       /* To calibrate the rotation instead */
       //TrajectoryCalibrateRotation(3600.0);
       /* To calibrate with the square method */
-      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0);
+      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1000.0);
       /* Increment the sequence index */
       if (trajectoryIndex_u8 < 255)
       {
@@ -699,41 +750,41 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeMm_d
 
   if ( (trajectoryIndex_u8 > trajectoryIndexLast_i8) && (trajectoryFinished_b == false) )
   {
-    //Serial.print("Index : ");
-    //Serial.print(trajectoryIndex_u8);
+    Serial.print("Index : ");
+    Serial.print(trajectoryIndex_u8);
 
     switch (trajectoryIndex_u8)
     {
       case 0:
-        //Serial.print(", Distance : 1m");
+        Serial.print(", Distance : 1m");
         PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true);
         break;
       case 1:
-        //Serial.print(", Orientation : 90°");
+        Serial.print(", Orientation : 90°");
         PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 2:
-        //Serial.print(", Distance : 1m");
+        Serial.print(", Distance : 1m");
         PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true);
         break;
       case 3:
-        //Serial.print(", Orientation : 90°");
+        Serial.print(", Orientation : 90°");
         PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 4:
-        //Serial.print(", Distance : 1m");
+        Serial.print(", Distance : 1m");
         PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true);
         break;
       case 5:
-        //Serial.print(", Orientation : 90°");
+        Serial.print(", Orientation : 90°");
         PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 6:
-        //Serial.print(", Distance : 1m");
+        Serial.print(", Distance : 1m");
         PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true);
         break;
       case 7:
-        //Serial.print(", Orientation : 90°");
+        Serial.print(", Orientation : 90°");
         PositionMgrGotoOrientationDegree(angleDeg_d);
         break;
       case 8:
@@ -778,6 +829,7 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
       Serial.println("°");
     }
 
+#ifndef PAMI_G
     switch (trajectoryIndex_u8)
     {
       case 0:
@@ -873,6 +925,95 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
       default:
         break;
     }
+#else
+    switch (trajectoryIndex_u8)
+    {
+      case 0:
+        /* Move backwards until border, with no pids */
+        OdometrySetThetaDeg(-90.0);
+        PositionMgrSetOrientationControl(true);
+        PositionMgrGotoDistanceMilliMeter(-150.0, true);
+        break;
+      case 1:
+        /* Reset the y coordinate, and the theta orientation */
+        OdometrySetYMilliMeter(2000.0 - PAMI_BACKWIDTH);
+        OdometrySetThetaDeg(-90.0);
+        /* Move forward */
+        PositionMgrSetOrientationControl(true);
+        PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - PAMI_BACKWIDTH, true);
+        break;
+
+      case 2:
+        /* Rotate Ccw or Cw ? */
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          PositionMgrGotoOrientationDegree(90.0);
+        }
+        else
+        {
+          PositionMgrGotoOrientationDegree(-90.0);
+        }
+        break;
+
+      case 3:
+        /* Move backwards until border */
+        PositionMgrSetOrientationControl(true);
+        PositionMgrGotoDistanceMilliMeter(-150.0, true);
+        break;
+
+      case 4:
+        /* Reset the x coordinate, and the theta orientation */
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          OdometrySetXMilliMeter(615.0 + PAMI_BACKWIDTH);
+          OdometrySetThetaDeg(0.0);
+          PositionMgrSetOrientationControl(true);
+          PositionMgrGotoDistanceMilliMeter(MATCH_START_POSITION_X_YELLOW - 615.0 - PAMI_BACKWIDTH, true);
+        }
+        else
+        {
+          OdometrySetXMilliMeter(3000.0 - 615.0 - PAMI_BACKWIDTH);
+          OdometrySetThetaDeg(180.0);
+          PositionMgrSetOrientationControl(true);
+          PositionMgrGotoDistanceMilliMeter(3000.0 - 615.0 - MATCH_START_POSITION_X_BLUE - PAMI_BACKWIDTH, true);
+        }
+        /* Finished */
+
+        // /* Great Hack */
+        // if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        // {
+        //   OdometrySetXMilliMeter(MATCH_START_POSITION_X_YELLOW);
+        // }
+        // else
+        // {
+        //   OdometrySetXMilliMeter(MATCH_START_POSITION_X_BLUE);
+        // }
+        //OdometrySetYMilliMeter(MATCH_START_POSITION_Y);
+        //OdometrySetThetaDeg(-90.0);
+
+        trajectoryFinished_b = true;
+        MatchMgrSetState(MATCH_STATE_READY);
+        if (DEBUG_SIMULATION)
+        {
+          if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+          {
+            OdometrySetXMilliMeter(MATCH_START_POSITION_X_YELLOW);
+            OdometrySetYMilliMeter(MATCH_START_POSITION_Y);
+          }
+          else
+          {
+            OdometrySetXMilliMeter(MATCH_START_POSITION_X_BLUE);
+            OdometrySetYMilliMeter(MATCH_START_POSITION_Y);
+          }
+          //OdometrySetThetaDeg(MATCH_START_POSITION_THETA);
+        }
+        break;
+
+      default:
+        break;
+    }
+#endif
+
     if (TRAJECTORY_DEBUG)
     {
       Serial.print("After border Calib Index : ");

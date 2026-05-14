@@ -57,9 +57,11 @@ void MatchMgrInit()
   /* Set up the interrupt on the color switch to change the color */
   attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
   /* Set up the  nano esp32 rgb leds */
+#ifndef PAMI_G
   pinMode(LED_RED, OUTPUT);
   pinMode(LED_GREEN, OUTPUT);
   pinMode(LED_BLUE, OUTPUT);
+#endif
 }
 
 void MatchMgrUpdate(bool timeMeasure_b)
@@ -88,16 +90,19 @@ void MatchMgrUpdate(bool timeMeasure_b)
         break;
 
       case MATCH_STATE_COLOR_SELECTION:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Waiting for color selection */
         //Serial.println("Waiting for color selection");
         break;
 
       case MATCH_STATE_BORDER_ADJUST:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Adjusting to border */
         //Serial.println("Border calibration");
         break;
 
       case MATCH_STATE_READY:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Ready, waiting to start */
         //Serial.println("Ready to start");
         //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
@@ -118,10 +123,15 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_END:
         /* End of match */
-        //Serial.println("End");
+        Serial.println("End");
         PositionMgrSetDistanceControl(false);     /* Sets the PAMI free of control loop */
         PositionMgrSetOrientationControl(false);
+#ifndef PAMI_G
         ActuatorServoStart();                     /* Headbang start! */
+#else
+        Serial.println("Launching Action?");
+        ActionMgrSetNextAction(ACTION_MGR_ID_EAT_NUTS, true); /* Eat nuts! */
+#endif
         break;
 
       default:
@@ -269,23 +279,35 @@ void MatchMgrChangeColor()
 void MatchMgrSetColorBlue()
 {
   matchMgrColor_en_g = MATCH_COLOR_YELLOW;
+#ifndef PAMI_G
   LedSetAnim(LED1_ID, ANIM_STATE_OFF);
   LedSetAnim(LED5_ID, ANIM_STATE_ON);
-  /* Yellow color */
+  /* Blue color */
   digitalWrite(LED_RED, LOW);
   digitalWrite(LED_GREEN, LOW);
   digitalWrite(LED_BLUE, HIGH);
+#else
+  LedSetAnim(LED1_ID, ANIM_STATE_ON);
+  LedSetAnim(LED2_ID, ANIM_STATE_ON);
+  LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+#endif
 }
 
 void MatchMgrSetColorYellow()
 {
   matchMgrColor_en_g = MATCH_COLOR_BLUE;
+#ifndef PAMI_G
   LedSetAnim(LED1_ID, ANIM_STATE_ON);
   LedSetAnim(LED5_ID, ANIM_STATE_OFF);
-  /* Blue color */
+  /* Yellow color */
   digitalWrite(LED_RED, HIGH);
   digitalWrite(LED_GREEN, HIGH);
   digitalWrite(LED_BLUE, LOW);
+#else
+  LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED2_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED3_ID, ANIM_STATE_ON);
+#endif
 }
 
 MatchMgrColorEn MatchMgrGetColor()

@@ -249,6 +249,22 @@ void MotorTest(int16_t speed)
   delay(1000);
 }
 
+void MotorDetectDeadzone()
+{
+  static int16_t speed_u16;
+
+  for (speed_u16; speed_u16<255; speed_u16++)
+  {
+    Serial.print("DeadzoneDetect : ");
+    Serial.println(speed_u16);
+  
+    MotorLeftSetSpeed(speed_u16);
+    MotorRightSetSpeed(speed_u16);
+    delay(100);
+  }
+
+}
+
 int16_t motorLeftGetSpeed()
 {
   return motorLeftSpeed_i16;
