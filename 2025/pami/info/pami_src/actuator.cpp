@@ -12,7 +12,14 @@
 #define ACTUATOR_DEBUG                false
 #define ACTUATOR_UPDATE_PERIOD_S      0.1     /* Refresh rate of the display 1/0.1 = 10fps */
 
+#if defined(PAMI_1) || defined(PAMI_2) || defined(PAMI_3) || defined(PAMI_4)
 #define ACTUATOR_SERVO_SPEED_NULL     90
+#endif
+
+#if defined(PAMI_6) || defined(PAMI_5)
+#define ACTUATOR_SERVO_SPEED_NULL     95
+#endif
+
 #define ACTUATOR_SERVO_SPEED_FULL_CW  180
 #define ACTUATOR_SERVO_SPEED_FULL_CCW 0
 

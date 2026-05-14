@@ -27,7 +27,7 @@
 //#define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
 //#define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
 
-#define MATCH_START_DELAY_S           86.0                      /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_S           85.0                      /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
 #define MATCH_DURATION_S              98.0                      /* Match duration [s] */
@@ -36,11 +36,11 @@
 #define PAMI_WIDTH                    85.0                      /* From left wheel to right wheel [mm] */
 #define PAMI_BACKWIDTH                60.0                      /* From wheel contact point to back [mm] */
 
-#define MATCH_START_POSITION_X_YELLOW 410.0                     /* [mm] */
+#define MATCH_START_POSITION_X_YELLOW 400.0                     /* [mm] */
 #define MATCH_START_POSITION_X_BLUE   (3000.0 - MATCH_START_POSITION_X_YELLOW) /* [mm] */
 #define MATCH_START_POSITION_Y        1600.0                    /* [mm] */
 #define MATCH_START_POSITION_THETA    -90.0                     /* [°] */
-#define Y1                            1180.0
+#define Y1                            1150.0
 #define X2                            700.0
 #define Y2                            100.0
 
@@ -49,8 +49,8 @@ inline pose_t trajectoryYellowPoseArray[2] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
-  { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
+  { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementYellow              sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
 
@@ -59,8 +59,8 @@ inline pose_t trajectoryBluePoseArray[2] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
-  { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
+  { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementBlue                sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
 
@@ -75,7 +75,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
 //#define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
 //#define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
 
-#define MATCH_START_DELAY_S           86.0                       /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_S           85.0                       /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
 #define MATCH_DURATION_S              98.0                      /* Match duration [s] */
@@ -88,7 +88,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
 #define MATCH_START_POSITION_X_BLUE   (3000.0 - MATCH_START_POSITION_X_YELLOW) /* [mm] */
 #define MATCH_START_POSITION_Y        1590.0                    /* [mm] */
 #define MATCH_START_POSITION_THETA    -90.0                     /* [°] */
-#define Y1                            1180.0
+#define Y1                            1150.0
 #define X2                            1450.0
 #define Y2                            150.0
 
@@ -97,7 +97,7 @@ inline pose_t trajectoryYellowPoseArray[2] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
   { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
 };
 #define nbMovementYellow              sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
@@ -107,7 +107,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
   { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
 };
 #define nbMovementBlue                sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
@@ -124,7 +124,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
 //#define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
 //#define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
 
-#define MATCH_START_DELAY_S           88.0                       /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_S           86.5                       /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
 #define MATCH_DURATION_S              98.0                      /* Match duration [s] */
@@ -133,11 +133,11 @@ inline pose_t trajectoryBluePoseArray[2] = {
 #define PAMI_WIDTH                    85.0                      /* From left wheel to right wheel [mm] */
 #define PAMI_BACKWIDTH                60.0                      /* From wheel contact point to back [mm] */
 
-#define MATCH_START_POSITION_X_YELLOW 410.0                     /* [mm] */
+#define MATCH_START_POSITION_X_YELLOW 400.0                     /* [mm] */
 #define MATCH_START_POSITION_X_BLUE   (3000.0 - MATCH_START_POSITION_X_YELLOW) /* [mm] */
 #define MATCH_START_POSITION_Y        1700.0                    /* [mm] */
 #define MATCH_START_POSITION_THETA    -90.0                     /* [°] */
-#define Y1                            1290.0
+#define Y1                            1250.0
 #define X2                            750.0
 #define Y2                            850.0
 
@@ -147,7 +147,7 @@ inline pose_t trajectoryYellowPoseArray[2] = {
   //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
   { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 2000},
-  { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementYellow              sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
 
@@ -157,7 +157,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
   //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
   { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 2000},
-  { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementBlue                sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
 
@@ -172,7 +172,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
 //#define DUREE_ATTENTE_S             2.0                       /* Wait time before start [s], should be 85 seconds */
 //#define DUREE_ATTENTE_MS            DUREE_ATTENTE_S * 1000.0  /* Wait time before start [ms] */
 
-#define MATCH_START_DELAY_S           88.0                       /* Pami delayed start time [s], should be 85 seconds */
+#define MATCH_START_DELAY_S           86.5                       /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
 #define MATCH_DURATION_S              98.0                      /* Match duration [s] */
@@ -185,16 +185,16 @@ inline pose_t trajectoryBluePoseArray[2] = {
 #define MATCH_START_POSITION_X_BLUE   (3000.0 - MATCH_START_POSITION_X_YELLOW) /* [mm] */
 #define MATCH_START_POSITION_Y        1690.0                    /* [mm] */
 #define MATCH_START_POSITION_THETA    -90.0                     /* [°] */
-#define Y1                            1290.0
-#define X2                            1450.0
-#define Y2                            850.0
+#define Y1                            1250.0
+#define X2                            1600.0
+#define Y2                            700.0
 
 /* côté jaune */
 inline pose_t trajectoryYellowPoseArray[2] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 500},
+  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 500},
   { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
 };
 #define nbMovementYellow              sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
@@ -204,7 +204,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 500},
+  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 500},
   { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
 };
 #define nbMovementBlue                sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
@@ -223,37 +223,40 @@ inline pose_t trajectoryBluePoseArray[2] = {
 #define MATCH_START_DELAY_S           90.0                       /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
-#define MATCH_DURATION_S              30.0//98.0                      /* Match duration [s] */
+#define MATCH_DURATION_S              99.0                      /* Match duration [s] */
 #define MATCH_DURATION_MS             MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
 
 #define PAMI_WIDTH                    85.0                      /* From left wheel to right wheel [mm] */
 #define PAMI_BACKWIDTH                60.0                      /* From wheel contact point to back [mm] */
 
-#define MATCH_START_POSITION_X_YELLOW 410.0                     /* [mm] */
+#define MATCH_START_POSITION_X_YELLOW 400.0                     /* [mm] */
 #define MATCH_START_POSITION_X_BLUE   (3000.0 - MATCH_START_POSITION_X_YELLOW) /* [mm] */
 #define MATCH_START_POSITION_Y        1800.0                    /* [mm] */
 #define MATCH_START_POSITION_THETA    -90.0                     /* [°] */
 #define Y1                            1400.0
-#define X2                            150.0
-#define Y2                            850.0
+#define X2                            140.0
+#define Y2                            840.0
+#define Y                             1100.0
 
 /* côté jaune */
-inline pose_t trajectoryYellowPoseArray[2] = {
+inline pose_t trajectoryYellowPoseArray[3] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 4000},
-  { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR,500},
+  { MATCH_START_POSITION_X_YELLOW, Y, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
+  { X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementYellow              sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
 
 /* côté bleu */
-inline pose_t trajectoryBluePoseArray[2] = {
+inline pose_t trajectoryBluePoseArray[3] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 4000},
-  { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 500},
+  { MATCH_START_POSITION_X_BLUE, Y, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
+  { 3000.0 - X2, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementBlue                sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
 
@@ -271,7 +274,7 @@ inline pose_t trajectoryBluePoseArray[2] = {
 #define MATCH_START_DELAY_S           89.0                       /* Pami delayed start time [s], should be 85 seconds */
 #define MATCH_START_DELAY_MS          MATCH_START_DELAY_S * 1000.0 /* same in [ms] */
 
-#define MATCH_DURATION_S              98.0                      /* Match duration [s] */
+#define MATCH_DURATION_S              99.0                      /* Match duration [s] */
 #define MATCH_DURATION_MS             MATCH_DURATION_S * 1000.0 /* Match duration [ms] */
 
 #define PAMI_WIDTH                    85.0                      /* From left wheel to right wheel [mm] */
@@ -291,9 +294,9 @@ inline pose_t trajectoryYellowPoseArray[3] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_YELLOW, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 4000},
-  { MATCH_START_POSITION_X_YELLOW, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
-  { X3, Y3, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_YELLOW, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 500},
+  { MATCH_START_POSITION_X_YELLOW, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
+  { X3, Y3, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementYellow              sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
 
@@ -302,9 +305,9 @@ inline pose_t trajectoryBluePoseArray[3] = {
   /* Position de départ */
   //{MATCH_START_POSITION_X_BLUE, MATCH_START_POSITION_Y, MATCH_START_POSITION_THETA, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, waitingTime_u32},
   /* Position du garde manger à viser */
-  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 4000},
-  { MATCH_START_POSITION_X_BLUE, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
-  { 3000.0 - X3, Y3, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, OBSTACLE_SENSOR, 0},
+  { MATCH_START_POSITION_X_BLUE, Y1, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 500},
+  { MATCH_START_POSITION_X_BLUE, Y2, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
+  { 3000.0 - X3, Y3, NO_THETA_ALIGN, MOVE_FORWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0},
 };
 #define nbMovementBlue                sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
 
