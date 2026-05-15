@@ -45,6 +45,7 @@ typedef enum
   TRAJECTORY_EMERGENCY_2ND_TRANSLATION = 9u,  /* Second translation of an emergency */
 #ifdef PAMI_G
   TRAJECTORY_WAYPOINT_ACTION = 10u,           /* Action to do if needed */
+  TRAJECTORY_WAYPOINT_ACTION_WAIT = 11u,      /* Action waiting */
 #endif
 } TrajectoryMgrWaypointState;         /* Enumeration used to select the mvt type */
 
@@ -187,6 +188,9 @@ uint8_t Trajectory(double colorSide)
 #ifdef PAMI_G
       case TRAJECTORY_WAYPOINT_ACTION:
         Serial.print("Action to do");
+        break;
+      case TRAJECTORY_WAYPOINT_ACTION_WAIT:
+        Serial.print("Action waiting");
         break;
 #endif      
       default:
@@ -402,7 +406,16 @@ uint8_t Trajectory(double colorSide)
         }
 #ifdef PAMI_G
         /* Set the state to action */
-        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ACTION;
+        if ( actionId_u8 != ACTION_MGR_ID_NONE)
+        {
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ACTION;
+        }
+        else
+        {
+          /* Set the state to next point */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+          trajectoryIndex_u8++;
+        }
 #else
         /* Set the state to next point */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
@@ -418,8 +431,21 @@ uint8_t Trajectory(double colorSide)
         /* Do the action with wait or not */
         ActionMgrSetNextAction(actionId_u8, isWait_b);
         /* Set the state to next point */
-        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
-        trajectoryIndex_u8++;
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ACTION_WAIT;
+        break;
+
+      case TRAJECTORY_WAYPOINT_ACTION_WAIT:
+        if (TRAJECTORY_DEBUG)
+        {
+          Serial.println("[Action wait?]");
+        }
+        /* Wait for the action_mgr to finish */
+        if ( ActionMgrGetState() == ACTION_MGR_STATE_DONE )
+        {
+          /* Set the state to next point */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+          trajectoryIndex_u8++;
+        }
         break;
 #endif
 
