@@ -35,11 +35,11 @@ bool soundEnable_b_g;
  ******************************************************************************/
 void SoundInit()
 {
-  mp3serial.begin(9600, SERIAL_8N1, /*rx =*/STEPPER_TMC_RX, /*tx =*/STEPPER_TMC_TX);
+  mp3serial.begin(9600, SERIAL_8N1, STEPPER_TMC_RX, STEPPER_TMC_TX);
 
   Serial.print("Sound|Init : ");
  
-  if (!myDFPlayer.begin(mp3serial, /*isACK = */true, /*doReset = */true))
+  if (!myDFPlayer.begin(mp3serial, true, true))
   {
     soundEnable_b_g = false;
     Serial.println("Failed.");

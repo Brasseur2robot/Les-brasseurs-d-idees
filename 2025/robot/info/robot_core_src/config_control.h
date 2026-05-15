@@ -12,18 +12,18 @@
  ******************************************************************************/
 #ifdef ROBOT_CORE
 
-#define KP_DISTANCE         0.7
+#define KP_DISTANCE         0.3
 #define KI_DISTANCE         0.0
-#define KD_DISTANCE         0.04
+#define KD_DISTANCE         0.02
 
-#define KP_ORIENTATION      0.5
+#define KP_ORIENTATION      0.2
 #define KI_ORIENTATION      0.0
-#define KD_ORIENTATION      0.02
+#define KD_ORIENTATION      0.01
 
-#define VITESSE_SLOW        500.0   /* [mm.s-1] */
-#define ACCELERATION_SLOW   200.0   /* [mm.s-2] */
-#define VITESSE_MAX         500.0   /* [mm.s-1] */
-#define ACCELERATION_MAX    300.0   /* [mm.s-2] */
+#define VITESSE_SLOW        1000.0   /* [mm.s-1] */
+#define ACCELERATION_SLOW   500.0   /* [mm.s-2] */
+#define VITESSE_MAX         5000.0 //3000  /* [mm.s-1] */
+#define ACCELERATION_MAX    750.0  //500 /* [mm.s-2] */
 
 #endif
 

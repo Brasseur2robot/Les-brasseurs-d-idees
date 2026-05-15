@@ -14,7 +14,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define MATCH_MGR_DEBUG             true
+#define MATCH_MGR_DEBUG             false
 #define MATCH_MGR_UPDATE_PERIOD_S   0.1   /* Refresh rate of the display 1/0.1 = 10fps */
 
 /******************************************************************************
@@ -96,11 +96,13 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_COLOR_SELECTION:
         /* Waiting for color selection */
+        matchMgrStartTimeMs_u32_g = millis();
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Waiting for color selection");
         break;
 
       case MATCH_STATE_BORDER_ADJUST:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Adjusting to border */
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Border calibration");
@@ -108,6 +110,7 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_READY:
         /* Ready, waiting to start */
+        matchMgrStartTimeMs_u32_g = millis();
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Ready to start");
         //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
@@ -243,24 +246,24 @@ void MatchMgrUpdateEventTimer()
   /* Compute elapsed time */
   matchMgrElapsedTimeMs_u32_g = millis() - matchMgrStartTimeMs_u32_g;
 
-  /* Test if it is time to event WAITFOREND */
-  if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_WAITFOREND_MS) && (matchMgrEventGotoWaitforend_b == false) )
-  {
-    matchMgrEventGotoWaitforend_b = true;
-    matchMgrEventFlagGotoWaitforend_b = true;
-    TrajectoryNewTrajectory();
+  // /* Test if it is time to event WAITFOREND */
+  // if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_WAITFOREND_MS) && (matchMgrEventGotoWaitforend_b == false) )
+  // {
+  //   matchMgrEventGotoWaitforend_b = true;
+  //   matchMgrEventFlagGotoWaitforend_b = true;
+  //   TrajectoryNewTrajectory();
 
-    /* Proceed to zone */
-    //matchMgrState_en_g = MATCH_STATE_END;
-    /* TODO signal this by leds! */
+  //   /* Proceed to zone */
+  //   //matchMgrState_en_g = MATCH_STATE_END;
+  //   /* TODO signal this by leds! */
 
-    if (MATCH_MGR_DEBUG)
-    {
-      Serial.print("[Event] Time :");
-      Serial.print(matchMgrElapsedTimeMs_u32_g);
-      Serial.println("Event Goto WaitForEnd");
-    }
-  }
+  //   if (MATCH_MGR_DEBUG)
+  //   {
+  //     Serial.print("[Event] Time :");
+  //     Serial.print(matchMgrElapsedTimeMs_u32_g);
+  //     Serial.println("Event Goto WaitForEnd");
+  //   }
+  // }
 
   /* Test if it is time to event GOTOENDZONE */
   if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_ENDZONE_MS) && (matchMgrEventGotoEndzone_b == false) )

@@ -9,9 +9,26 @@
 
 typedef struct LidarDataStruct {
   bool init_b;
-  uint8_t distance_u8;
-  uint8_t angle_u8;
+  uint16_t distance_u16;
+  int16_t angle_i16;
 } lidarData_t;
+
+typedef struct PointStruct {
+  int16_t x;
+  int16_t y;
+} point_t;
+
+typedef struct RectangleStruct {
+  int16_t left;
+  int16_t right;
+  int16_t bottom;
+  int16_t top;
+} rect_t;
+
+typedef struct PointPolarStruct {
+  int16_t rho;
+  int16_t theta;
+} pointPolar_t;
 
 /******************************************************************************
  * Function Declarations
@@ -23,6 +40,8 @@ void ObstacleSensorUpdate(bool timeMeasure_b);
 bool ObstacleSensorDetected();
 void ObstacleSensorSetThreshold(uint16_t value_u16);
 bool ObstacleSensorLidarReceiveMessage();
-bool ObstacleSensorLidarSendMessage(uint8_t msgId_u08);
+bool ObstacleSensorLidarSendMessage(uint16_t msgId_u16);
+point_t polarToCart(pointPolar_t pointPolar_st);
+bool IsInRect(point_t point_st, rect_t rect_st);
 
 #endif

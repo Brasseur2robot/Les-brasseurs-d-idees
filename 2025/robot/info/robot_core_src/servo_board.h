@@ -16,18 +16,18 @@
 #define SERVO_BOARD_ARM_LEFT_ACCEL              300.0
 #define SERVO_BOARD_ARM_LEFT_MIN                0.0
 #define SERVO_BOARD_ARM_LEFT_MAX                (270.0 / 1.5) // Divided by 1.5 to accomodate the servo board which handles 180° servos
-#define SERVO_BOARD_ARM_LEFT_RETRACTED          ((245.0 - 5.0) / 1.5) //218.0 / 1.5 //145.0
+#define SERVO_BOARD_ARM_LEFT_RETRACTED          ((245.0 - 0.0) / 1.5) //218.0 / 1.5 //145.0
 #define SERVO_BOARD_ARM_LEFT_MIDSTOP            ((0.0 + 155.0 ) / 1.5)  //7.0 + 35.0
-#define SERVO_BOARD_ARM_LEFT_EXTENDED           ((0.0 + 80.0) / 1.5) //7.0
+#define SERVO_BOARD_ARM_LEFT_EXTENDED           ((0.0 + 75.0) / 1.5) //7.0
 
 #define SERVO_BOARD_ARM_RIGHT_ID                1
 #define SERVO_BOARD_ARM_RIGHT_SPEED             600.0 /* [°/s] rounded from 0.192 [s/60°] */
 #define SERVO_BOARD_ARM_RIGHT_ACCEL             300.0
 #define SERVO_BOARD_ARM_RIGHT_MIN               0.0
 #define SERVO_BOARD_ARM_RIGHT_MAX               (270.0 / 1.5) // Divided by 1.5 to accomodate the servo board which handles 180° servos
-#define SERVO_BOARD_ARM_RIGHT_RETRACTED         ((0.0 + 5.0 ) / 1.5) //7.0
+#define SERVO_BOARD_ARM_RIGHT_RETRACTED         ((0.0 + 0.0 ) / 1.5) //7.0
 #define SERVO_BOARD_ARM_RIGHT_MIDSTOP           ((245.0 - 155.0) / 1.5) //145.0 - 35.0
-#define SERVO_BOARD_ARM_RIGHT_EXTENDED          ((245.0 - 80.0) / 1.5) // 218.0 / 1.5 //114.0
+#define SERVO_BOARD_ARM_RIGHT_EXTENDED          ((245.0 - 75.0) / 1.5) // 218.0 / 1.5 //114.0
 
 #define SERVO_BOARD_SLOPE_ID                    2
 #define SERVO_BOARD_SLOPE_SPEED                 600.0 /* [°/s] rounded from 0.192 [s/60°] */

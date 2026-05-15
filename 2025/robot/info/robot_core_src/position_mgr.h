@@ -1,6 +1,8 @@
 #ifndef position_mgr_h_
 #define position_mgr_h_
 
+#include "action_mgr.h"
+
 /******************************************************************************
    Types declarations
  ******************************************************************************/
@@ -20,9 +22,9 @@ typedef struct PoseStruct {
     bool direction;             // if true, forward move else backwards
     bool resetTheta;            // if theta is to be reset
     bool obstacleSensorEnable;  // if obstacle sensor active or not
-    bool actuatorState;         // if true = catch, else release
     uint32_t waitingTimeMs_u32; // if non null, waitingTime after arriving at position
-    uint8_t clawState_u8;       // if 0, nothing to do, if 1 clawOut, if 2 clawIn
+    ActionMgrIdEn actionId_en;  /* Action to do at pose */
+    bool actionIsWait_b;        /* if the robot should wait the action to finish */
 } pose_t;
 
 /******************************************************************************
@@ -34,7 +36,7 @@ void PositionMgrStop();
 void PositionMgrUpdate(bool timeMeasure_b);
 void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg);
 void PositionMgrGotoPose(pose_t pose);
-void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b);
+void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b, double speed_d);
 void PositionMgrGotoOrientationDegree(double theta_deg);
 PositionManagerStateEn PositionMgrGetState();
 bool PositionMgrGetEmergencyState();

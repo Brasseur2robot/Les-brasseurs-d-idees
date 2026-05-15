@@ -123,7 +123,6 @@ void PositionMgrStop() {
 */
 void PositionMgrUpdate(bool timeMeasure_b) {
   uint32_t currentTime_u32 = 0;
-  static bool emergencyActivated_b = false;
 
   currentTime_u32 = millis();
   static uint32_t lastExecutionTime_u32 = currentTime_u32; /* Quick fix to not have a big time calculated at first execution */
@@ -151,13 +150,13 @@ void PositionMgrUpdate(bool timeMeasure_b) {
 
     /* Looks for obstacle detection, only if currently moving */
     if (positionMgrState_en_g == POSITION_STATE_MOVING) {
-      if ((ObstacleSensorDetected() == true) && (emergencyActivated_b == false)) {
-        emergencyActivated_b = true;
+      if ((ObstacleSensorDetected() == true) && (emergencyActivated_b_g == false)) {
+        emergencyActivated_b_g = true;
         RampEmergencyStop(&rampDistance_st_g);
         RampEmergencyStop(&rampOrientation_st_g);
         LedSetAnim(LED1_ID, ANIM_STATE_BLINK);
         LedSetBlinkNb(LED1_ID, 2);
-        //Serial.println("Emergency");
+        Serial.println("Emergency!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
       }
     }
 
@@ -199,7 +198,7 @@ void PositionMgrUpdate(bool timeMeasure_b) {
           || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
         //Serial.print("Ramp finished, ");
         /* count tiemout detection */
-        if (timeOutCount_u8 < 20) {
+        if (timeOutCount_u8 < 40) {
           timeOutCount_u8 += 1;
           positionMgrState_en_g = POSITION_STATE_MOVING;
           //Serial.print("Incrementing timeout, ");
@@ -395,7 +394,7 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg) {
    @result    none
 
 */
-void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b) {
+void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b, double speed_d) {
   //IhmStop();
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
@@ -405,9 +404,9 @@ void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b) {
 
   /* Test if braking at the end of the ramp is required */
   if (braking_b == true)
-    RampNew(&rampDistance_st_g, (int32_t)MilliMeterToTop(distanceMm_d), 0, (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(ACCELERATION_SLOW));
+    RampNew(&rampDistance_st_g, (int32_t)MilliMeterToTop(distanceMm_d), 0, (int32_t)MilliMeterToTop(speed_d), (int32_t)MilliMeterToTop(ACCELERATION_MAX));
   else
-    RampNew(&rampDistance_st_g, (int32_t)MilliMeterToTop(distanceMm_d), (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(VITESSE_SLOW), (int32_t)MilliMeterToTop(ACCELERATION_SLOW));
+    RampNew(&rampDistance_st_g, (int32_t)MilliMeterToTop(distanceMm_d), (int32_t)MilliMeterToTop(speed_d), (int32_t)MilliMeterToTop(speed_d), (int32_t)MilliMeterToTop(ACCELERATION_MAX));
 }
 
 /**

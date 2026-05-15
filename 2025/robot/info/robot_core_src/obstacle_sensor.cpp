@@ -15,11 +15,12 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define OBSTACLE_SENSOR_THRESHOLD_MM        250   // [mm]
-#define OBSTACLE_SENSOR_THRESHOLD_MINI_MM   100   // [mm]
-#define OBSTACLE_SENSOR_THRESHOLD_MAXI_MM   600   // [mm]
+#define OBSTACLE_SENSOR_THRESHOLD_MM        400   // [mm]
+#define OBSTACLE_SENSOR_THRESHOLD_MINI_MM   400   // [mm]
+#define OBSTACLE_SENSOR_THRESHOLD_MAXI_MM   800   // [mm]
 #define DEBUG_OBSTACLE                      false
-#define DEBUG_OBSTACLE_COM                  true
+#define DEBUG_OBSTACLE_COM                  false
+#define DEBUG_OBSTACLE_TRIG                 false
 
 /******************************************************************************
   Types declarations
@@ -44,6 +45,7 @@ uint16_t obstacleSensorThreshold_u16;
 HardwareSerial RaspiSerial(2);
 lidarData_t lidarData_st_g;
 
+rect_t detectionRect_st_g;
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -66,8 +68,8 @@ void ObstacleSensorInit()
   RaspiSerial.begin(1000000, SERIAL_8N1, STEPPER_TMC_RX, STEPPER_TMC_TX);
   /* init Lidar structure */
   lidarData_st_g.init_b = false;
-  lidarData_st_g.distance_u8 = 0;
-  lidarData_st_g.angle_u8 = 0;
+  lidarData_st_g.distance_u16 = 0;
+  lidarData_st_g.angle_i16 = 0;
   /* Try communicating ? */
   ObstacleSensorLidarSendMessage(LIDAR_ID_PING);
   delay(100);
@@ -82,6 +84,11 @@ void ObstacleSensorInit()
     Serial.println("Ok");
     LedSetError(ERROR_LIDAR, true);
   }
+
+  detectionRect_st_g.left = 50;
+  detectionRect_st_g.right = 1000;
+  detectionRect_st_g.bottom = -300;
+  detectionRect_st_g.top = 300;
 
 #else
 
@@ -173,7 +180,7 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
   if (obstacleSensorEnable_b == true)
   {
 #if ROBOT_USE_LIDAR == true
-    if ((lidarData_st_g.distance_u8 > 0 ) && (lidarData_st_g.distance_u8 < obstacleSensorThreshold_u16) )
+    if ((lidarData_st_g.distance_u16 > 0 ) && (lidarData_st_g.distance_u16 < obstacleSensorThreshold_u16) )
     {
       obstacleSensorDetected_b = true;
     } 
@@ -181,6 +188,35 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
     {
       obstacleSensorDetected_b = false;
     }
+    /* Alternative method */
+    pointPolar_t adversaryPolar_st;
+    adversaryPolar_st.rho = lidarData_st_g.distance_u16;
+    adversaryPolar_st.theta = lidarData_st_g.angle_i16;
+    point_t adversary_st = polarToCart(adversaryPolar_st);
+    bool inside_b = IsInRect(adversary_st, detectionRect_st_g);
+
+    if ( inside_b == true )
+    {
+      /* Adversary in sight */
+    }
+    else
+    {
+      /* Adversary not in sight */
+    }
+    if (DEBUG_OBSTACLE_TRIG)
+    {
+      Serial.print("ObsSensor|Trig : dist ");
+      Serial.print(adversaryPolar_st.rho);
+      Serial.print(", angle : ");
+      Serial.print(adversaryPolar_st.theta);
+      Serial.print(", transforms in : ");
+      Serial.print(adversary_st.x);
+      Serial.print(", ");
+      Serial.print(adversary_st.y);
+      Serial.print(", is it inside 50,1000 -400,400 :"); 
+      Serial.print(inside_b);
+    }
+
 #else
     if ((distance_u16 > 0 ) && (distance_u16 < obstacleSensorThreshold_u16) )
     {
@@ -199,8 +235,14 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
 
   if (DEBUG_OBSTACLE)
   {
-    Serial.print("Distance measured : ");
+    Serial.print("ObsSensor|Enabled : ");
+    Serial.print(obstacleSensorEnable_b);
+    Serial.print(", distance measured : ");
+#if ROBOT_USE_LIDAR == true
+    Serial.print(lidarData_st_g.distance_u16);
+#else
     Serial.print(distance_u16);
+#endif
     Serial.print(", Threshold : ");
     Serial.print(obstacleSensorThreshold_u16);
     Serial.print(", Obstacle : ");
@@ -258,21 +300,23 @@ bool ObstacleSensorLidarReceiveMessage()
 {
   bool result_b = false;
 
-  uint8_t msgId_u8 = 0;
-  uint8_t msgPlayload1_u8 = 0;
-  uint8_t msgPlayload2_u8 = 0;
+  uint16_t msgId_u16 = 0;
+  uint16_t msgPlayload1_u16 = 0;
+  int16_t msgPlayload2_i16 = 0;
+  lidarData_st_g.distance_u16 = 0;
+  lidarData_st_g.angle_i16 = 0;
 
   while (RaspiSerial.available() > 0)
   {
     String msg = RaspiSerial.readStringUntil('\n');
-    Serial.print(msg);
     int separatorIndex = msg.indexOf(';');
+    int lastSeparatorIndex = msg.lastIndexOf(';');
 
-    msgId_u8 = (uint8_t)msg.substring(0, separatorIndex).toInt();
-    msgPlayload1_u8 = (uint8_t)msg.substring(separatorIndex + 1).toInt();
-    msgPlayload2_u8 = (uint8_t)msg.substring(separatorIndex + 1).toInt();
+    msgId_u16 = (uint16_t)msg.substring(0, separatorIndex).toInt();
+    msgPlayload1_u16 = (uint16_t)msg.substring(separatorIndex + 1, lastSeparatorIndex).toInt();
+    msgPlayload2_i16 = (int16_t)msg.substring(lastSeparatorIndex + 1).toInt();
 
-    switch(msgId_u8)
+    switch(msgId_u16)
     {
       case LIDAR_ID_NONE:
         /* error? */
@@ -280,7 +324,7 @@ bool ObstacleSensorLidarReceiveMessage()
       
       case LIDAR_ID_PING:
         /* RPI ping back ? if correct playload OK */
-        if ( (msgPlayload1_u8 == LIDAR_PLAYLOAD_PING) && ( msgPlayload2_u8== LIDAR_PLAYLOAD_PING) )
+        if ( (msgPlayload1_u16 == LIDAR_PLAYLOAD_PING) && ( msgPlayload2_i16== LIDAR_PLAYLOAD_PING) )
         {
           lidarData_st_g.init_b = true;
           if (DEBUG_OBSTACLE_COM)
@@ -296,15 +340,16 @@ bool ObstacleSensorLidarReceiveMessage()
 
       case LIDAR_ID_OBSTACLE_POS:
         /* Lidar is sending a measurement */
-        lidarData_st_g.distance_u8 = msgPlayload1_u8;
-        lidarData_st_g.angle_u8 = msgPlayload2_u8;
+        lidarData_st_g.distance_u16 = msgPlayload1_u16;
+        lidarData_st_g.angle_i16 = msgPlayload2_i16;
         if (DEBUG_OBSTACLE_COM)
         {
           Serial.print("ObsSensor|Received measurement : distance = ");
-          Serial.print(msgPlayload1_u8);
+          Serial.print(lidarData_st_g.distance_u16);
           Serial.print(", angle = ");
-          Serial.println(msgPlayload2_u8);
+          Serial.println(lidarData_st_g.angle_i16);
         }
+        break;
       default:
         if (DEBUG_OBSTACLE_COM)
         {
@@ -314,13 +359,16 @@ bool ObstacleSensorLidarReceiveMessage()
     }
   }
 
-  if (msgId_u8 != 0)
+  if (msgId_u16 != 0)
   {
     /* there was a new msg */
     result_b = true;
+    LedSetError(ERROR_LIDAR, true);
   }
   else
   {
+    lidarData_st_g.init_b = true;
+    LedSetError(ERROR_LIDAR, false);
     if (DEBUG_OBSTACLE_COM)
     {
       //Serial.println("ObsSensor|Received nothing.");
@@ -330,13 +378,13 @@ bool ObstacleSensorLidarReceiveMessage()
   return result_b;
 }
 
-bool ObstacleSensorLidarSendMessage(uint8_t msgId_u08)
+bool ObstacleSensorLidarSendMessage(uint16_t msgId_u16)
 {
   bool result_b = false;
 
   String msg = "";
 
-  switch(msgId_u08)
+  switch(msgId_u16)
   {
     case LIDAR_ID_NONE:
       /* error? */
@@ -359,7 +407,32 @@ bool ObstacleSensorLidarSendMessage(uint8_t msgId_u08)
 
   if (DEBUG_OBSTACLE_COM)
   {
-    //Serial.print("ObsSensor|Sending msg : " + msg);
+    Serial.print("ObsSensor|Sending msg : " + msg);
+  }
+
+  return result_b;
+}
+
+point_t polarToCart(pointPolar_t pointPolar_st)
+{
+  point_t pointCart_st;
+  pointCart_st.x = 0;
+  pointCart_st.y = 0;
+
+  pointCart_st.x = pointPolar_st.rho * cos(pointPolar_st.theta);
+  pointCart_st.y = pointPolar_st.rho * sin(pointPolar_st.theta);
+
+  return pointCart_st;
+}
+
+
+bool IsInRect(point_t point_st, rect_t rect_st)
+{
+  bool result_b = false;
+
+  if ( (point_st.x >= rect_st.left) && (point_st.x <= rect_st.right) && (point_st.y >= rect_st.bottom) && (point_st.y <= rect_st.top) )
+  {
+    result_b = true;
   }
 
   return result_b;

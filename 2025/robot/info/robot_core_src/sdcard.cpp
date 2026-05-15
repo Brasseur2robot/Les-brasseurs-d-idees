@@ -64,7 +64,7 @@ void SdcardInit() {
     Serial.println("UNKNOWN");
   }
 
-  // SdcardListDir(SD, "/", 0);
+  SdcardListDir(SD, "/", 0);
   // SdcardCreateDir(SD, "/mydir");
   // SdcardListDir(SD, "/", 0);
   // SdcardRemoveDir(SD, "/mydir");
@@ -100,6 +100,8 @@ void SdcardListDir(fs::FS &fs, const char *dirname, uint8_t levels) {
     return;
   }
 
+  IhmClearFileList();
+  
   File file = root.openNextFile();
   while (file) {
     if (file.isDirectory()) {
@@ -114,7 +116,7 @@ void SdcardListDir(fs::FS &fs, const char *dirname, uint8_t levels) {
       Serial.print("  SIZE: ");
       Serial.println(file.size());
       /* Add filename to the submenu */
-      //IhmAddFile(file.name());
+      IhmAddFile(file.name());
     }
     file = root.openNextFile();
   }

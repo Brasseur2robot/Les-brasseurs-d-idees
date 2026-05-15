@@ -15,7 +15,7 @@
  * tops per wheel rotation.
  */
 #define N_TOP_PER_WHEEL_TURN  4.0*500.0    /* Encoder top number per wheel turn [-] */
-#define FACTOR_DISTANCE       0.9308820107051 /* Factor to adjust the top count */
+#define FACTOR_DISTANCE       0.933828238722168 /* Factor to adjust the top count */
 #define FACTOR_WHEEL_LEFT     1.0
 #define FACTOR_WHEEL_RIGHT    1.0
 /*
@@ -38,7 +38,7 @@
  */
 #define WHEELBASE_M           0.250 * 0.99802005834  /* Wheelbase of the robot [m] */
 //#define RAD_TO_TOP            N_TOP_PER_WHEEL_TURN / (WHEEL_DIAMETER_M / WHEELBASE_M ) / PI
-#define RAD_TO_TOP            (2.0 * 1989.4367886486 * FACTOR_DISTANCE)
+#define RAD_TO_TOP            (2.0 * 1839.479198483659 * FACTOR_DISTANCE)
 
 #define BACK_LENGTH           0.0 /* Length between wheel center and the back of the ROBOT_CORE */
 

@@ -5,13 +5,15 @@
 #include <ArduinoJson.h>
 #include <SD.h>
 #include "config.h"
+#include "action_mgr.h"
 #include "robot_mgr.h"
 #include "sdcard.h"
+#include "trajectory_mgr.h"
 
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define ROBOT_MGR_DEBUG false
+#define ROBOT_MGR_DEBUG true
 
 /******************************************************************************
   Types declarations
@@ -46,7 +48,7 @@ void RobotMgrInit()
 
   /* Takes the file from the SD file system */
   bool result_b = RobotMgrLoadConfiguration(filename);
-  
+
   /* is it reeeaaaady to rumble ? */
   Serial.print("RobotMgr|Init : ");
   if (result_b == true)
@@ -69,7 +71,7 @@ void RobotMgrUpdate()
 
 }
 
-bool RobotMgrLoadConfiguration(const char* filename) //, Config& config) {
+bool RobotMgrLoadConfiguration(const char* filename)
 {
   bool result_b = false;
 
@@ -116,8 +118,8 @@ bool RobotMgrLoadConfiguration(const char* filename) //, Config& config) {
     trajectoryJsonPoseArray_pst[idx].theta = object["angle"];
     trajectoryJsonPoseArray_pst[idx].resetTheta = object["orientation"];
     trajectoryJsonPoseArray_pst[idx].direction = object["direction"];
-    trajectoryJsonPoseArray_pst[idx].clawState_u8 = object["action"];
-    bool wea = object["wea"];
+    trajectoryJsonPoseArray_pst[idx].actionId_en = object["action"];
+    trajectoryJsonPoseArray_pst[idx].actionIsWait_b = object["wea"];
     idx++;
   }
 
@@ -141,15 +143,38 @@ bool RobotMgrLoadConfiguration(const char* filename) //, Config& config) {
       Serial.print(", direction : ");
       Serial.print(trajectoryJsonPoseArray_pst[idx].direction);
       Serial.print(", action : ");
-      Serial.print(trajectoryJsonPoseArray_pst[idx].clawState_u8);
-      //Serial.print(", wea : ");
-      //Serial.print(wea);
+      Serial.print(trajectoryJsonPoseArray_pst[idx].actionId_en);
+      Serial.print(", wait end of action : ");
+      Serial.print(trajectoryJsonPoseArray_pst[idx].actionIsWait_b);
       Serial.println();
     }
   }
   
   /* Close the file */
   SdCardCloseFile(SD, file);
+
+  // /* Try pile */
+  // WaypointPile_t *wpPile_st = NULL;   /* Impératif de l'initialiser à NULL */
+  // /* Load pile */
+  // for (uint8_t idx = 0; idx < array.size(); idx++)
+  // {
+  //   Push(&wpPile_st, trajectoryJsonPoseArray_pst[idx]);
+  // }
+  // /* Debug print */
+  // Serial.print("RobotMgr|Pile Pose nb :");
+  // Serial.println(Length(wpPile_st));
+  // View(wpPile_st);
+
+  // /* Try File */
+  // WaypointPile_t *wpFile_st = NULL;   /* Impératif de l'initialiser à NULL */
+  // for (uint8_t idx; idx < array.size(); idx++)
+  // {
+  //   WaypointFile(&wpFile_st, trajectoryJsonPoseArray_pst[idx]);
+  // }
+  //  /* Debug print */
+  // Serial.print("RobotMgr|File Pose nb :");
+  // Serial.println(Length(wpFile_st));
+  // View(wpFile_st);
 
   return result_b;
 }

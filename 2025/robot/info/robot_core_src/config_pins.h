@@ -40,8 +40,8 @@
 #define STEPPER_TMC_TX        D2
 
 /* IO Expnder pins */
+#define IOX_GRAB_END_STOP     0
 #define IOX_SD_CS             8
-
 #endif
 
 

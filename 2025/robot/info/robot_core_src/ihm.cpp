@@ -23,8 +23,10 @@
 #include "controller.h"
 #include "color_sensor.h"
 #include "ihm.h"
+#include "io_expander.h"
 #include "motor.h"
 #include "match_mgr.h"
+#include "robot_mgr.h"
 #include "servo_board.h"
 #include "sound.h"
 
@@ -56,6 +58,8 @@ LcdMenu menu(renderer);
 SimpleRotary encoder(IHM_ENCODER_PIN_A, IHM_ENCODER_PIN_B, IHM_ENCODER_SW_PIN);
 SimpleRotaryAdapter encoderA(&menu, &encoder);
 
+bool Input0_b = false;
+
 uint8_t selectedColor = 0;
 std::vector<const char*> colors = {"None", "Blue", "Yellow"};
 
@@ -78,20 +82,31 @@ void changeColor()
   /* Set color to none */
   if (selectedColor == 0)
   {
-  IhmSetColor(0, 255, 0);
-  MatchMgrChangeColor(MATCH_COLOR_NONE);
+    IhmSetColor(0, 255, 0);
+    MatchMgrChangeColor(MATCH_COLOR_NONE);
   } else if (selectedColor == 1)
   {
-  /* Set color to blue */
-  IhmSetColor(0, 0, 255);
-  MatchMgrChangeColor(MATCH_COLOR_BLUE);
+    /* Set color to blue */
+    IhmSetColor(0, 0, 255);
+    MatchMgrChangeColor(MATCH_COLOR_BLUE);
+    /* Load blue strategy */
+    RobotMgrLoadConfiguration("/blue.json");
+
   } else if (selectedColor == 2)
   {
-  /* Set color to yellow */
+    /* Set color to yellow */
     IhmSetColor(255, 255, 0);
     MatchMgrChangeColor(MATCH_COLOR_YELLOW);
+    /* Load Yellow strategy */
+    RobotMgrLoadConfiguration("/blue.json");
+
   }
 }
+
+MENU_SCREEN(InputDbgScreen, InputDbgItems,
+            ITEM_VALUE("Io 0 ", Input0_b, "%d")
+            );
+
 float targetR;
 float targetL;
 MENU_SCREEN(ServoCfgScreen, ServoCfgItems,
@@ -312,7 +327,9 @@ MENU_SCREEN(mainScreen, mainItems,
 
             ITEM_SUBMENU("Dynamixel Cfg", DynamixelCfgScreen),
 
-            ITEM_SUBMENU("Servo Cfg", ServoCfgScreen)
+            ITEM_SUBMENU("Servo Cfg", ServoCfgScreen),
+
+            ITEM_SUBMENU("Input debug", InputDbgScreen)
             );
 
 /******************************************************************************
@@ -355,6 +372,9 @@ void IhmUpdate(bool timeMeasure_b) {
         colorYellow_u16 = ColorSensorGetYellow();
       }
     }
+
+    Input0_b = IoExpanderGet(IOX_GRAB_END_STOP);
+
     menu.poll();
 
     /* Measure execution time if needed */
@@ -375,7 +395,18 @@ void IhmSetColor(uint8_t red, uint8_t green, uint8_t blue)
   lcdAdapter.show();
 }
 
-void IhmAddFile(const char filename[])
+void IhmClearFileList()
 {
+  while (SDFilesScreen->size() > 1)
+  {
+    SDFilesScreen->removeLastItem();
+  }
+}
+
+void IhmAddFile(const char * filename)
+{
+  Serial.print("Adding file : ");
+  Serial.println(filename);
   SDFilesScreen->addItem( ITEM_BASIC(filename) );
+  Serial.println( SDFilesScreen->getItemAt(1)->getText() );
 }

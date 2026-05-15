@@ -63,6 +63,6 @@ void ActionMgrInit();
 void ActionMgrUpdate(bool timeMeasure_b);
 bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b);
 void ActionMgrNextStep();
-
+ActionMgrStateEn ActionMgrGetState();
 
 #endif
