@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "actuator.h"
 #include "config.h"
+#include "controller.h"
 #include "com_wifi.h"
 //#include "customTimer.h"
 #include "ihm.h"
@@ -66,6 +67,7 @@ void setup() {
 #endif
   ActuatorInit();
   ComWifiInit();
+  ControllerInit(true);
   IhmInit();
   LedInit();
   MatchMgrInit();
@@ -77,6 +79,7 @@ void setup() {
   SensorInit();
 #endif
   TrajectoryMgrInit();
+  PositionMgrStop();
 }
 
 void loop() {
@@ -89,6 +92,7 @@ void loop() {
 #else
   ActuatorUpdate(DEBUG_TIME);
   SensorUpdate(DEBUG_TIME);
+  ControllerUpdate(DEBUG_TIME);
 #endif
   IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms, now on esp32 26ms */
   LedUpdate(DEBUG_TIME);

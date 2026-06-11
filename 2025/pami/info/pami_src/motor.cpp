@@ -11,7 +11,7 @@
  ******************************************************************************/
 #define DEBUG_MOTOR     false
 
-#define MOTOR_PWM_FREQ  1000
+#define MOTOR_PWM_FREQ  10000
 #define MOTOR_PWM_RES   8
 
 /******************************************************************************
@@ -139,13 +139,17 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   {
     if (motorLeftSpeed_i16 > 0)
     {
-      motorLeftPwmA1.write(abs(motorLeftSpeed_i16));
-      motorLeftPwmA2.write(0);
+      //motorLeftPwmA1.write(abs(motorLeftSpeed_i16));
+      //motorLeftPwmA2.write(0);
+      motorLeftPwmA1.write(255);
+      motorLeftPwmA2.write(255 - abs(motorLeftSpeed_i16));
     }
     else
     {
-    motorLeftPwmA1.write(0);
-    motorLeftPwmA2.write(abs(motorLeftSpeed_i16));
+    //motorLeftPwmA1.write(0);
+    //motorLeftPwmA2.write(abs(motorLeftSpeed_i16));
+    motorLeftPwmA1.write(225 - abs(motorLeftSpeed_i16));
+    motorLeftPwmA2.write(255);
     }
   }
 
@@ -200,13 +204,17 @@ void MotorRightSetSpeed(double motorSpeed_d)
   {
     if (motorRightSpeed_i16 > 0)
     {
-      motorRightPwmA1.write(abs(motorRightSpeed_i16));
-      motorRightPwmA2.write(0);
+      //motorRightPwmA1.write(abs(motorRightSpeed_i16));
+      //motorRightPwmA2.write(0);
+      motorRightPwmA1.write(255);
+      motorRightPwmA2.write(255 - abs(motorRightSpeed_i16));
     }
     else
     {
-      motorRightPwmA1.write(0);
-      motorRightPwmA2.write(abs(motorRightSpeed_i16));
+      //motorRightPwmA1.write(0);
+      //motorRightPwmA2.write(abs(motorRightSpeed_i16));
+      motorRightPwmA1.write(255 - abs(motorRightSpeed_i16));
+      motorRightPwmA2.write(255);
     }
   }
 
