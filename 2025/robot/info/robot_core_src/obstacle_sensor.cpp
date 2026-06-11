@@ -22,6 +22,8 @@
 #define DEBUG_OBSTACLE_COM                  false
 #define DEBUG_OBSTACLE_TRIG                 false
 
+#define TABLE_WIDTH_MM                      3000
+#define TABLE_HEIGHT_MM                     2000
 /******************************************************************************
   Types declarations
 ******************************************************************************/
@@ -46,6 +48,9 @@ HardwareSerial RaspiSerial(2);
 lidarData_t lidarData_st_g;
 
 rect_t detectionRect_st_g;
+rect_t tableRect_st_g;
+rect_t sceneRect_st_g;
+
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -89,6 +94,16 @@ void ObstacleSensorInit()
   detectionRect_st_g.right = 1000;
   detectionRect_st_g.bottom = -300;
   detectionRect_st_g.top = 300;
+
+  tableRect_st_g.left = 0;
+  tableRect_st_g.right = TABLE_WIDTH_MM;
+  tableRect_st_g.bottom = 0;
+  tableRect_st_g.top = TABLE_HEIGHT_MM;
+
+  sceneRect_st_g.left = 600;
+  sceneRect_st_g.right = 2400;
+  sceneRect_st_g.bottom = 1550;
+  sceneRect_st_g.top = 3000;
 
 #else
 
@@ -419,8 +434,8 @@ point_t polarToCart(pointPolar_t pointPolar_st)
   pointCart_st.x = 0;
   pointCart_st.y = 0;
 
-  pointCart_st.x = pointPolar_st.rho * cos(pointPolar_st.theta);
-  pointCart_st.y = pointPolar_st.rho * sin(pointPolar_st.theta);
+  pointCart_st.x = (int16_t)(pointPolar_st.rho * cos(pointPolar_st.theta));
+  pointCart_st.y = (int16_t)(pointPolar_st.rho * sin(pointPolar_st.theta));
 
   return pointCart_st;
 }
