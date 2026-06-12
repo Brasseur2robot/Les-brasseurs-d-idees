@@ -244,7 +244,7 @@ void RampEmergencyStop(RampParametersSt * ramp_pst)
   ramp_pst->rampState_en = RAMP_STATE_RAMPDOWN;
 
   /* Update the acceleration */
-  ramp_pst->accelerationMaxTopPerS_i32 = (int32_t)MeterToTop(ACCELERATION_MAX);
+  ramp_pst->accelerationMaxTopPerS_i32 = (int32_t)MilliMeterToTop(ACCELERATION_MAX);
   ramp_pst->accelerationCurrentTopPerS_i32 = - ramp_pst->accelerationMaxTopPerS_i32;
 
   /* Compute the breaking distance, from the actual speed */
@@ -272,7 +272,6 @@ int32_t RampGetSpeed(RampParametersSt * ramp_pst)
 {
   return ramp_pst->speedCurrentTopPerS_i32;
 }
-
 
 int32_t RampGetDistance(RampParametersSt * ramp_pst)
 {

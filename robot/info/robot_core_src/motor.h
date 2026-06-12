@@ -14,6 +14,4 @@ void MotorRightSetSpeed(double motorSpeed_d);
 int16_t motorLeftGetSpeed();
 int16_t motorRightGetSpeed();
 
-//void setPwmFrequency(int pin, int divisor);
-
 #endif

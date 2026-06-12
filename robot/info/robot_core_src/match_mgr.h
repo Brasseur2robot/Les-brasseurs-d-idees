@@ -47,7 +47,7 @@ void MatchMgrResetEventEndzoneState();
 void MatchMgrSetWaitingTimer(uint32_t waitingPeriodMs_u32);
 void MatchMgrUpdateWaitingTimer();
 
-void MatchMgrChangeColor();
+void MatchMgrChangeColor(MatchMgrColorEn selectedColor_en);
 MatchMgrColorEn MatchMgrGetColor();
 
 #endif

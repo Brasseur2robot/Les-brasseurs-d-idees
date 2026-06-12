@@ -11,20 +11,25 @@ int32_t OdometryGetXTop();
 int32_t OdometryGetYTop();
 int32_t OdometryGetDistanceTop();
 int32_t OdometryGetOrientationTop();
-double OdometryGetXMeter();
-double OdometryGetYMeter();
+double OdometryGetXMilliMeter();
+double OdometryGetYMilliMeter();
 double OdometryGetThetaRad();
+<<<<<<< HEAD:pami/info/pami_src/odometry.h
 double OdometryGetThetaDeg();
 void OdometrySetXMeter(double xM_d);
 void OdometrySetYMeter(double xM_d);
+=======
+void OdometrySetXMilliMeter(double xMm_d);
+void OdometrySetYMilliMeter(double xMm_d);
+>>>>>>> robot_poc:2025/robot/info/robot_core_src/odometry.h
 void OdometrySetThetaDeg(double thetaDeg_d);
 
 void OdometryUpdate(bool timeMeasure_b);
 void OdometryEncoderTest();
 
-double MeterToTop(double meter);
-double TopToMeter(double top);
-double TopToRad(double nTop);
-double RadToTop(double radian);
+double MilliMeterToTop(double milliMeter_d);
+double TopToMilliMeter(double top_d);
+double TopToRad(double nTop_d);
+double RadToTop(double radian_d);
 
 #endif

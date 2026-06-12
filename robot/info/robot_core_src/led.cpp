@@ -68,6 +68,11 @@ void LedInit()
   pixels.clear();
 
   ledState = 0;
+
+  // for(int i=0; i<NUMPIXELS; i++) {
+  //   pixels.setPixelColor(i, pixels.Color(0, 150, 0));
+  //   pixels.show();
+  // }
 }
 
 void LedSetLedPin( int ledId, int ledPin)
@@ -178,7 +183,10 @@ void LedUpdate(bool timeMeasure_b)
           break;
         }
     }
+    
+    //for(int i=0; i<NUMPIXELS; i++) {
     pixels.setPixelColor(0, pixels.Color(ledAnimLum[LED1_ID], ledAnimLum[LED2_ID], ledAnimLum[LED3_ID]));
+    //}
     pixels.show();
   }
 
@@ -191,23 +199,57 @@ void LedUpdate(bool timeMeasure_b)
   }
 }
 
-void LedSetError(int errorCode)
+void LedSetError(int errorCode, bool set_b)
 {
+  uint32_t color_u32;
+
+  if (set_b == true)
+    color_u32 = pixels.Color(0, 150, 0);
+  else
+    color_u32 = pixels.Color(150, 0, 0);
+
   switch (errorCode)
   {
     case ERROR_WIFI:
-      LedSetAnim(LED1_ID, ANIM_STATE_BLINK);
-      LedSetBlinkNb(LED1_ID, 1);
+      pixels.setPixelColor(1, color_u32);
       break;
 
-    case ERROR_ACCELEROMETER:
-      LedSetAnim(LED2_ID, ANIM_STATE_BLINK);
-      LedSetBlinkNb(LED2_ID, 2);
+    case ERROR_DXL:
+      pixels.setPixelColor(2, color_u32);
+      break;
+
+    case ERROR_SERVO_BOARD:
+      pixels.setPixelColor(3, color_u32);
+      break;
+
+    case ERROR_IO_EXP:
+      pixels.setPixelColor(4, color_u32);
+      break;
+ 
+    case ERROR_COLOR_SENSOR:
+      pixels.setPixelColor(5, color_u32);
+      break;
+
+    case ERROR_IHM:
+      pixels.setPixelColor(6, color_u32);
+      break;
+
+    case ERROR_SD_CARD:
+      pixels.setPixelColor(7, color_u32);
+      break;
+    
+    case ERROR_SOUND:
+      pixels.setPixelColor(8, color_u32);
+      break;
+
+    case ERROR_LIDAR:
+      pixels.setPixelColor(9, color_u32);
       break;
 
     default:
       break;
   }
+  pixels.show();
 }
 
 void LedAnimAllOff()

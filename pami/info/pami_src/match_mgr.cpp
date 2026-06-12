@@ -4,9 +4,12 @@
 #include <Arduino.h>
 #include "actuator.h"
 #include "config.h"
+#include "ihm.h"
 #include "led.h"
 #include "match_mgr.h"
+#include "obstacle_sensor.h"
 #include "position_mgr.h"
+#include "trajectory_mgr.h"
 
 /******************************************************************************
    Constants and Macros
@@ -53,6 +56,12 @@ void MatchMgrInit()
   attachInterrupt(digitalPinToInterrupt(SWITCH_REED_START_PIN), MatchMgrSwitchState, CHANGE);
   /* Set up the interrupt on the color switch to change the color */
   attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
+  /* Set up the  nano esp32 rgb leds */
+#ifndef PAMI_G
+  pinMode(LED_RED, OUTPUT);
+  pinMode(LED_GREEN, OUTPUT);
+  pinMode(LED_BLUE, OUTPUT);
+#endif
 }
 
 void MatchMgrUpdate(bool timeMeasure_b)
@@ -81,19 +90,22 @@ void MatchMgrUpdate(bool timeMeasure_b)
         break;
 
       case MATCH_STATE_COLOR_SELECTION:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Waiting for color selection */
         //Serial.println("Waiting for color selection");
         break;
 
       case MATCH_STATE_BORDER_ADJUST:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Adjusting to border */
         //Serial.println("Border calibration");
         break;
 
       case MATCH_STATE_READY:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Ready, waiting to start */
         //Serial.println("Ready to start");
-        LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
+        //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
         break;
 
       case MATCH_STATE_ON_WAITING:
@@ -111,10 +123,15 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_END:
         /* End of match */
-        //Serial.println("End");
+        Serial.println("End");
         PositionMgrSetDistanceControl(false);     /* Sets the PAMI free of control loop */
         PositionMgrSetOrientationControl(false);
+#ifndef PAMI_G
         ActuatorServoStart();                     /* Headbang start! */
+#else
+        Serial.println("Launching Action?");
+        ActionMgrSetNextAction(ACTION_MGR_ID_EAT_NUTS, true); /* Eat nuts! */
+#endif
         break;
 
       default:
@@ -165,6 +182,10 @@ void MatchMgrStartMatch()
   matchMgrStartTimeMs_u32_g = millis();
   /* Set the start delay (use for a delayed Pami start) */
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
+  /* Start the obstacle sensor */
+  ObstacleSensorStart();
+  /* Init Base trajectory */
+  TrajectoryBaseInit();
 
   if (MATCH_MGR_DEBUG)
   {
@@ -246,17 +267,47 @@ void MatchMgrChangeColor()
     /* if function is called, change the color to the other one */
     if (matchMgrColor_en_g == MATCH_COLOR_BLUE)
     {
-      matchMgrColor_en_g = MATCH_COLOR_YELLOW;
-      LedSetAnim(LED1_ID, ANIM_STATE_OFF);
-      LedSetAnim(LED5_ID, ANIM_STATE_ON);
+      MatchMgrSetColorBlue();
     }
     else
     {
-      matchMgrColor_en_g = MATCH_COLOR_BLUE;
-      LedSetAnim(LED1_ID, ANIM_STATE_ON);
-      LedSetAnim(LED5_ID, ANIM_STATE_OFF);
+      MatchMgrSetColorYellow();
     }
   }
+}
+
+void MatchMgrSetColorBlue()
+{
+  matchMgrColor_en_g = MATCH_COLOR_YELLOW;
+#ifndef PAMI_G
+  LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED5_ID, ANIM_STATE_ON);
+  /* Blue color */
+  digitalWrite(LED_RED, LOW);
+  digitalWrite(LED_GREEN, LOW);
+  digitalWrite(LED_BLUE, HIGH);
+#else
+  LedSetAnim(LED1_ID, ANIM_STATE_ON);
+  LedSetAnim(LED2_ID, ANIM_STATE_ON);
+  LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+#endif
+}
+
+void MatchMgrSetColorYellow()
+{
+  matchMgrColor_en_g = MATCH_COLOR_BLUE;
+#ifndef PAMI_G
+  LedSetAnim(LED1_ID, ANIM_STATE_ON);
+  LedSetAnim(LED5_ID, ANIM_STATE_OFF);
+  /* Yellow color */
+  digitalWrite(LED_RED, HIGH);
+  digitalWrite(LED_GREEN, HIGH);
+  digitalWrite(LED_BLUE, LOW);
+#else
+  LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED2_ID, ANIM_STATE_OFF);
+  LedSetAnim(LED3_ID, ANIM_STATE_ON);
+#endif
 }
 
 MatchMgrColorEn MatchMgrGetColor()

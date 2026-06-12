@@ -43,6 +43,8 @@ void MatchMgrSetWaitingTimer(long waitingPeriodMs_u32);
 void MatchMgrUpdateWaitingTimer();
 
 void MatchMgrChangeColor();
+void MatchMgrSetColorBlue();
+void MatchMgrSetColorYellow();
 MatchMgrColorEn MatchMgrGetColor();
 
 #endif

@@ -2,6 +2,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
+#include <ESP32Servo.h>
 #include "config.h"
 #include "motor.h"
 
@@ -9,6 +10,10 @@
    Constants and Macros
  ******************************************************************************/
 #define DEBUG_MOTOR     false
+
+#define MOTOR_PWM_FREQ  10000
+#define MOTOR_PWM_RES   8
+
 /******************************************************************************
   Types declarations
 ******************************************************************************/
@@ -20,6 +25,10 @@
 /******************************************************************************
    Global Variables Declarations
  ******************************************************************************/
+ESP32PWM motorLeftPwmA1;
+ESP32PWM motorLeftPwmA2;
+ESP32PWM motorRightPwmA1;
+ESP32PWM motorRightPwmA2;
 
 /******************************************************************************
    Module Global Variables
@@ -46,7 +55,16 @@ void MotorInit()
   pinMode(MOTOR_RIGHT_PIN_INA1, OUTPUT);
   pinMode(MOTOR_RIGHT_PIN_INA2, OUTPUT);
 
-  //setPwmFrequency(3, 1);
+	// Allow allocation of all timers
+	ESP32PWM::allocateTimer(0);
+	ESP32PWM::allocateTimer(1);
+	ESP32PWM::allocateTimer(2);
+	ESP32PWM::allocateTimer(3);
+	motorLeftPwmA1.attachPin(MOTOR_LEFT_PIN_INA1, MOTOR_PWM_FREQ, MOTOR_PWM_RES);
+	motorLeftPwmA2.attachPin(MOTOR_LEFT_PIN_INA2, MOTOR_PWM_FREQ, MOTOR_PWM_RES);
+	motorRightPwmA1.attachPin(MOTOR_RIGHT_PIN_INA1, MOTOR_PWM_FREQ, MOTOR_PWM_RES);
+	motorRightPwmA2.attachPin(MOTOR_RIGHT_PIN_INA2, MOTOR_PWM_FREQ, MOTOR_PWM_RES);
+  MotorStop();
 }
 
 /**
@@ -60,22 +78,22 @@ void MotorInit()
 */
 void MotorStop()
 {
-  digitalWrite(MOTOR_LEFT_PIN_INA1, LOW );
-  analogWrite(MOTOR_LEFT_PIN_INA2, LOW );
-  digitalWrite(MOTOR_RIGHT_PIN_INA1, LOW );
-  analogWrite(MOTOR_RIGHT_PIN_INA2, LOW );
+  motorLeftPwmA1.write(0);
+  motorLeftPwmA2.write(0);
+  motorRightPwmA1.write(0);
+  motorRightPwmA2.write(0);
 }
 
 void MotorLeftBrake()
 {
-  digitalWrite(MOTOR_LEFT_PIN_INA1, HIGH);
-  analogWrite(MOTOR_LEFT_PIN_INA2, 0);
+  motorLeftPwmA1.write(255);
+  motorLeftPwmA2.write(255);
 }
 
 void MotorRightBrake()
 {
-  digitalWrite(MOTOR_RIGHT_PIN_INA1, HIGH);
-  analogWrite(MOTOR_RIGHT_PIN_INA2, 0);
+  motorRightPwmA1.write(255);
+  motorRightPwmA2.write(255);
 }
 
 /**
@@ -104,7 +122,6 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   {
     motorSpeed_d = 255;
   }
-
   if (motorSpeed_d < -255)
   {
     motorSpeed_d = -255;
@@ -113,24 +130,33 @@ void MotorLeftSetSpeed(double motorSpeed_d)
   motorLeftSpeed_i16 = int16_t(motorSpeed_d);
 
   /* Write speed on the outputs */
-  if (motorLeftSpeed_i16 > 0)
+  if (motorLeftSpeed_i16 == 0)
   {
-    digitalWrite(MOTOR_LEFT_PIN_INA1, HIGH);
-    analogWrite(MOTOR_LEFT_PIN_INA2, 255 - motorLeftSpeed_i16);
+    motorLeftPwmA1.write(0);
+    motorLeftPwmA2.write(0);
   }
   else
   {
-    digitalWrite(MOTOR_LEFT_PIN_INA1, LOW);
-    analogWrite(MOTOR_LEFT_PIN_INA2, -motorLeftSpeed_i16);
+    if (motorLeftSpeed_i16 > 0)
+    {
+      //motorLeftPwmA1.write(abs(motorLeftSpeed_i16));
+      //motorLeftPwmA2.write(0);
+      motorLeftPwmA1.write(255);
+      motorLeftPwmA2.write(255 - abs(motorLeftSpeed_i16));
+    }
+    else
+    {
+    //motorLeftPwmA1.write(0);
+    //motorLeftPwmA2.write(abs(motorLeftSpeed_i16));
+    motorLeftPwmA1.write(225 - abs(motorLeftSpeed_i16));
+    motorLeftPwmA2.write(255);
+    }
   }
 
   if (DEBUG_MOTOR)
   {
     Serial.print("Left Motor Command : ");
-    if (motorSpeed_d > 0)
-      Serial.print(motorLeftSpeed_i16);
-    else
-      Serial.print(motorLeftSpeed_i16);
+    Serial.print(motorLeftSpeed_i16);
     Serial.println();
   }
 }
@@ -161,55 +187,90 @@ void MotorRightSetSpeed(double motorSpeed_d)
   {
     motorSpeed_d = 255;
   }
-
   if (motorSpeed_d < -255)
   {
     motorSpeed_d = -255;
   }
-  
-  motorRightSpeed_i16 = int16_t(motorSpeed_d);
 
+  motorRightSpeed_i16 = int16_t(motorSpeed_d);
+ 
   /* Write speed on the outputs */
-  if (motorSpeed_d > 0)
+  if (motorRightSpeed_i16 == 0)
   {
-    digitalWrite(MOTOR_RIGHT_PIN_INA1, HIGH); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, 255 - motorRightSpeed_i16);
+    motorRightPwmA1.write(0);
+    motorRightPwmA2.write(0);
   }
   else
   {
-    digitalWrite(MOTOR_RIGHT_PIN_INA1, LOW); // direction
-    analogWrite(MOTOR_RIGHT_PIN_INA2, -motorRightSpeed_i16);
+    if (motorRightSpeed_i16 > 0)
+    {
+      //motorRightPwmA1.write(abs(motorRightSpeed_i16));
+      //motorRightPwmA2.write(0);
+      motorRightPwmA1.write(255);
+      motorRightPwmA2.write(255 - abs(motorRightSpeed_i16));
+    }
+    else
+    {
+      //motorRightPwmA1.write(0);
+      //motorRightPwmA2.write(abs(motorRightSpeed_i16));
+      motorRightPwmA1.write(255 - abs(motorRightSpeed_i16));
+      motorRightPwmA2.write(255);
+    }
   }
 
   if (DEBUG_MOTOR)
   {
     Serial.print("Right Motor Command : ");
-    if (motorSpeed_d > 0)
-      Serial.print(motorRightSpeed_i16);
-    else
-      Serial.print(-motorRightSpeed_i16);
+    Serial.print(motorRightSpeed_i16);
     Serial.println();
   }
 }
 
-void MotorTest(int8_t speed)
+void MotorTest(int16_t speed)
 {
-  Serial.println("Left : 255, Right : 255");
+  Serial.print("Left : ");
+  Serial.print(speed);
+  Serial.print(", Right : ");
+  Serial.print(speed);
+  Serial.println();
   MotorLeftSetSpeed(speed);
   MotorRightSetSpeed(speed);
   delay(1000);
+  
   Serial.println("Left : 0, Right : 0");
   MotorLeftSetSpeed(0);
   MotorRightSetSpeed(0);
   delay(1000);
-  Serial.println("Left : -255, Right : -255");
+
+  Serial.print("Left : ");
+  Serial.print(-speed);
+  Serial.print(", Right : ");
+  Serial.print(-speed);
+  Serial.println();
   MotorLeftSetSpeed(-speed);
   MotorRightSetSpeed(-speed);
   delay(1000);
+  
   Serial.println("Left : 0, Right : 0");
   MotorLeftSetSpeed(0);
   MotorRightSetSpeed(0);
   delay(1000);
+}
+
+void MotorDetectDeadzone()
+{
+  static int16_t speed_u16;
+
+  for (speed_u16; speed_u16<255; speed_u16++)
+  {
+    Serial.print("DeadzoneDetect : ");
+    Serial.println(speed_u16);
+  
+    MotorLeftSetSpeed(speed_u16);
+    MotorRightSetSpeed(speed_u16);
+    delay(100);
+  }
+
 }
 
 int16_t motorLeftGetSpeed()
@@ -221,66 +282,3 @@ int16_t motorRightGetSpeed()
 {
   return motorRightSpeed_i16;
 }
-
-/**
-  Divides a given PWM pin frequency by a divisor.
-
-  The resulting frequency is equal to the base frequency divided by
-  the given divisor:
-  - Base frequencies:
-  o The base frequency for pins 3, 9, 10, and 11 is 31250 Hz.
-  o The base frequency for pins 5 and 6 is 62500 Hz.
-  - Divisors:
-  o The divisors available on pins 5, 6, 9 and 10 are: 1, 8, 64,
-  256, and 1024.
-  o The divisors available on pins 3 and 11 are: 1, 8, 32, 64,
-  128, 256, and 1024.
-
-  PWM frequencies are tied together in pairs of pins. If one in a
-  pair is changed, the other is also changed to match:
-  - Pins 5 and 6 are paired on timer0
-  - Pins 9 and 10 are paired on timer1
-  - Pins 3 and 11 are paired on timer2
-
-  Note that this function will have side effects on anything else
-  that uses timers:
-  - Changes on pins 3, 5, 6, or 11 may cause the delay() and
-  millis() functions to stop working. Other timing-related
-  functions may also be affected.
-  - Changes on pins 9 or 10 will cause the Servo library to function
-  incorrectly.
-
-  Thanks to macegr of the Arduino forums for his documentation of the
-  PWM frequency divisors. His post can be viewed at:
-  http://www.arduino.cc/cgi-bin/yabb2/YaBB.pl?num=1235060559/0#4
-*/
-//void setPwmFrequency(int pin, int divisor) {
-//  byte mode;
-//  if (pin == 5 || pin == 6 || pin == 9 || pin == 10) {
-//    switch (divisor) {
-//      case 1: mode = 0x01; break;
-//      case 8: mode = 0x02; break;
-//      case 64: mode = 0x03; break;
-//      case 256: mode = 0x04; break;
-//      case 1024: mode = 0x05; break;
-//      default: return;
-//    }
-//    if (pin == 5 || pin == 6) {
-//      TCCR0B = TCCR0B & 0b11111000 | mode;
-//    } else {
-//      TCCR1B = TCCR1B & 0b11111000 | mode;
-//    }
-//  } else if (pin == 3 || pin == 11) {
-//    switch (divisor) {
-//      case 1: mode = 0x01; break;
-//      case 8: mode = 0x02; break;
-//      case 32: mode = 0x03; break;
-//      case 64: mode = 0x04; break;
-//      case 128: mode = 0x05; break;
-//      case 256: mode = 0x06; break;
-//      case 1024: mode = 0x7; break;
-//      default: return;
-//    }
-//    TCCR2B = TCCR2B & 0b11111000 | mode;
-//  }
-//}

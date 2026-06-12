@@ -13,6 +13,7 @@
   Included Files
 ******************************************************************************/
 #include <Arduino.h>
+#include <Adafruit_NeoPixel.h>
 #include "config.h"
 #include "led.h"
 
@@ -46,6 +47,7 @@
 int ledState = 0;
 int previousTime = 0;
 
+#ifndef PAMI_G
 int ledAnimPin[LED_NUMBER] = {0, 0, 0, 0, 0};
 int ledAnimInc[LED_NUMBER] = {0, 0, 0, 0, 0};
 int ledAnimLum[LED_NUMBER] = {0, 0, 0, 0, 0};
@@ -54,26 +56,43 @@ int ledAnimBlinkIdx[LED_NUMBER] = {0, 0, 0, 0, 0};
 
 int ledAnimState[LED_NUMBER] = {0, 0, 0, 0, 0};
 long ledAnimPreviousTime[LED_NUMBER] = {0, 0, 0, 0, 0};
+#else
+#define NUMPIXELS           1
+Adafruit_NeoPixel pixels(NUMPIXELS, LED1_PIN, NEO_GRB + NEO_KHZ800);
 
+int ledAnimPin[LED_NUMBER] = {0, 1, 2};
+int ledAnimInc[LED_NUMBER] = {0, 0, 0};
+int ledAnimLum[LED_NUMBER] = {0, 0, 0};
+int ledAnimBlinkNb[LED_NUMBER] = {1, 1, 1};
+int ledAnimBlinkIdx[LED_NUMBER] = {0, 0, 0};
+
+int ledAnimState[LED_NUMBER] = {0, 0, 0};
+long ledAnimPreviousTime[LED_NUMBER] = {0, 0, 0};
+#endif
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
 void LedInit()
 {
   pinMode(LED1_PIN, OUTPUT);
+#ifndef PAMI_G
   pinMode(LED2_PIN, OUTPUT);
   pinMode(LED3_PIN, OUTPUT);
   pinMode(LED4_PIN, OUTPUT);
   pinMode(LED5_PIN, OUTPUT);
-
+#else
+  pixels.begin();
+  pixels.clear();
+#endif
   ledState = 0;
 
   LedSetLedPin(LED1_ID, LED1_PIN);
+#ifndef PAMI_G
   LedSetLedPin(LED2_ID, LED2_PIN);
   LedSetLedPin(LED3_ID, LED3_PIN);
   LedSetLedPin(LED4_ID, LED4_PIN);
   LedSetLedPin(LED5_ID, LED5_PIN);
-
+#endif
   LedAnimAllOff();
 }
 
@@ -119,7 +138,7 @@ void LedUpdate(bool timeMeasure_b)
 
       case ANIM_STATE_ON:
         {
-          ledAnimLum[ledId] = 255;
+          ledAnimLum[ledId] = 1;
           break;
         }
 
@@ -132,7 +151,7 @@ void LedUpdate(bool timeMeasure_b)
               if ( (currentTime_u32 - ledAnimPreviousTime[ledId]) < ( (ledAnimBlinkIdx[ledId] + 1) * ANIM_BLINK_TIME_UP + ledAnimBlinkIdx[ledId] * ANIM_BLINK_TIME_DOWN) )
               {
                 // Up blink cycle
-                ledAnimLum[ledId] = 255;
+                ledAnimLum[ledId] = 1;
               }
               else
               {
@@ -185,7 +204,12 @@ void LedUpdate(bool timeMeasure_b)
           break;
         }
     }
-    analogWrite(ledAnimPin[ledId], ledAnimLum[ledId]);
+#ifndef PAMI_G
+    digitalWrite(ledAnimPin[ledId], ledAnimLum[ledId]);
+#else
+    pixels.setPixelColor(0, pixels.Color(ledAnimLum[LED1_ID], ledAnimLum[LED2_ID], ledAnimLum[LED3_ID]));
+    pixels.show();
+#endif
     //delay(1);
     //Serial.print(ledAnimInc[ledId]);
     //Serial.print(" ");
@@ -231,8 +255,10 @@ void LedAnimAllOff()
   LedSetAnim(LED1_ID, ANIM_STATE_OFF);
   LedSetAnim(LED2_ID, ANIM_STATE_OFF);
   LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+#ifndef PAMI_G
   LedSetAnim(LED4_ID, ANIM_STATE_OFF);
   LedSetAnim(LED5_ID, ANIM_STATE_OFF);
+#endif
 }
 
 void LedAnimK2000()
@@ -322,6 +348,9 @@ void LedAnimK2000()
     }
   }
 }
+
+#define DUREE_ATTENTE_S   5
+#define DUREE_ATTENTE_MS  DUREE_ATTENTE_S * 1000.0
 
 void LedAnimStart()
 {

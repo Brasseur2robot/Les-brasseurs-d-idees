@@ -6,7 +6,7 @@
    Included Files
  ******************************************************************************/
 #include <Arduino.h>
-#include <Encoder.h>
+#include <ESP32Encoder.h>
 #include "config.h"
 #include "odometry.h"
 
@@ -31,22 +31,27 @@
 /******************************************************************************
    Module Global Variables
  ******************************************************************************/
-Encoder encoderLeft(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
-Encoder encoderRight(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
+ESP32Encoder encoderLeft;
+ESP32Encoder encoderRight;
 
 int32_t distanceLeft_i32_g;
 int32_t distanceRight_i32_g;
 int32_t orient_init_i32_g = 0.0;
-/* Pose of the robot in meter and radians*/
-int32_t odometryX_i32_g;
-int32_t odometryY_i32_g;
+/* Pose of the robot in tops and radians*/
+int32_t odometryXTop_i32_g;
+int32_t odometryYTop_i32_g;
 double odometryThetaRad_d_g;
-/* Pose of the robot in tops */
+/* Distance and orientation of the robot in tops */
 int32_t odometryDistanceTop_i32_g;
 int32_t odometryOrientationTop_i32_g;
 
+<<<<<<< HEAD:pami/info/pami_src/odometry.cpp
 int32_t orient_precedente;
 int32_t orient;
+=======
+int32_t orient_precedente_i32;
+int32_t orient_i32;
+>>>>>>> robot_poc:2025/pami/info/pami_src/odometry.cpp
 
 /******************************************************************************
    Functions Definitions
@@ -61,13 +66,16 @@ int32_t orient;
 */
 void OdometryInit()
 {
-  pinMode(ENCODER_LEFT_PIN_A, INPUT);
-  pinMode(ENCODER_LEFT_PIN_B, INPUT);
-  pinMode(ENCODER_RIGHT_PIN_A, INPUT);
-  pinMode(ENCODER_RIGHT_PIN_B, INPUT);
+  /* Configure esp32 encoders pins and pull-up */
+  ESP32Encoder::useInternalWeakPullResistors = puType::up;
+  encoderLeft.attachFullQuad(ENCODER_LEFT_PIN_A, ENCODER_LEFT_PIN_B);
+  encoderRight.attachFullQuad(ENCODER_RIGHT_PIN_A, ENCODER_RIGHT_PIN_B);
 
-  odometryX_i32_g = 0L;
-  odometryY_i32_g = 0L;
+  encoderLeft.clearCount();
+  encoderRight.clearCount();
+
+  odometryXTop_i32_g = 0L;
+  odometryYTop_i32_g = 0L;
   odometryDistanceTop_i32_g = 0L;
   odometryOrientationTop_i32_g = 0L;
   odometryThetaRad_d_g = 0.0;
@@ -95,22 +103,22 @@ int32_t OdometryGetOrientationTop()
 
 int32_t OdometryGetXTop()
 {
-  return odometryX_i32_g;
+  return odometryXTop_i32_g;
 }
 
 int32_t OdometryGetYTop()
 {
-  return odometryY_i32_g;
+  return odometryYTop_i32_g;
 }
 
-double OdometryGetXMeter()
+double OdometryGetXMilliMeter()
 {
-  return TopToMeter((double)odometryX_i32_g);
+  return TopToMilliMeter((double)odometryXTop_i32_g);
 }
 
-double OdometryGetYMeter()
+double OdometryGetYMilliMeter()
 {
-  return TopToMeter((double)odometryY_i32_g);
+  return TopToMilliMeter((double)odometryYTop_i32_g);
 }
 
 double OdometryGetThetaRad()
@@ -118,23 +126,28 @@ double OdometryGetThetaRad()
   return odometryThetaRad_d_g;
 }
 
+<<<<<<< HEAD:pami/info/pami_src/odometry.cpp
 double OdometryGetThetaDeg()
 {
   return odometryThetaRad_d_g * RAD_TO_DEG;
 }
 
 void OdometrySetXMeter(double xM_d)
+=======
+void OdometrySetXMilliMeter(double xMm_d)
+>>>>>>> robot_poc:2025/pami/info/pami_src/odometry.cpp
 {
-  odometryX_i32_g = (int32_t)MeterToTop(xM_d);
+  odometryXTop_i32_g = (int32_t)MilliMeterToTop(xMm_d);
 }
 
-void OdometrySetYMeter(double yM_d)
+void OdometrySetYMilliMeter(double yMm_d)
 {
-  odometryY_i32_g = (int32_t)MeterToTop(yM_d);
+  odometryYTop_i32_g = (int32_t)MilliMeterToTop(yMm_d);
 }
 
 void OdometrySetThetaDeg(double thetaDeg_d)
 {
+<<<<<<< HEAD:pami/info/pami_src/odometry.cpp
   double thetaTop_d = RadToTop(thetaDeg_d * DEG_TO_RAD);                // compute the target theta in top
   double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;   // compute the error between actual and target
   
@@ -162,6 +175,13 @@ void OdometrySetThetaDeg(double thetaDeg_d)
   orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
   orient_precedente = orient;
     
+=======
+  double thetaTop_d = RadToTop(thetaDeg_d * PI / 180.0);                    // compute the target theta in top
+  double thetaErrorTop_d = odometryOrientationTop_i32_g - thetaTop_d;       // compute the error between actual and target
+  orient_init_i32_g -= thetaErrorTop_d;                                     // rotates the init orient from the error
+  orient_i32 = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g);  // updates internal variables
+  orient_precedente_i32 = orient_i32;
+>>>>>>> robot_poc:2025/pami/info/pami_src/odometry.cpp
   OdometryUpdate(false);
 }
 
@@ -193,14 +213,26 @@ void OdometryUpdate(bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   // Récupérons les mesures des codeurs
-  distanceLeft_i32_g = encoderLeft.read() * FACTOR_WHEEL_LEFT;
-  distanceRight_i32_g = encoderRight.read() * FACTOR_WHEEL_RIGHT;
+  distanceLeft_i32_g = encoderLeft.getCount() * FACTOR_WHEEL_LEFT;
+  distanceRight_i32_g = encoderRight.getCount() * FACTOR_WHEEL_RIGHT;
+
+  if (DEBUG_SIMULATION)
+  {
+    distanceLeft_i32_g = 0;
+    distanceRight_i32_g = 0;
+  }
 
   odometryDistanceTop_i32_g = ( distanceRight_i32_g + distanceLeft_i32_g ) / 2; // distance en pas parcourue à tn
+<<<<<<< HEAD:pami/info/pami_src/odometry.cpp
   orient = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
   delta_orient = orient - orient_precedente; // correspond à Dqn mais en pas
+=======
+  orient_i32 = orient_init_i32_g + (distanceRight_i32_g - distanceLeft_i32_g); //correspond à qn mais en pas
+  delta_d = odometryDistanceTop_i32_g - distance_precedente; // correspond à L mais en pas
+  delta_orient = orient_i32 - orient_precedente_i32; // correspond à Dqn mais en pas
+>>>>>>> robot_poc:2025/pami/info/pami_src/odometry.cpp
 
-  odometryOrientationTop_i32_g = (orient + orient_precedente) / 2; // correspond à qmoy en pas
+  odometryOrientationTop_i32_g = (orient_i32 + orient_precedente_i32) / 2; // correspond à qmoy en pas
 
   delta_orient_radian = TopToRad((double)delta_orient); // correspond à Dqn en rd
   odometryThetaRad_d_g = TopToRad((double)odometryOrientationTop_i32_g); // correspond à qmoy en rd
@@ -217,14 +249,19 @@ void OdometryUpdate(bool timeMeasure_b)
   dx = K * (double)delta_d * cos(odometryThetaRad_d_g);
   dy = K * (double)delta_d * sin(odometryThetaRad_d_g);
 
-  odometryX_i32_g = odometryX_i32_g + (int32_t)dx; // valeurs exprimées dans le système d’unité robot
-  odometryY_i32_g = odometryY_i32_g + (int32_t)dy;
+  odometryXTop_i32_g = odometryXTop_i32_g + (int32_t)dx; // valeurs exprimées dans le système d’unité robot
+  odometryYTop_i32_g = odometryYTop_i32_g + (int32_t)dy;
 
+<<<<<<< HEAD:pami/info/pami_src/odometry.cpp
   //Serial.println("Dx = " + String(odometryX_i32_g));
   //Serial.println("Dy = " + String(odometryY_i32_g));
   //Serial.println("delta_d" + String(odometryThetaRad_d_g));
+=======
+  //Serial.println("Dx = " + String(odometryXTop_i32_g));
+  //Serial.println("Dy = " + String(odometryYTop_i32_g));
+>>>>>>> robot_poc:2025/pami/info/pami_src/odometry.cpp
 
-  orient_precedente = orient ; // actualisation de qn-1
+  orient_precedente_i32 = orient_i32 ; // actualisation de qn-1
   distance_precedente = odometryDistanceTop_i32_g ; //actualisation de Dn-1
 
   if (ODOMETRY_DEBUG)
@@ -234,7 +271,7 @@ void OdometryUpdate(bool timeMeasure_b)
     Serial.print(", d droite = ");
     Serial.println(distanceRight_i32_g);
     Serial.print(", orientation = ");
-    Serial.println(orient);
+    Serial.println(orient_i32);
     Serial.print(", Delta orient = ");
     Serial.println(delta_orient);
     Serial.print(", orientationMoyenne = ");
@@ -256,8 +293,8 @@ void OdometryUpdate(bool timeMeasure_b)
 
 void OdometryEncoderTest()
 {
-  int32_t distanceLeft = encoderLeft.read();
-  int32_t distanceRight = encoderRight.read();
+  int32_t distanceLeft = encoderLeft.getCount();
+  int32_t distanceRight = encoderRight.getCount();
   Serial.print("Encoder Left : ");
   Serial.print(distanceLeft);
   Serial.print(", Encoder Right : ");
@@ -265,34 +302,35 @@ void OdometryEncoderTest()
   Serial.println();
 }
 
-double MeterToTop(double meter)
+double MilliMeterToTop(double millimeter_d)
 {
-  double nTop = 0;
+  double nTop_d = 0;
   //nTop = meter * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL * PI);
-  nTop = meter * METER_TO_TOP;
-  return nTop;
+  nTop_d = millimeter_d * MILLIMETER_TO_TOP;
+  return nTop_d;
 }
 
-double TopToMeter(double top)
+double TopToMilliMeter(double top_d)
 {
-  double meter = 0.0;
+  double millimeter_d = 0.0;
   //meter = top * (DIAMETER_WHEEL * PI) / N_TOP_PER_WHEEL_TURN;
-  meter = top / METER_TO_TOP;
-  return meter;
+  millimeter_d = top_d / MILLIMETER_TO_TOP;
+  return millimeter_d;
 }
 
-double TopToRad(double nTop)
+double TopToRad(double nTop_d)
 {
-  double radian = 0.0;
+  double radian_d = 0.0;
   //radian = (nTop / N_TOP_PER_WHEEL_TURN) * (DIAMETER_WHEEL / DIAMETER_ROBOT ) * 2.0 * PI;
-  radian = nTop / RAD_TO_TOP;
-  return radian;
+  radian_d = nTop_d / RAD_TO_TOP;
+  return radian_d;
 }
 
-double RadToTop(double radian)
+double RadToTop(double radian_d)
 {
-  double nTop = 0.0;
+  double nTop_d = 0.0;
   //nTop = radian * N_TOP_PER_WHEEL_TURN / (DIAMETER_WHEEL / DIAMETER_ROBOT ) / 2.0 / PI;
+<<<<<<< HEAD:pami/info/pami_src/odometry.cpp
   nTop = radian * RAD_TO_TOP;
   if (RAD_TO_TOP_DEBUG)
   {
@@ -301,4 +339,8 @@ double RadToTop(double radian)
     Serial.println("nTop : " + String(nTop));
   }
   return nTop;
+=======
+  nTop_d = radian_d * RAD_TO_TOP;
+  return nTop_d;
+>>>>>>> robot_poc:2025/pami/info/pami_src/odometry.cpp
 }

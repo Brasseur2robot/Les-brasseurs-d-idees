@@ -51,6 +51,7 @@ uint16_t obstacleSensorThreshold_u16;
 */
 void ObstacleSensorInit()
 {
+#if DEBUG_SIMULATION == false
   sensor.setTimeout(500);
   if (!sensor.init())
   {
@@ -59,9 +60,13 @@ void ObstacleSensorInit()
   }
   else
   {
+#ifndef PAMI_G
     LedSetAnim(LED4_ID, ANIM_STATE_ON);
+#endif
   }
-
+#else
+    Serial.println("Simulation, no sensor connected");
+#endif
   obstacleSensorDetected_b = false;
   obstacleSensorThreshold_u16 = OBSTACLE_SENSOR_THRESHOLD_MM;
 }
@@ -70,15 +75,19 @@ void ObstacleSensorStart()
 {
   obstacleSensorEnable_b = true;
   /* Blinking once Led 4 to indicate sensor enabled */
+#ifndef PAMI_G
   LedSetAnim(LED4_ID, ANIM_STATE_BLINK);
   LedSetBlinkNb(LED4_ID, 1);
+#endif
 }
 
 void ObstacleSensorStop()
 {
   obstacleSensorEnable_b = false;
+#ifndef PAMI_G
   /* Led full on to indicate sensor off */
   LedSetAnim(LED4_ID, ANIM_STATE_ON);
+#endif
 }
 
 /**
@@ -98,16 +107,17 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
     durationMeasureStart_u32 = micros();
 
   /* Get the distance in [cm] */
-  uint16_t distance_u16;
+  uint16_t distanceTmp_u16;
+  static uint16_t distanceLast_u16;
 
-  if (sensor.readRangeNoBlocking(distance_u16))
+  if (sensor.readRangeNoBlocking(distanceTmp_u16))
   {
-
+    distanceLast_u16 = distanceTmp_u16;
   }
 
   if (obstacleSensorEnable_b == true)
   {
-    if ((distance_u16 > 0 ) && (distance_u16 < obstacleSensorThreshold_u16) )
+    if ((distanceLast_u16 > 0 ) && (distanceLast_u16 < obstacleSensorThreshold_u16) )
     {
       obstacleSensorDetected_b = true;
     } 
@@ -124,9 +134,11 @@ void ObstacleSensorUpdate(bool timeMeasure_b)
   if (DEBUG_OBSTACLE)
   {
     Serial.print("Distance measured : ");
-    Serial.print(distance_u16);
+    Serial.print(distanceLast_u16);
     Serial.print(", Threshold : ");
     Serial.print(obstacleSensorThreshold_u16);
+    Serial.print(", Enabled : ");
+    Serial.print(obstacleSensorEnable_b);
     Serial.print(", Obstacle : ");
     Serial.print(obstacleSensorDetected_b);
     Serial.println();

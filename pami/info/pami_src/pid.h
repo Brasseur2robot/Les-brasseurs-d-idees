@@ -12,16 +12,16 @@ typedef struct
 {
   bool enable_b;
   bool antiWindup_b;
-  double deltaTime_d;
-  double reference_d;
-  double error_d;
-  double previousError_d;
-  double kp_d;
-  double ki_d;
-  double kd_d;
-  double integral_d;
-  double derivative_d;
-  double output_d;
+  float deltaTime_f;
+  float reference_f;
+  float error_f;
+  float previousError_f;
+  float kp_f;
+  float ki_f;
+  float kd_f;
+  float integral_f;
+  float derivative_f;
+  float output_f;
 } PidControllerSt; /* typedef for ramp parameters */
 
 /******************************************************************************
@@ -32,17 +32,17 @@ void PidStart(PidControllerSt * pid_pst);
 void PidStop(PidControllerSt * pid_pst);
 
 void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b);
-void PidSetDeltaTime(PidControllerSt * pid_pst, double value_d);
-void PidSetReference(PidControllerSt * pid_pst, double value_d);
-void PidSetCoefficients(PidControllerSt * pid_pst, double kp_d, double ki_d, double kd_d);
+void PidSetDeltaTime(PidControllerSt * pid_pst, float value_f);
+void PidSetReference(PidControllerSt * pid_pst, float value_f);
+void PidSetCoefficients(PidControllerSt * pid_pst, float kp_f, float ki_f, float kd_f);
 
 bool PidGetEnable(PidControllerSt * pid_pst);
-double PidGetDeltaTime(PidControllerSt * pid_pst);
-double PidGetError(PidControllerSt * pid_pst);
-double PidGetProportionnal(PidControllerSt * pid_pst);
-double PidGetIntegral(PidControllerSt * pid_pst);
-double PidGetDerivative(PidControllerSt * pid_pst);
+float PidGetDeltaTime(PidControllerSt * pid_pst);
+float PidGetError(PidControllerSt * pid_pst);
+float PidGetProportionnal(PidControllerSt * pid_pst);
+float PidGetIntegral(PidControllerSt * pid_pst);
+float PidGetDerivative(PidControllerSt * pid_pst);
 
-double PidUpdate(PidControllerSt * pid_pst, double mesure, bool timeMeasure_b);
+float PidUpdate(PidControllerSt * pid_pst, float mesure, bool timeMeasure_b);
 
 #endif

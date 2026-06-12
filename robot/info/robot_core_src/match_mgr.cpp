@@ -3,6 +3,8 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
+#include "action_mgr.h"
+#include "com_wifi.h"
 #include "led.h"
 #include "match_mgr.h"
 #include "obstacle_sensor.h"
@@ -12,7 +14,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define MATCH_MGR_DEBUG             true
+#define MATCH_MGR_DEBUG             false
 #define MATCH_MGR_UPDATE_PERIOD_S   0.1   /* Refresh rate of the display 1/0.1 = 10fps */
 
 /******************************************************************************
@@ -38,6 +40,7 @@ MatchMgrColorEn matchMgrColor_en_g;
 
 uint32_t matchMgrWaitingTimerDuration_u32_g;
 uint32_t matchMgrWaitingTimerStartTime_u32_g;
+MatchMgrStateEn matchMgrWaitingTimerReturnState_en_g;
 
 bool matchMgrEventGotoWaitforend_b;
 bool matchMgrEventGotoEndzone_b;
@@ -58,7 +61,7 @@ void MatchMgrInit()
   /* Set up the interrupt on the reed switch to start the preparation (falling) and the match (rising) */
   attachInterrupt(digitalPinToInterrupt(SWITCH_REED_START_PIN), MatchMgrSwitchState, CHANGE);
   /* Set up the interrupt on the color switch to change the color */
-  attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
+  //attachInterrupt(digitalPinToInterrupt(SWITCH_COLOR_PIN), MatchMgrChangeColor, FALLING);
 
   matchMgrEventGotoWaitforend_b = false;
   matchMgrEventGotoEndzone_b = false;
@@ -93,11 +96,13 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_COLOR_SELECTION:
         /* Waiting for color selection */
+        matchMgrStartTimeMs_u32_g = millis();
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Waiting for color selection");
         break;
 
       case MATCH_STATE_BORDER_ADJUST:
+        matchMgrStartTimeMs_u32_g = millis();
         /* Adjusting to border */
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Border calibration");
@@ -105,6 +110,7 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_READY:
         /* Ready, waiting to start */
+        matchMgrStartTimeMs_u32_g = millis();
         //        if (MATCH_MGR_DEBUG)
         //          Serial.println("Ready to start");
         //LedSetAnim(LED3_ID, ANIM_STATE_BREATH);
@@ -112,26 +118,27 @@ void MatchMgrUpdate(bool timeMeasure_b)
 
       case MATCH_STATE_ON_WAITING:
         /* In a wait timer */
-        //        if (MATCH_MGR_DEBUG)
-        //          Serial.println("Waiting");
+        if (MATCH_MGR_DEBUG)
+          Serial.println("Waiting");
         MatchMgrUpdateEndTimer();
         MatchMgrUpdateWaitingTimer();
         break;
 
       case MATCH_STATE_ON_MOVING:
         /* Moving */
-        //        if (MATCH_MGR_DEBUG)
-        //          Serial.println("Moving");
+        if (MATCH_MGR_DEBUG)
+          Serial.println("Moving");
         MatchMgrUpdateEventTimer();
         MatchMgrUpdateEndTimer();
         break;
 
       case MATCH_STATE_END:
         /* End of match */
-        //        if (MATCH_MGR_DEBUG)
-        //          Serial.println("End");
+        if (MATCH_MGR_DEBUG)
+          Serial.println("End");
         PositionMgrSetDistanceControl(false);     /* Sets the robot free of control loop */
         PositionMgrSetOrientationControl(false);
+        ActionMgrSetNextAction(ACTION_MGR_ID_SHUTDOWN, WAIT);
         //ActuatorServoStart();                   /* Headbang start! */
         break;
 
@@ -167,7 +174,10 @@ void MatchMgrSwitchState()
     /* if color selection is done, launches the preparation, if not not, nothing to do */
     if ((matchMgrColor_en_g != MATCH_COLOR_NONE) && (matchMgrState_en_g == MATCH_STATE_COLOR_SELECTION) )
     {
+      /* Set in transport mode */
+      ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
       matchMgrState_en_g = MATCH_STATE_BORDER_ADJUST;
+      MatchMgrSetWaitingTimer(3000);
       ObstacleSensorStop();
     }
   }
@@ -182,8 +192,12 @@ void MatchMgrStartMatch()
 {
   /* Log the start time */
   matchMgrStartTimeMs_u32_g = millis();
+  /* Set the state to moving */
+  matchMgrState_en_g = MATCH_STATE_ON_MOVING;
   /* Set the start delay (use for a delayed Pami start) */
   MatchMgrSetWaitingTimer(MATCH_START_DELAY_MS);
+  /* Send the start signal to the PAMIs TODO : define at which condition this should happen */
+  ComWifiSendStart();
   /* Start the obstacle sensor */
   ObstacleSensorStart();
   /* Init Base trajectory */
@@ -232,24 +246,24 @@ void MatchMgrUpdateEventTimer()
   /* Compute elapsed time */
   matchMgrElapsedTimeMs_u32_g = millis() - matchMgrStartTimeMs_u32_g;
 
-  /* Test if it is time to event WAITFOREND */
-  if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_WAITFOREND_MS) && (matchMgrEventGotoWaitforend_b == false) )
-  {
-    matchMgrEventGotoWaitforend_b = true;
-    matchMgrEventFlagGotoWaitforend_b = true;
-    TrajectoryNewTrajectory();
+  // /* Test if it is time to event WAITFOREND */
+  // if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_WAITFOREND_MS) && (matchMgrEventGotoWaitforend_b == false) )
+  // {
+  //   matchMgrEventGotoWaitforend_b = true;
+  //   matchMgrEventFlagGotoWaitforend_b = true;
+  //   TrajectoryNewTrajectory();
 
-    /* Proceed to zone */
-    //matchMgrState_en_g = MATCH_STATE_END;
-    /* TODO signal this by leds! */
+  //   /* Proceed to zone */
+  //   //matchMgrState_en_g = MATCH_STATE_END;
+  //   /* TODO signal this by leds! */
 
-    if (MATCH_MGR_DEBUG)
-    {
-      Serial.print("[Event] Time :");
-      Serial.print(matchMgrElapsedTimeMs_u32_g);
-      Serial.println("Event Goto WaitForEnd");
-    }
-  }
+  //   if (MATCH_MGR_DEBUG)
+  //   {
+  //     Serial.print("[Event] Time :");
+  //     Serial.print(matchMgrElapsedTimeMs_u32_g);
+  //     Serial.println("Event Goto WaitForEnd");
+  //   }
+  // }
 
   /* Test if it is time to event GOTOENDZONE */
   if ( (matchMgrElapsedTimeMs_u32_g >= MATCH_GOTO_ENDZONE_MS) && (matchMgrEventGotoEndzone_b == false) )
@@ -293,6 +307,8 @@ void MatchMgrResetEventEndzoneState()
 
 void MatchMgrSetWaitingTimer(uint32_t waitingPeriodMs_u32)
 {
+  /* Record the state in which we were */
+  matchMgrWaitingTimerReturnState_en_g = matchMgrState_en_g;
   /* Set the match manager to on_waiting */
   /* This should be done only if robot is not moving !!! */
   matchMgrState_en_g = MATCH_STATE_ON_WAITING;
@@ -305,7 +321,8 @@ void MatchMgrSetWaitingTimer(uint32_t waitingPeriodMs_u32)
   {
     Serial.print("Waiting period of : ");
     Serial.print(matchMgrWaitingTimerDuration_u32_g);
-    Serial.print(" set.");
+    Serial.print(" set. I should return to state : ");
+    Serial.print(matchMgrWaitingTimerReturnState_en_g);
     Serial.println();
   }
 }
@@ -318,7 +335,8 @@ void MatchMgrUpdateWaitingTimer()
 
   if ( elapsedWaitingTime_u32 >= matchMgrWaitingTimerDuration_u32_g )
   {
-    matchMgrState_en_g = MATCH_STATE_ON_MOVING;
+    /* Return to the state we were before timer */
+    matchMgrState_en_g = matchMgrWaitingTimerReturnState_en_g;
 
     if (MATCH_MGR_DEBUG)
     {
@@ -330,33 +348,51 @@ void MatchMgrUpdateWaitingTimer()
   /* else, still waiting! */
 }
 
-void MatchMgrChangeColor()
+void MatchMgrChangeColor(MatchMgrColorEn selectedColor_en)
 {
   /* Change color only if match not started */
   if (matchMgrState_en_g == MATCH_STATE_COLOR_SELECTION)
   {
     /* if function is called, change the color to the other one */
-    if (matchMgrColor_en_g == MATCH_COLOR_BLUE)
+    switch(selectedColor_en)
     {
-      matchMgrColor_en_g = MATCH_COLOR_YELLOW;
-      LedSetAnim(LED1_ID, ANIM_STATE_ON);
-      LedSetAnim(LED2_ID, ANIM_STATE_ON);
-      LedSetAnim(LED3_ID, ANIM_STATE_OFF);
-      if (MATCH_MGR_DEBUG)
-      {
-        Serial.println("Color yellow selected");
-      }
-    }
-    else
-    {
-      matchMgrColor_en_g = MATCH_COLOR_BLUE;
-      LedSetAnim(LED1_ID, ANIM_STATE_OFF);
-      LedSetAnim(LED2_ID, ANIM_STATE_OFF);
-      LedSetAnim(LED3_ID, ANIM_STATE_ON);
-      if (MATCH_MGR_DEBUG)
-      {
-        Serial.println("Color blue selected");
-      }
+      case MATCH_COLOR_NONE:
+        matchMgrColor_en_g = MATCH_COLOR_NONE;
+        LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED2_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+        if (MATCH_MGR_DEBUG)
+        {
+          Serial.println("Should not be possible to change back to none");
+        }
+        break;
+      
+      case MATCH_COLOR_BLUE:
+        matchMgrColor_en_g = MATCH_COLOR_BLUE;
+        LedSetAnim(LED1_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED2_ID, ANIM_STATE_OFF);
+        LedSetAnim(LED3_ID, ANIM_STATE_ON);
+        ComWifiSendColor(MATCH_COLOR_YELLOW);
+        if (MATCH_MGR_DEBUG)
+        {
+          Serial.println("Color blue selected");
+        }
+        break;
+
+      case MATCH_COLOR_YELLOW:
+        matchMgrColor_en_g = MATCH_COLOR_YELLOW;
+        LedSetAnim(LED1_ID, ANIM_STATE_ON);
+        LedSetAnim(LED2_ID, ANIM_STATE_ON);
+        LedSetAnim(LED3_ID, ANIM_STATE_OFF);
+        ComWifiSendColor(MATCH_COLOR_BLUE);
+        if (MATCH_MGR_DEBUG)
+        {
+          Serial.println("Color yellow selected");
+        }
+        break;
+      
+      default:
+        break;
     }
   }
 }

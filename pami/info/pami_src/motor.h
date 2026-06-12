@@ -6,7 +6,8 @@
  ******************************************************************************/
 void MotorInit();
 void MotorStop();
-void MotorTest(int8_t speed);
+void MotorTest(int16_t speed);
+void MotorDetectDeadzone();
 void MotorLeftBrake();
 void MotorRightBrake();
 void MotorLeftSetSpeed(double motorSpeed_d);
@@ -14,6 +15,9 @@ void MotorRightSetSpeed(double motorSpeed_d);
 int16_t motorLeftGetSpeed();
 int16_t motorRightGetSpeed();
 
+<<<<<<< HEAD:pami/info/pami_src/motor.h
 // void setPwmFrequency(int pin, int divisor);
 
+=======
+>>>>>>> robot_poc:2025/pami/info/pami_src/motor.h
 #endif

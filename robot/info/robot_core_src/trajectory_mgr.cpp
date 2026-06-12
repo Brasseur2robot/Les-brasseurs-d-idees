@@ -5,12 +5,13 @@
 #include "config.h"
 #include "config_match.h"
 #include "actuator.h"
+#include "action_mgr.h"
+#include "obstacle_sensor.h"
 #include "match_mgr.h"
 #include "odometry.h"
 #include "position_mgr.h"
 #include "servo_board.h"
 #include "trajectory_mgr.h"
-#include "trajectory_evasion.h"
 #include "trajectory_pythagora.h"
 
 /******************************************************************************
@@ -20,15 +21,29 @@
 #define COLOR_DEBUG                 false
 #define TRAJECTORY_UPDATE_PERIOD_S  0.1
 
+#define TRAJECTORY_EMERGENCY_WAIT_TIME_MS       1000
+#define TRAJECTORY_EMERGENCY_1ST_ROTATION_DEG   90.0
+#define TRAJECTORY_EMERGENCY_1ST_TRANSLATION_MM 200.0
+#define TRAJECTORY_EMERGENCY_2ND_ROTATION_DEG   90.0
+#define TRAJECTORY_EMERGENCY_2ND_TRANSLATION_MM 200.0
+
 /******************************************************************************
    Types declarations
  ******************************************************************************/
 typedef enum
 {
-  TRAJECTORY_WAYPOINT_NONE = 0u,      /* No state */
-  TRAJECTORY_WAYPOINT_AIM = 1u,       /* First aim towards waypoint */
-  TRAJECTORY_WAYPOINT_GO_TO = 2u,     /* Then go to waypoint */
-  TRAJECTORY_WAYPOINT_ROTATION = 3u,  /* Then final orientation */
+  TRAJECTORY_WAYPOINT_NONE = 0u,              /* No state */
+  TRAJECTORY_WAYPOINT_AIM = 1u,               /* First aim towards waypoint */
+  TRAJECTORY_WAYPOINT_GO_TO = 2u,             /* Then go to waypoint */
+  TRAJECTORY_WAYPOINT_ROTATION = 3u,          /* Then final orientation */
+  TRAJECTORY_WAYPOINT_SUPP_DELAY = 4u,        /* If wanted, wait on destination */
+  TRAJECTORY_EMERGENCY_WAIT = 5u,             /* Emergency wait */
+  TRAJECTORY_EMERGENCY_1ST_ROTATION = 6u,     /* First phase of an emergency */
+  TRAJECTORY_EMERGENCY_1ST_TRANSLATION = 7u,  /* Second phase of an emergency */
+  TRAJECTORY_EMERGENCY_2ND_ROTATION = 8u,     /* Third phase of an emergency */
+  TRAJECTORY_EMERGENCY_2ND_TRANSLATION = 9u,  /* Fourth phase of an emergency */
+  TRAJECTORY_WAYPOINT_ACTION = 10u,           /* Action to do if needed */
+  TRAJECTORY_WAYPOINT_ACTION_WAIT = 11u,      /* Action waiting */
 } TrajectoryMgrWaypointState;         /* Enumeration used to select the mvt type */
 
 /******************************************************************************
@@ -103,22 +118,24 @@ void TrajectoryNewTrajectory()
 */
 uint8_t Trajectory(double colorSide)
 {
-  static double xMeterActual = 0.0;
-  static double yMeterActual = 0.0;
+  static double xMilliMeterActual = 0.0;
+  static double yMilliMeterActual = 0.0;
   static double thetaDegActual = 0.0;
-  static double xMeterWaypoint = 0.0;
-  static double yMeterWaypoint = 0.0;
+  static double xMilliMeterWaypoint = 0.0;
+  static double yMilliMeterWaypoint = 0.0;
   static double thetaDegWaypoint = 0.0;
   static double distanceWaypoint = 0.0;
   static double orientationWaypoint = 0.0;
   static bool   directionWaypoint_b = true;
-  static double actuatorState_b = false;
+  static bool resetTheta_b = false;
+  static bool obstacleSensorEnable_b = true;
   static uint32_t waitingTimeMs_u32 = 0;
-  static uint8_t clawState_u8;
+  static ActionMgrIdEn actionId_en;
+  static bool actionIsWait_b;
 
-  static double orientationToGo_d = 0.0;
-  static double distanceToGo_d = 0.0;
-  static double orientationFinalToGo_d = 0.0;
+  static double orientationToGoDeg_d = 0.0;
+  static double distanceToGoMm_d = 0.0;
+  static double orientationFinalToGoDeg_d = 0.0;
 
 
   if (TRAJECTORY_DEBUG) {
@@ -147,6 +164,30 @@ uint8_t Trajectory(double colorSide)
       case TRAJECTORY_WAYPOINT_ROTATION:
         Serial.print("Fin Rot");
         break;
+      case TRAJECTORY_WAYPOINT_SUPP_DELAY:
+        Serial.print("Attente finale");
+        break;
+      case TRAJECTORY_EMERGENCY_WAIT:
+        Serial.print("Emergency wait!");
+        break;     
+      case TRAJECTORY_EMERGENCY_1ST_ROTATION:
+        Serial.print("Em 1st rotation");
+        break;
+      case TRAJECTORY_EMERGENCY_1ST_TRANSLATION:
+        Serial.print("Em 1st translation");
+        break;
+      case TRAJECTORY_EMERGENCY_2ND_ROTATION:
+        Serial.print("Em 2nd rotation");
+        break;
+      case TRAJECTORY_EMERGENCY_2ND_TRANSLATION:
+        Serial.print("Em 2nd translation");
+        break;
+      case TRAJECTORY_WAYPOINT_ACTION:
+        Serial.print("Action to do");
+        break;
+      case TRAJECTORY_WAYPOINT_ACTION_WAIT:
+        Serial.print("Action waiting");
+        break;
       default:
         Serial.print("default");
         break;
@@ -171,8 +212,8 @@ uint8_t Trajectory(double colorSide)
       case TRAJECTORY_WAYPOINT_AIM:
         /* First align with target */
         /* Get the actual x y theta and computes the rotation and translation to do */
-        xMeterActual = OdometryGetXMeter() * 1000.0;
-        yMeterActual = OdometryGetYMeter() * 1000.0;
+        xMilliMeterActual = OdometryGetXMilliMeter();
+        yMilliMeterActual = OdometryGetYMilliMeter();
         thetaDegActual = OdometryGetThetaRad() * RAD_TO_DEG;
 
         /* Prepare trajectory towards next waypoint */
@@ -182,173 +223,173 @@ uint8_t Trajectory(double colorSide)
             break;
 
           case MATCH_COLOR_YELLOW:
-            xMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].x;
-            yMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].y;
+            xMilliMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].x;
+            yMilliMeterWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].y;
             thetaDegWaypoint = trajectoryYellowPoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryYellowPoseArray[trajectoryIndex_u8].direction;
-            actuatorState_b = trajectoryYellowPoseArray[trajectoryIndex_u8].actuatorState;
+            obstacleSensorEnable_b = trajectoryYellowPoseArray[trajectoryIndex_u8].obstacleSensorEnable;
             waitingTimeMs_u32 = trajectoryYellowPoseArray[trajectoryIndex_u8].waitingTimeMs_u32;
-            clawState_u8 = trajectoryYellowPoseArray[trajectoryIndex_u8].clawState_u8;
+            actionId_en = trajectoryYellowPoseArray[trajectoryIndex_u8].actionId_en;
+            actionIsWait_b = trajectoryYellowPoseArray[trajectoryIndex_u8].actionIsWait_b;
 
-            if (MatchMgrGetEventWaitforEndState() == true )
+            /* if (MatchMgrGetEventWaitforEndState() == true )
             {
               MatchMgrResetEventWaitforEndState();
               Serial.println("Event Wait for End loaded");
-              xMeterWaypoint = WaitingYellowPose_t.x;
-              yMeterWaypoint = WaitingYellowPose_t.y;
+              xMilliMeterWaypoint = WaitingYellowPose_t.x;
+              yMilliMeterWaypoint = WaitingYellowPose_t.y;
               thetaDegWaypoint = WaitingYellowPose_t.theta;
               directionWaypoint_b = WaitingYellowPose_t.direction;
-              actuatorState_b = WaitingYellowPose_t.actuatorState;
+              obstacleSensorEnable_b = WaitingYellowPose_t.obstacleSensorEnable;
               waitingTimeMs_u32 = WaitingYellowPose_t.waitingTimeMs_u32;
-              clawState_u8 = WaitingYellowPose_t.clawState_u8;
-              nbMovement = 1;
+              actionId_en = WaitingYellowPose_t.actionId_en;
+              actionIsWait_b = WaitingYellowPose_t.actionIsWait_b;
+               nbMovement = 1;
 
-            }
+            }*/
 
             if (MatchMgrGetEventEndzoneState() == true )
             {
               MatchMgrResetEventEndzoneState();
               Serial.println("Event Wait for End loaded");
-              xMeterWaypoint = EndZoneYellowPose_t.x;
-              yMeterWaypoint = EndZoneYellowPose_t.y;
+              xMilliMeterWaypoint = EndZoneYellowPose_t.x;
+              yMilliMeterWaypoint = EndZoneYellowPose_t.y;
               thetaDegWaypoint = EndZoneYellowPose_t.theta;
               directionWaypoint_b = EndZoneYellowPose_t.direction;
-              actuatorState_b = EndZoneYellowPose_t.actuatorState;
-              waitingTimeMs_u32 = WaitingYellowPose_t.waitingTimeMs_u32;
-              clawState_u8 = WaitingYellowPose_t.clawState_u8;
+              obstacleSensorEnable_b = EndZoneYellowPose_t.obstacleSensorEnable;
+              waitingTimeMs_u32 = EndZoneYellowPose_t.waitingTimeMs_u32;
+              actionId_en = EndZoneYellowPose_t.actionId_en;
+              actionIsWait_b = EndZoneYellowPose_t.actionIsWait_b;
               nbMovement = 1;
             }
             break;
 
           case MATCH_COLOR_BLUE:
-            xMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].x;
-            yMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].y;
+            xMilliMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].x;
+            yMilliMeterWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].y;
             thetaDegWaypoint = trajectoryBluePoseArray[trajectoryIndex_u8].theta;
             directionWaypoint_b = trajectoryBluePoseArray[trajectoryIndex_u8].direction;
-            actuatorState_b = trajectoryBluePoseArray[trajectoryIndex_u8].actuatorState;
+            obstacleSensorEnable_b = trajectoryBluePoseArray[trajectoryIndex_u8].obstacleSensorEnable;
             waitingTimeMs_u32 = trajectoryBluePoseArray[trajectoryIndex_u8].waitingTimeMs_u32;
-            clawState_u8 = trajectoryBluePoseArray[trajectoryIndex_u8].clawState_u8;
+            actionId_en = trajectoryBluePoseArray[trajectoryIndex_u8].actionId_en;
+            actionIsWait_b = trajectoryBluePoseArray[trajectoryIndex_u8].actionIsWait_b;
 
-            if (MatchMgrGetEventWaitforEndState() == true )
+            /* if (MatchMgrGetEventWaitforEndState() == true )
             {
               MatchMgrResetEventWaitforEndState();
               Serial.println("Event Wait for End loaded");
-              xMeterWaypoint = WaitingBluePose_t.x;
-              yMeterWaypoint = WaitingBluePose_t.y;
+              xMilliMeterWaypoint = WaitingBluePose_t.x;
+              yMilliMeterWaypoint = WaitingBluePose_t.y;
               thetaDegWaypoint = WaitingBluePose_t.theta;
               directionWaypoint_b = WaitingBluePose_t.direction;
-              actuatorState_b = WaitingBluePose_t.actuatorState;
+              obstacleSensorEnable_b = WaitingBluePose_t.obstacleSensorEnable;
               waitingTimeMs_u32 = WaitingBluePose_t.waitingTimeMs_u32;
-              clawState_u8 = WaitingBluePose_t.clawState_u8;
+              actionId_en = WaitingBluePose_t.actionId_en;
+              actionIsWait_b = WaitingBluePose_t.actionIsWait_b;
               nbMovement = 1;
-            }
+            }*/
 
             if (MatchMgrGetEventEndzoneState() == true )
             {
               MatchMgrResetEventEndzoneState();
               Serial.println("Event Wait for End loaded");
-              xMeterWaypoint = EndZoneBluePose_t.x;
-              yMeterWaypoint = EndZoneBluePose_t.y;
+              xMilliMeterWaypoint = EndZoneBluePose_t.x;
+              yMilliMeterWaypoint = EndZoneBluePose_t.y;
               thetaDegWaypoint = EndZoneBluePose_t.theta;
               directionWaypoint_b = EndZoneBluePose_t.direction;
-              actuatorState_b = EndZoneBluePose_t.actuatorState;
+              obstacleSensorEnable_b = EndZoneBluePose_t.obstacleSensorEnable;
               waitingTimeMs_u32 = EndZoneBluePose_t.waitingTimeMs_u32;
-              clawState_u8 = EndZoneBluePose_t.clawState_u8;
+              actionId_en = EndZoneBluePose_t.actionId_en;
+              actionIsWait_b = EndZoneBluePose_t.actionIsWait_b;
               nbMovement = 1;
             }
             break;
         }
 
-        /* Do the actuator */
-        if (actuatorState_b == true)
+        /* Start or stop the obstacle sensor */
+        if (obstacleSensorEnable_b == true)
         {
-          ServoBoardCenterLeftCatch();
-          ServoBoardCenterRightCatch();
-          ServoBoardExtLeftCatch();
-          ServoBoardExtRightCatch();
+          ObstacleSensorStart();
         }
         else
         {
-          ServoBoardCenterLeftRelease();
-          ServoBoardCenterRightRelease();
-          ServoBoardExtLeftRelease();
-          ServoBoardExtRightRelease();
+          ObstacleSensorStop();
         }
 
         /* Compute angle and distance */
-        distanceWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, true);
-        orientationWaypoint = pythagoraCalculation(xMeterActual, yMeterActual, xMeterWaypoint, yMeterWaypoint, false);
+        distanceWaypoint = pythagoraCalculation(xMilliMeterActual, yMilliMeterActual, xMilliMeterWaypoint, yMilliMeterWaypoint, true);
+        orientationWaypoint = pythagoraCalculation(xMilliMeterActual, yMilliMeterActual, xMilliMeterWaypoint, yMilliMeterWaypoint, false);
 
         /* Forward move*/
         if (directionWaypoint_b == true)
         {
-          orientationToGo_d = orientationWaypoint - thetaDegActual;
-          distanceToGo_d = distanceWaypoint;
-          orientationFinalToGo_d = thetaDegWaypoint - orientationWaypoint; // necessary?
+          orientationToGoDeg_d = orientationWaypoint - thetaDegActual;
+          distanceToGoMm_d = distanceWaypoint;
+          orientationFinalToGoDeg_d = thetaDegWaypoint - orientationWaypoint; // necessary?
         }
         else /* Backward */
         {
-          orientationToGo_d = (orientationWaypoint - thetaDegActual) + 180.0;
-          distanceToGo_d = -distanceWaypoint;
-          orientationFinalToGo_d = (thetaDegWaypoint - orientationWaypoint) - 180.0;
+          orientationToGoDeg_d = (orientationWaypoint - thetaDegActual) + 180.0;
+          distanceToGoMm_d = -distanceWaypoint;
+          orientationFinalToGoDeg_d = (thetaDegWaypoint - orientationWaypoint) - 180.0;
         }
 
         /* If rotation more than 180°, go the other way */
-        if (orientationToGo_d > 180.0 )
+        if (orientationToGoDeg_d > 180.0 )
         {
-          orientationToGo_d = orientationToGo_d - 360.0;
+          orientationToGoDeg_d = orientationToGoDeg_d - 360.0;
         }
         /* If rotation less than -180°, go the other way */
-        if (orientationToGo_d < -180.0 )
+        if (orientationToGoDeg_d < -180.0 )
         {
-          orientationToGo_d = orientationToGo_d + 360.0;
+          orientationToGoDeg_d = orientationToGoDeg_d + 360.0;
         }
 
         /* If rotation more than 180°, go the other way */
-        if (orientationFinalToGo_d > 180.0 )
+        if (orientationFinalToGoDeg_d > 180.0 )
         {
-          orientationFinalToGo_d = orientationFinalToGo_d - 360.0;
+          orientationFinalToGoDeg_d = orientationFinalToGoDeg_d - 360.0;
         }
         /* If rotation less than -180°, go the other way */
-        if (orientationFinalToGo_d < -180.0 )
+        if (orientationFinalToGoDeg_d < -180.0 )
         {
-          orientationFinalToGo_d = orientationFinalToGo_d + 360.0;
+          orientationFinalToGoDeg_d = orientationFinalToGoDeg_d + 360.0;
         }
 
         if (TRAJECTORY_DEBUG)
         {
           Serial.print(" [Aiming] I am at point x=");
-          Serial.print(xMeterActual);
-          Serial.print(", y=");
-          Serial.print(yMeterActual);
-          Serial.print(", theta=");
+          Serial.print(xMilliMeterActual);
+          Serial.print("mm, y=");
+          Serial.print(yMilliMeterActual);
+          Serial.print("mm, theta=");
           Serial.print(thetaDegActual);
-          Serial.print(" and I want to go to point x=");
-          Serial.print(xMeterWaypoint);
-          Serial.print(", y=");
-          Serial.print(yMeterWaypoint);
-          Serial.print(", theta=");
-          Serial.println(thetaDegWaypoint);
-          Serial.print("It is a ");
+          Serial.print("° and I want to go to point x=");
+          Serial.print(xMilliMeterWaypoint);
+          Serial.print("mm, y=");
+          Serial.print(yMilliMeterWaypoint);
+          Serial.print("mm, theta=");
+          Serial.print(thetaDegWaypoint);
+          Serial.print("°. It is a ");
           if (directionWaypoint_b == true)
-            Serial.print("forward move");
+            Serial.print("forward move ");
           else
-            Serial.print("backward move");
+            Serial.print("backward move ");
           if (thetaDegWaypoint == 361.0)
-            Serial.println(" No final alignement");
+            Serial.println("with no final alignement.");
           else
             Serial.println();
           Serial.print("This means I need to rotate : ");
-          Serial.print(orientationToGo_d);
-          Serial.print(", to move : ");
-          Serial.print(distanceToGo_d);
-          Serial.print(" and finally to rotate : ");
-          Serial.print(orientationFinalToGo_d);
-          Serial.println();
+          Serial.print(orientationToGoDeg_d);
+          Serial.print("°, to move : ");
+          Serial.print(distanceToGoMm_d);
+          Serial.print("mm and finally to rotate : ");
+          Serial.print(orientationFinalToGoDeg_d);
+          Serial.println("°.");
         }
 
         /* Do the aim */
-        PositionMgrGotoOrientationDegree(orientationToGo_d);
+        PositionMgrGotoOrientationDegree(orientationToGoDeg_d);
         /* Set the state to Go to */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_GO_TO;
         break;
@@ -360,7 +401,7 @@ uint8_t Trajectory(double colorSide)
           Serial.println("[Advance]");
         }
         /* Do the Go to */
-        PositionMgrGotoDistanceMeter(distanceToGo_d, true);
+        PositionMgrGotoDistanceMilliMeter(distanceToGoMm_d, true, VITESSE_MAX);
         /* Set the state to Rotation, if alignement is required */
         if (thetaDegWaypoint != 361.0)
         {
@@ -368,39 +409,14 @@ uint8_t Trajectory(double colorSide)
         }
         else
         {
-          /* Set the next waypoint in the trajectory */
-          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
-          /* Test if it needs to wait */
-          if (waitingTimeMs_u32 != 0)
-          {
-            MatchMgrSetWaitingTimer(waitingTimeMs_u32);
-          }
-          /* Claw */
-          switch (clawState_u8)
-          {
-            case CLAW_NOT:
-              /* Nothing to do */
-              break;
-
-            case CLAW_OUT:
-              ActuatorClawOut();
-              break;
-
-            case CLAW_IN:
-              ActuatorClawIn();
-              break;
-
-            default:
-              break;
-          }
-
-          trajectoryIndex_u8++;
+          /* Set waiting state */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_SUPP_DELAY;
 
           if (DEBUG_SIMULATION)
           {
-            OdometrySetXMeter(xMeterWaypoint / 1000.0);
-            OdometrySetYMeter(yMeterWaypoint / 1000.0);
-            OdometrySetThetaDeg((OdometryGetThetaRad() * 180 / PI) + orientationToGo_d);
+            OdometrySetXMilliMeter(xMilliMeterWaypoint);
+            OdometrySetYMilliMeter(yMilliMeterWaypoint);
+            OdometrySetThetaDeg((OdometryGetThetaRad() * 180 / PI) + orientationToGoDeg_d);
           }
         }
         break;
@@ -412,41 +428,119 @@ uint8_t Trajectory(double colorSide)
           Serial.println("[Final rotation]");
         }
         /* Do the Rotation */
-        PositionMgrGotoOrientationDegree(orientationFinalToGo_d);
-        /* Set the next waypoint in the trajectory */
-        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+        PositionMgrGotoOrientationDegree(orientationFinalToGoDeg_d);
+        /* Set waiting state */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_SUPP_DELAY;
+
+        if (DEBUG_SIMULATION)
+        {
+          OdometrySetXMilliMeter(xMilliMeterWaypoint);
+          OdometrySetYMilliMeter(yMilliMeterWaypoint);
+          OdometrySetThetaDeg(thetaDegWaypoint);
+        }
+        break;
+        
+      case TRAJECTORY_WAYPOINT_SUPP_DELAY:
         /* Test if it needs to wait */
         if (waitingTimeMs_u32 != 0)
         {
           MatchMgrSetWaitingTimer(waitingTimeMs_u32);
         }
-        /* Claw */
-        switch (clawState_u8)
+        if ( actionId_en != ACTION_MGR_ID_NONE)
         {
-          case CLAW_NOT:
-            /* Nothing to do */
-            break;
-
-          case CLAW_OUT:
-            ActuatorClawOut();
-            break;
-
-          case CLAW_IN:
-            ActuatorClawIn();
-            break;
-
-          default:
-            break;
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ACTION;
         }
-
-        trajectoryIndex_u8++;
-
-        if (DEBUG_SIMULATION)
+        else
         {
-          OdometrySetXMeter(xMeterWaypoint / 1000.0);
-          OdometrySetYMeter(yMeterWaypoint / 1000.0);
-          OdometrySetThetaDeg(thetaDegWaypoint);
+          /* Set the state to next point */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+          trajectoryIndex_u8++;
         }
+        break;
+      
+      case TRAJECTORY_WAYPOINT_ACTION:
+        if (TRAJECTORY_DEBUG)
+        {
+          Serial.println("[Action to do?]");
+        }
+        /* Do the action with wait or not */
+        ActionMgrSetNextAction(actionId_en, actionIsWait_b);
+        /* Set the state to next point */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_ACTION_WAIT;
+        break;
+
+      case TRAJECTORY_WAYPOINT_ACTION_WAIT:
+        if (TRAJECTORY_DEBUG)
+        {
+          Serial.println("[Action wait?]");
+        }
+        /* Wait for the action_mgr to finish */
+        if ( ActionMgrGetState() == ACTION_MGR_STATE_DONE )
+        {
+          /* Set the state to next point */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+          trajectoryIndex_u8++;
+        }
+        break;
+
+      case TRAJECTORY_EMERGENCY_WAIT:
+        if (TRAJECTORY_DEBUG)
+        {
+          Serial.println("[Emergency wait]");
+        }
+        /* Should wait a few second, re-test obstacle */
+        if ( ObstacleSensorDetected() == false)
+        {
+          if (TRAJECTORY_DEBUG)
+          {
+            Serial.println("[No more obstacle]");
+          }
+          /* No more, re load waypoint */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
+        }
+        else
+        {
+          /* Still here, next state of emergency */
+          //trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_1ST_ROTATION;
+          /* For now, we will wait only */
+          trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_WAIT;
+        }
+        break;
+
+      case TRAJECTORY_EMERGENCY_1ST_ROTATION:
+        if (TRAJECTORY_DEBUG)
+        {
+          Serial.println("[Emergency move]");
+        }
+        /* Do not return in emergency */
+        ObstacleSensorStop();
+        /* Rotation */
+        PositionMgrGotoOrientationDegree(colorSide * TRAJECTORY_EMERGENCY_1ST_ROTATION_DEG);
+        /* Next state of emergency */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_1ST_TRANSLATION;
+        break;
+
+      case TRAJECTORY_EMERGENCY_1ST_TRANSLATION:
+        /* Reenable */
+        ObstacleSensorStart();
+        /* Translation */
+        PositionMgrGotoDistanceMilliMeter(TRAJECTORY_EMERGENCY_1ST_TRANSLATION_MM, true, VITESSE_SLOW);
+        /* Return to load actual point */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_2ND_ROTATION;
+        break;
+
+      case TRAJECTORY_EMERGENCY_2ND_ROTATION:
+        /* Rotation inverse */
+        PositionMgrGotoOrientationDegree(colorSide * (-TRAJECTORY_EMERGENCY_2ND_ROTATION_DEG));
+        /* Next state of emergency */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_2ND_TRANSLATION;
+        break;
+
+      case TRAJECTORY_EMERGENCY_2ND_TRANSLATION:
+        /* Translation */
+        PositionMgrGotoDistanceMilliMeter(TRAJECTORY_EMERGENCY_2ND_TRANSLATION_MM, true, VITESSE_SLOW);
+        /* Return to load actual point */
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_AIM;
         break;
 
       default:
@@ -542,7 +636,7 @@ void TrajectoryMgrCalibTrajectory()
       /* Start sequence */
       TrajectoryCalibrateBorder(trajectoryIndex_u8);
       /* To calibrate the distance instead */
-      //TrajectoryCalibrateDistance(2.0);
+      //TrajectoryCalibrateDistance(2000.0);
       /* To calibrate the rotation instead */
       //TrajectoryCalibrateRotation(3600.0);
       /* To calibrate with the square method */
@@ -616,12 +710,53 @@ void TrajectoryMgrMainTrajectory()
     case POSITION_STATE_STOPPED:
       /* Next move */
       //Serial.println("Next move");
-      trajectoryIndex_u8 = Trajectory(colorSide);
+      if ((PositionMgrGetEmergencyState() == true) && (trajectoryMgrWaypointState_en_g != TRAJECTORY_EMERGENCY_WAIT) )
+      {
+        Serial.println("Stopped Emergency!");
+        ObstacleSensorStop();
+        trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_WAIT;
+        MatchMgrSetWaitingTimer(1000);
+        PositionMgrSetEmergencyState(false);
+        ObstacleSensorStart();
+      }
+      Trajectory(colorSide);
+      break;
+    default:
+      break;
+  }
+}
+
+/**
+   @brief     This function makes the robot follow the match trajectory.
+
+
+   @param     none
+
+   @result    none
+
+*/
+void TrajectoryMgrMatchTrajectory()
+{
+  /* According to the position mgr state, wait, go to next position or do evasion */
+  switch (PositionMgrGetState())
+  {
+    case POSITION_STATE_NONE:
+      /* No state */
+      //Serial.println("No state");
+      break;
+    case POSITION_STATE_MOVING:
+      /* Nothing to do */
+      //Serial.println("Moving");
+      break;
+    case POSITION_STATE_STOPPED:
+      /* Next move */
+      //Serial.println("Next move");
+      // TODO if new move exists, load next move
       break;
     case POSITION_STATE_EMERGENCY_ACTIVATED:
       /* What to do ?*/
       Serial.println("Emergency in trajectory_mgr");
-      //EvasionMgr(colorSide, trajectoryIndex_u8);
+      // TODO According to actual position, target position and obstacle, compute new intermediate target.
       break;
     default:
       break;
@@ -643,7 +778,7 @@ void TrajectoryCalibrateDistance(double distance_d)
 
   if (trajectoryFinished_b == false)
   {
-    PositionMgrGotoDistanceMeter(distance_d, true);
+    PositionMgrGotoDistanceMilliMeter(distance_d, true, VITESSE_SLOW);
     trajectoryFinished_b = true;
   }
 }
@@ -684,14 +819,14 @@ void TrajectoryCalibrateRotation(double angle_d)
 
    @param     trajectoryIndex_u8    Index used by the manager to determine which part of the trajectory it is on.
 
-              squareSizeM_d         Size in meters of the sides of the square.
+              squareSizeMm_d        Size in millimeters of the sides of the square.
 
               direction_b           Direction (true cw, false, ccw).
 
    @result    none
 
 */
-void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d)
+void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeMm_d)
 {
   static int8_t trajectoryIndexLast_i8 = -1;
   static bool trajectoryFinished_b = false;
@@ -716,7 +851,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d)
     {
       case 0:
         //Serial.print(", Distance : 1m");
-        PositionMgrGotoDistanceMeter(squareSizeM_d, true);
+        PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true, VITESSE_SLOW);
         break;
       case 1:
         //Serial.print(", Orientation : 90°");
@@ -724,7 +859,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d)
         break;
       case 2:
         //Serial.print(", Distance : 1m");
-        PositionMgrGotoDistanceMeter(squareSizeM_d, true);
+        PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true, VITESSE_SLOW);
         break;
       case 3:
         //Serial.print(", Orientation : 90°");
@@ -732,7 +867,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d)
         break;
       case 4:
         //Serial.print(", Distance : 1m");
-        PositionMgrGotoDistanceMeter(squareSizeM_d, true);
+        PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true, VITESSE_SLOW);
         break;
       case 5:
         //Serial.print(", Orientation : 90°");
@@ -740,7 +875,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeM_d)
         break;
       case 6:
         //Serial.print(", Distance : 1m");
-        PositionMgrGotoDistanceMeter(squareSizeM_d, true);
+        PositionMgrGotoDistanceMilliMeter(squareSizeMm_d, true, VITESSE_SLOW);
         break;
       case 7:
         //Serial.print(", Orientation : 90°");
@@ -780,9 +915,9 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
       Serial.print("Before border Calib Index : ");
       Serial.print(trajectoryIndex_u8);
       Serial.print(", I am at point x=");
-      Serial.print(OdometryGetXMeter() * 1000.0);
+      Serial.print(OdometryGetXMilliMeter());
       Serial.print("mm, y=");
-      Serial.print(OdometryGetYMeter() * 1000.0);
+      Serial.print(OdometryGetYMilliMeter());
       Serial.print("mm, theta=");
       Serial.print(OdometryGetThetaRad() * RAD_TO_DEG);
       Serial.println("°");
@@ -800,24 +935,24 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         {
           OdometrySetThetaDeg(180.0);
         }
-        PositionMgrSetOrientationControl(false);
-        PositionMgrGotoDistanceMeter(-0.15, true);
+        PositionMgrSetOrientationControl(true);
+        PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_SLOW);
         break;
       case 1:
         /* Reset the x coordinate, and the theta orientation */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          OdometrySetXMeter(ROBOT_BACKWIDTH);
+          OdometrySetXMilliMeter(ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(0.0);
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true);
+          PositionMgrGotoDistanceMilliMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
         }
         else
         {
-          OdometrySetXMeter(3.0 - ROBOT_BACKWIDTH);
+          OdometrySetXMilliMeter(3000.0 - ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(180.0);
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMeter(MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true);
+          PositionMgrGotoDistanceMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
         }
         /* Move forward X cm */
 
@@ -827,40 +962,40 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Rotate Ccw or Cw ? */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          PositionMgrGotoOrientationDegree(90.0);
+          PositionMgrGotoOrientationDegree(-90.0);
         }
         else
         {
-          PositionMgrGotoOrientationDegree(-90.0);
+          PositionMgrGotoOrientationDegree(90.0);
         }
         break;
 
       case 3:
         /* Move backwards until border */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMeter(-0.7, true);
+        PositionMgrGotoDistanceMilliMeter(-600.0, true, VITESSE_SLOW);
         break;
 
       case 4:
         /* Reset the y coordinate */
-        OdometrySetYMeter(ROBOT_BACKWIDTH);
-        OdometrySetThetaDeg(90.0);
+        OdometrySetYMilliMeter(2000.0 - ROBOT_BACKWIDTH);
+        OdometrySetThetaDeg(-90.0);
         /* Move forward */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMeter(MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true);
+        PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
         /* Finished */
 
-        /* Great Hack */
-        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
-        {
-          OdometrySetXMeter(MATCH_START_POSITION_X_YELLOW);
-        }
-        else
-        {
-          OdometrySetXMeter(3.0 - MATCH_START_POSITION_X_BLUE);
-        }
-        //OdometrySetYMeter(MATCH_START_POSITION_Y);
-        OdometrySetThetaDeg(90.0);
+        // /* Great Hack */
+        // if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        // {
+        //   OdometrySetXMilliMeter(MATCH_START_POSITION_X_YELLOW);
+        // }
+        // else
+        // {
+        //   OdometrySetXMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE);
+        // }
+        // //OdometrySetYMeter(MATCH_START_POSITION_Y);
+        // OdometrySetThetaDeg(-90.0);
 
         trajectoryFinished_b = true;
         MatchMgrSetState(MATCH_STATE_READY);
@@ -868,13 +1003,13 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         {
           if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
           {
-            OdometrySetXMeter(MATCH_START_POSITION_X_YELLOW);
-            OdometrySetYMeter(MATCH_START_POSITION_Y);
+            OdometrySetXMilliMeter(MATCH_START_POSITION_X_YELLOW);
+            OdometrySetYMilliMeter(MATCH_START_POSITION_Y);
           }
           else
           {
-            OdometrySetXMeter(3.0 - MATCH_START_POSITION_X_BLUE);
-            OdometrySetYMeter(MATCH_START_POSITION_Y);
+            OdometrySetXMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE);
+            OdometrySetYMilliMeter(MATCH_START_POSITION_Y);
           }
           //OdometrySetThetaDeg(MATCH_START_POSITION_THETA);
         }
@@ -888,9 +1023,9 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
       Serial.print("After border Calib Index : ");
       Serial.print(trajectoryIndex_u8);
       Serial.print(", I am at point x=");
-      Serial.print(OdometryGetXMeter() * 1000.0);
+      Serial.print(OdometryGetXMilliMeter());
       Serial.print("mm, y=");
-      Serial.print(OdometryGetYMeter() * 1000.0);
+      Serial.print(OdometryGetYMilliMeter());
       Serial.print("mm, theta=");
       Serial.print(OdometryGetThetaRad() * RAD_TO_DEG);
       Serial.println("°");
@@ -901,3 +1036,127 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
 /******************************************************************************
    Private functions definitions
  ******************************************************************************/
+
+bool Push(WaypointPile_t **wpPile, pose_t pose_st)
+{
+  bool result_b = false;
+
+  WaypointPile_t *element = (WaypointPile_t*)malloc(sizeof(WaypointPile_t));
+  if(element) 
+    result_b = true;     /* Si l'allocation a reussi. */
+  element->pose_st = pose_st;
+  element->prec = *wpPile;
+  *wpPile = element;     /* Le pointeur pointe sur le dernier élément. */
+
+  return result_b;
+}
+
+bool WaypointFile(WaypointPile_t **wpFile, pose_t pose_st)
+{
+  bool result_b = false;
+
+  WaypointPile_t *element = (WaypointPile_t*)malloc(sizeof(WaypointPile_t));
+  if(element) 
+    result_b = true;     /* Si l'allocation a reussi. */
+
+  element->pose_st = pose_st;
+  element->prec = NULL;
+
+  WaypointPile_t *tmp;
+  if(*wpFile != NULL)
+  {
+    Serial.println("file non nulle");
+    tmp = (*wpFile)->prec;
+    Serial.println("tmp");
+    while (tmp->prec != NULL)
+    {
+      Serial.println("un niveau en +");
+      tmp = tmp->prec;
+    }
+    Serial.println("niveau trouvé");
+    tmp->prec = element;
+  }
+  else
+  {
+    Serial.println("File nulle");
+    *wpFile = element;
+  }  
+  return result_b;
+}
+
+pose_t WaypointUnFile(WaypointPile_t **wpFile)
+{
+  pose_t poseUnfiled_st;
+
+  /* On vérifie s'il y a quelque chose à défiler */
+  if ((*wpFile)->prec != NULL)
+  {
+    WaypointPile_t *elementDefile = (*wpFile)->prec;
+    poseUnfiled_st = elementDefile->pose_st;
+    (*wpFile)->prec = elementDefile->prec;
+    free(elementDefile);
+  }
+  return poseUnfiled_st;
+}
+
+pose_t Pop(WaypointPile_t **wpPile)
+{
+  pose_t pose_st;
+  WaypointPile_t *tmp;
+  //if(!*wpPile) 
+    //return -1;     /* Retourne -1 si la pile est vide. */
+  tmp = (*wpPile)->prec;
+  pose_st = (*wpPile)->pose_st;
+  free(*wpPile);
+  *wpPile = tmp;       /* Le pointeur pointe sur le dernier élément. */
+  return pose_st;     /* Retourne la valeur soutirée de la pile. */
+}
+
+void Clear(WaypointPile_t **wpPile)
+{
+  WaypointPile_t *tmp;
+  while(*wpPile)
+  {
+    tmp = (*wpPile)->prec;
+    free(*wpPile);
+    *wpPile = tmp;
+  }
+}
+
+int Length(WaypointPile_t *wpPile)
+{
+  int n=0;
+  while(wpPile)
+  {
+    n++;
+    wpPile = wpPile->prec;
+  }
+  return n;
+}
+
+void View(WaypointPile_t *wpPile)
+{
+  uint8_t nb_u8 = 0;
+  while(wpPile != NULL)
+  {
+    Serial.print("RobotMgr|Pile Pose nb :");
+    Serial.print(nb_u8);
+    Serial.print(", x : ");
+    Serial.print(wpPile->pose_st.x);
+    Serial.print(", y : ");
+    Serial.print(wpPile->pose_st.y);
+    Serial.print(", angle : ");
+    Serial.print(wpPile->pose_st.theta);
+    Serial.print(", orientation/resetTheta : ");
+    Serial.print(wpPile->pose_st.resetTheta);
+    Serial.print(", direction : ");
+    Serial.print(wpPile->pose_st.direction);
+    Serial.print(", action : ");
+    Serial.print(wpPile->pose_st.actionId_en);
+    Serial.print(", wait end action : ");
+    Serial.print(wpPile->pose_st.actionIsWait_b);
+    Serial.println();
+    nb_u8++;
+    wpPile = wpPile->prec;
+  }
+}
