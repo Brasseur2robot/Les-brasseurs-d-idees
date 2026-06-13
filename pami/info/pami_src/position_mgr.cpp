@@ -196,10 +196,6 @@ void PositionMgrUpdate(bool timeMeasure_b)
     ObstacleSensorSetThreshold( (uint16_t)( 2.0 * TopToMilliMeter(RampGetDistanceBrake(&rampDistance_st_g)) ) );
     //Serial.println(ObstacleSensorDetected());
 
-<<<<<<< HEAD:pami/info/pami_src/position_mgr.cpp
-    if (emergencyActivated_b == false)
-    {
-=======
     /* if Ramp init, then stopped */
     if ((RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) {
       positionMgrState_en_g = POSITION_STATE_STOPPED;
@@ -216,8 +212,6 @@ void PositionMgrUpdate(bool timeMeasure_b)
           //Serial.print("Incrementing timeout, ");
           //Serial.print(timeOutCount_u8);
           //Serial.print(", ");
->>>>>>> robot_poc:2025/pami/info/pami_src/position_mgr.cpp
-
           /* if both pid error < acceptable range -> stopped */
           if ( (abs(pidDistance_st_g.error_f) < 5) && (abs(pidOrientation_st_g.error_f) < 5) ) {
             positionMgrState_en_g = POSITION_STATE_STOPPED;

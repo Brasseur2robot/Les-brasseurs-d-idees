@@ -4,14 +4,11 @@
 /******************************************************************************
  * Function Declarations
  ******************************************************************************/
-<<<<<<< HEAD:pami/info/pami_src/trajectory_mgr.h
-void Trajectory(double colorSide, uint8_t trajectoryIndex_u8);
-=======
+
 void TrajectoryMgrInit();
 void TrajectoryBaseInit();
 void TrajectoryNewTrajectory();
 uint8_t Trajectory(double colorSide);
->>>>>>> robot_poc:2025/pami/info/pami_src/trajectory_mgr.h
 void TrajectoryMgrUpdate(bool timeMeasure_b);
 void TrajectoryMgrCalibTrajectory();
 void TrajectoryMgrMainTrajectory();

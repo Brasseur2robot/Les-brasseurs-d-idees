@@ -6,7 +6,7 @@
  ******************************************************************************/
 #ifdef PAMI_1
 
-#define MOTOR_DEADZONE        24.0
+#define MOTOR_DEADZONE        0.0
 
 /*
  * The Pami motor has a reduction ratio of 30:1 and a maximum speed of 220 rpm.

@@ -77,16 +77,6 @@ void setup() {
   PositionMgrInit();
 #ifndef PAMI_G
   SensorInit();
-<<<<<<< HEAD:pami/info/pami_src/main.cpp
-  //CustomTimerInit();
-}
-
-void loop() {
-  // MotorTest(MOTOR_DEADZONE);
-  // OdometryEncoderTest();
-  ActuatorUpdate(DEBUG_TIME);
-  // IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms */
-=======
 #endif
   TrajectoryMgrInit();
   PositionMgrStop();
@@ -105,7 +95,6 @@ void loop() {
   ControllerUpdate(DEBUG_TIME);
 #endif
   IhmUpdate(DEBUG_TIME); /* Takes too much time, 74ms, now on esp32 26ms */
->>>>>>> robot_poc:2025/pami/info/pami_src/main.cpp
   LedUpdate(DEBUG_TIME);
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);

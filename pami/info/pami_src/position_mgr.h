@@ -6,31 +6,6 @@
  ******************************************************************************/
 typedef enum
 {
-<<<<<<< HEAD:pami/info/pami_src/position_mgr.h
-  POSITION_STATE_NONE = 0u,                /* No state */
-  POSITION_STATE_MOVING = 1u,              /* Position manager is moving */
-  POSITION_STATE_STOPPED = 2u,             /* Position manager finished his move, ready for antother one */
-  POSITION_STATE_EMERGENCY_ACTIVATED = 3u, /* Position manager swap to the emergency trajectory */
-} PositionManagerStateEn;                  /* Enumeration used to select the position manager state */
-
-typedef enum
-{
-  POSITION_STATE_EMERGENCY_NONE = 0u,         /* No state */
-  POSITION_STATE_EMERGENCY_STOPPED = 1u,      /* Position manager is stopped in emergency */
-  POSITION_STATE_EMERGENCY_MOVING = 2u,       /* Position manager is moving in emergency */
-  POSITION_STATE_EMERGENCY_END = 3u,          /* Position manager is at the end of the emergency */
-} PositionManagerStateEmergencyEn;            /* Enumeration used to select the position manager emergency state */
-
-typedef struct PoseStruct
-{
-  // Member definitions
-  double x;
-  double y;
-  double theta;
-  double direction;
-  double resetTheta;
-  double obstacleSensorEnable;
-=======
   POSITION_STATE_NONE = 0u,         /* No state */
   POSITION_STATE_MOVING = 1u,       /* Position manager is moving */
   POSITION_STATE_STOPPED = 2u,      /* Position manager finished his move, ready for antother one */
@@ -46,7 +21,6 @@ typedef struct PoseStruct {
     bool resetTheta;
     bool obstacleSensorEnable;
     uint32_t waitingTimeMs_u32; // if non null, waitingTime after arriving at position
->>>>>>> robot_poc:2025/pami/info/pami_src/position_mgr.h
 } pose_t;
 #else
 typedef struct PoseStruct {

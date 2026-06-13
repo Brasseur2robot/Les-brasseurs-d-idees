@@ -15,9 +15,4 @@ void MotorRightSetSpeed(double motorSpeed_d);
 int16_t motorLeftGetSpeed();
 int16_t motorRightGetSpeed();
 
-<<<<<<< HEAD:pami/info/pami_src/motor.h
-// void setPwmFrequency(int pin, int divisor);
-
-=======
->>>>>>> robot_poc:2025/pami/info/pami_src/motor.h
 #endif

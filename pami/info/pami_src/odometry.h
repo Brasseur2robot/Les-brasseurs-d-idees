@@ -14,14 +14,8 @@ int32_t OdometryGetOrientationTop();
 double OdometryGetXMilliMeter();
 double OdometryGetYMilliMeter();
 double OdometryGetThetaRad();
-<<<<<<< HEAD:pami/info/pami_src/odometry.h
-double OdometryGetThetaDeg();
-void OdometrySetXMeter(double xM_d);
-void OdometrySetYMeter(double xM_d);
-=======
 void OdometrySetXMilliMeter(double xMm_d);
 void OdometrySetYMilliMeter(double xMm_d);
->>>>>>> robot_poc:2025/robot/info/robot_core_src/odometry.h
 void OdometrySetThetaDeg(double thetaDeg_d);
 
 void OdometryUpdate(bool timeMeasure_b);

@@ -80,30 +80,26 @@ void ControllerUpdate(bool timeMeasure_b) {
         controller.read(&e);
 
         float speed_f;
+        float dist_f;
         float angle_f;
         float dir_f;
 
 #ifdef CONTROLLER_STEAM
         /* Read speed input from the distance to center */
-        speed_f = sqrt( pow(e.stickY, 2) + pow(e.stickX, 2) );
+        dist_f = sqrt( pow(e.stickY, 2) + pow(e.stickX, 2) );
+        speed_f = e.stickY;
         angle_f = atan2(e.stickY, e.stickX) * RAD_TO_DEG;
         dir_f = e.stickX;
 
-        /* Read directly form thumbstick*/
-        //speed_f = e.stickX;
-        //angle_f = e.stickY;
         /* Trigger */
         //float forward_f = (1.0 - factorForwardExpo_f) * pow(e.rightTrigger, 3) + (factorForwardExpo_f * e.rightTrigger);
         //float rewind_f = (1.0 - factorForwardExpo_f) * pow(e.leftTrigger, 3) + (factorForwardExpo_f * e.leftTrigger);
 #else
         /* Read speed input from the distance to center */
-        speed_f = sqrt( pow(e.leftStickY, 2) + pow(e.leftStickX, 2) );
+        dist_f = sqrt( pow(e.leftStickY, 2) + pow(e.leftStickX, 2) );
+        speed_f = e.leftStickY;
         angle_f = atan2(e.leftStickY, e.leftStickX) * RAD_TO_DEG;
-        dir_f = e.leftStickX
-
-        /* Read directly form thumbstick*/
-        //speed_f = e.stickX;
-        //angle_f = e.stickY;
+        dir_f = e.leftStickX;
 #endif
         /* Expo */ 
         float factorForwardExpo_f = 0.2;
@@ -111,15 +107,15 @@ void ControllerUpdate(bool timeMeasure_b) {
         float factorDirectionExpo_f = 0.2;
         float direction_f = (1.0 - factorDirectionExpo_f) * pow(dir_f, 3) + (factorDirectionExpo_f * dir_f / 180.0);
 
-#ifdef CONTROLLER_STEAM
         /* Deadzone */
-        if ( speed_f <= 0.08 ) {
+        if ( dist_f <= 0.08 ) {
           flag_goRear = 0;
         }
         
+        /* Take care of reward */
         if (flag_goRear == 0)
         {
-          if ( speed_f >= 0.08 )
+          if ( dist_f >= 0.08 )
           {
             /* Take care of reward */
             if ( (angle_f > -135.0) && (angle_f < -45.0) ) {
@@ -131,27 +127,25 @@ void ControllerUpdate(bool timeMeasure_b) {
             }
           }
         }
-#else
-        /* Take care of reward */
-        if ((abs(e.leftStickY) <= 0.08) && (abs(e.leftStickX) <= 0.08)) {
-          flag_goRear = 0;
-        }
-        if ((flag_goRear == 0) && (e.leftStickY < -0.1)) {
-          flag_goRear = -1;
-        }
-        if ((flag_goRear == 0) && ( (e.leftStickY > 0.08) || (abs(e.leftStickX) > 0.08) ) ) {
-          flag_goRear = 1;
-        }
-#endif
-        /* Direction mix plus rear inversion */
+        // if ((abs(e.leftStickY) <= 0.08) && (abs(e.leftStickX) <= 0.08)) {
+        //   flag_goRear = 0;
+        // }
+        // if ((flag_goRear == 0) && (e.leftStickY < -0.1)) {
+        //   flag_goRear = -1;
+        // }
+        // if ((flag_goRear == 0) && ( (e.leftStickY > 0.08) || (abs(e.leftStickX) > 0.08) ) ) {
+        //   flag_goRear = 1;
+        // }
+
+        /* Direction mix plus */
         float directionMix_f = 0.3;
         float vitesseG = 0.0;
         float vitesseD = 0.0;
         
         //vitesseG = (0.9 * forward_f + flag_goRear * directionMix_f * direction_f) * 255.0;
         //vitesseD = (0.9 * forward_f - flag_goRear * directionMix_f * direction_f) * 255.0;
-        vitesseG = (0.9 * flag_goRear * forward_f + flag_goRear * directionMix_f * direction_f) * 255.0;
-        vitesseD = (0.9 * flag_goRear * forward_f - flag_goRear * directionMix_f * direction_f) * 255.0;
+        vitesseG = (0.9 * forward_f + flag_goRear * directionMix_f * direction_f) * 255.0;
+        vitesseD = (0.9 * forward_f - flag_goRear * directionMix_f * direction_f) * 255.0;
         /* Trigger */
         // if (forward_f >= 0.08)
         // {
