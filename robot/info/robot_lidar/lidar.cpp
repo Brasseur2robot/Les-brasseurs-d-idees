@@ -155,10 +155,10 @@ void LidarUpdate() {
       }
     }
 
-    Serial.print("Nb points : ");
-    Serial.print(n);
-    Serial.print("Time while print : ");
-    Serial.println(micros() - time);
+    //Serial.print("Nb points : ");
+    //Serial.print(n);
+    //Serial.print("Time while print : ");
+    //Serial.println(micros() - time);
 
     /*
     // --- Alternative display and data access examples ---
