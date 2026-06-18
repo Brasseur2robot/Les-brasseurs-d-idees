@@ -17,3 +17,6 @@ Codebase de l'équipe légende des brasseurs d'idées concourant à la coupe de 
 ## Lidar
 Le STL27L : [doc ici](https://www.waveshare.com/wiki/DTOF_LIDAR_STL27L) Avec le programme de test "LdsPointCloudViewer" dispo sur le lien. Il y a aussi un bête programme pour juste démarrer/arrêter le Lidar à partir d'un esp.
 Un [projet](https://github.com/kaiaai/LDS/blob/main/README.md) qui supporte pas mal de Lidar différent (mais pas le notre). Cela semble une bonne base de départ.
+
+## Telemétrie et debug
+[Ici](https://git.poivron-robotique.fr/Keuronde/ESP32_Teleplot/src/branch/master/ESP32_Teleplot.ino) un projet tout simple pour envoyer par wifi des paquets UDP à un serveur Teleplot (pour un uC ESP-32).
