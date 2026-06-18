@@ -12,7 +12,8 @@ Codebase de l'équipe légende des brasseurs d'idées concourant à la coupe de 
 
 ## Palmarès
 
-- 2025 : 25ème au classement général et 9ème classement légende
+- 2025 : 25ème au classement général et 9ème classement Légendes
+- 2026 : 48ème au classement général et 18ème classement Légendes
 
 ## Lidar
 Le STL27L : [doc ici](https://www.waveshare.com/wiki/DTOF_LIDAR_STL27L) Avec le programme de test "LdsPointCloudViewer" dispo sur le lien. Il y a aussi un bête programme pour juste démarrer/arrêter le Lidar à partir d'un esp.
