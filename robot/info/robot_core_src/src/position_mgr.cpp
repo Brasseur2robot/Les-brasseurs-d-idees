@@ -197,8 +197,8 @@ void PositionMgrUpdate(bool timeMeasure_b) {
       if (((positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED))
           || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
         //Serial.print("Ramp finished, ");
-        /* count tiemout detection */
-        if (timeOutCount_u8 < 40) {
+        /* count timeout detection */
+        if (timeOutCount_u8 < 200) {
           timeOutCount_u8 += 1;
           positionMgrState_en_g = POSITION_STATE_MOVING;
           //Serial.print("Incrementing timeout, ");
@@ -208,12 +208,12 @@ void PositionMgrUpdate(bool timeMeasure_b) {
           /* if both pid error < acceptable range -> stopped */
           if ( (abs(pidDistance_st_g.error_d) < 5) && (abs(pidOrientation_st_g.error_d) < 5) ) {
             positionMgrState_en_g = POSITION_STATE_STOPPED;
-            //Serial.print("Position reached, ");
+            //Serial.println("Position reached, ");
           }
         } else {
           positionMgrState_en_g = POSITION_STATE_STOPPED;
           timeOutCount_u8 = 0;
-          //Serial.print("Timeout reached");
+          //Serial.println("Timeout reached");
           /* Both ramp should finish, robot should stay controlled at current pos */
           RampInit(&rampDistance_st_g);
           RampInit(&rampOrientation_st_g);

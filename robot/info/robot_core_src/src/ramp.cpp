@@ -14,7 +14,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define RAMP_NEW_DEBUG          false
+#define RAMP_NEW_DEBUG          true
 #define RAMP_UPDATE_DEBUG       false
 #define RAMP_EMERGENCY_DEBUG    false
 
@@ -108,8 +108,8 @@ void RampNew(RampParametersSt * ramp_pst, int32_t distanceTotalTop_i32, int32_t 
     ramp_pst->rampState_en = RAMP_STATE_CONTINUOUS;
   }
 
-  ramp_pst->speedMaxTopPerS_i32 = ramp_pst->direction_g_i8 * speedMaxTopPerS_i32;
-  ramp_pst->accelerationMaxTopPerS_i32 = ramp_pst->direction_g_i8 * accelerationMaxTopPerS_i32;
+  ramp_pst->speedMaxTopPerS_i32 = ramp_pst->direction_g_i8 * speedMaxTopPerS_i32 * 10;
+  ramp_pst->accelerationMaxTopPerS_i32 = ramp_pst->direction_g_i8 * accelerationMaxTopPerS_i32 * 10;
 
 
   if (RAMP_NEW_DEBUG)

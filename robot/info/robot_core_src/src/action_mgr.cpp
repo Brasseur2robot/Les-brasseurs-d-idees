@@ -279,7 +279,7 @@ void ActionMgrInit()
   ServoBoardInit();
   ActuatorDxlInit();
   /* Load action READY at startup */
-  ActionMgrSetNextAction(ACTION_MGR_ID_READY, true);
+  //ActionMgrSetNextAction(ACTION_MGR_ID_READY, true);
 }
 
 void ActionMgrUpdate(bool timeMeasure_b)

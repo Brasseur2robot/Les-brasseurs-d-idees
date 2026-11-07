@@ -25,10 +25,10 @@
 #define MOTOR_RIGHT_PIN_PWM   D10
 
 /* Encoder pins */
-#define ENCODER_LEFT_PIN_A    A1
-#define ENCODER_LEFT_PIN_B    A0
-#define ENCODER_RIGHT_PIN_A   A2
-#define ENCODER_RIGHT_PIN_B   A3
+#define ENCODER_LEFT_PIN_A    A3
+#define ENCODER_LEFT_PIN_B    A2
+#define ENCODER_RIGHT_PIN_A   A0
+#define ENCODER_RIGHT_PIN_B   A1
 
 /* Dynamixel Pins */
 #define DYNAMIXEL_CTRL        D9

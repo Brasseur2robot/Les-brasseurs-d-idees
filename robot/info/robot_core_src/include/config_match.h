@@ -25,10 +25,11 @@
 #define ROBOT_WIDTH                 310.0                     /* From left encoder to right encoder [mm] */
 #define ROBOT_BACKWIDTH             125.0                     /* From encoder contact point to back [mm] */
 
-#define MATCH_START_POSITION_X_YELLOW   (175.0)    // + ROBOT_WIDTH / 2.0)  /* [mm] */
-#define MATCH_START_POSITION_X_BLUE     (2825.0)   // + ROBOT_WIDTH / 2.0)  /* [mm] */
-#define MATCH_START_POSITION_Y      (1750.0) // + ROBOT_BACKWIDTH)              /* [mm] */
-#define MATCH_START_POSITION_THETA  -90.0                                   /* [°] */
+#define MATCH_START_POSITION_X_YELLOW       (350.0)    // + (ROBOT_WIDTH / 2.0)  /* [mm] */
+#define MATCH_START_POSITION_X_BLUE         (2650.0)   // + (ROBOT_WIDTH / 2.0)  /* [mm] */
+#define MATCH_START_POSITION_Y              (1000.0) // + (ROBOT_BACKWIDTH)      /* [mm] */
+#define MATCH_START_POSITION_THETA_YELLOW   0.0                                 /* [°] */
+#define MATCH_START_POSITION_THETA_BLUE     180.0                               /* [°] */
 
 #define MOVE_FORWARD                true
 #define MOVE_BACKWARD               false
@@ -39,93 +40,57 @@
 #define NO_OBSTACLE_SENSOR          false
 
 /* côté jaune */
-inline pose_t trajectoryYellowPoseArray[6] = {
+#define TRAJECTORY_YELLOW_POSE_NB 6
+static pose_t trajectoryYellowPoseArray[TRAJECTORY_YELLOW_POSE_NB] = {
   /* Position de départ */
-  //{MATCH_START_POSITION_X_YELLOW,  MATCH_START_POSITION_Y,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  /* Avance jusqu'au premier tas de caisse */
-  {MATCH_START_POSITION_X_YELLOW,  1350.0,    MATCH_START_POSITION_THETA,  MOVE_FORWARD,  NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_GRAB_BOXES},
-  /* Avance jusqu'à la première zone de dépose */
-  {MATCH_START_POSITION_X_YELLOW,  800.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  /* Avance jusqu'au deuxième tas de caisse */
-  {MATCH_START_POSITION_X_YELLOW,  550.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_GRAB_BOXES},
-  /* Fais un tour */
-  {400.0,  550.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  {400.0,  1200.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  {175.0,  1500.0,  90.0, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE}
-  // /* Avance jusqu'à la bordure */
-  // {MATCH_START_POSITION_X_YELLOW,  125.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  // /* Recule */
-  // {MATCH_START_POSITION_X_YELLOW,  175.0,  NO_THETA_ALIGN,  MOVE_BACKWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  // /* Tourne et recule, met le curseur */
-  // {125.0,  175.0,  NO_THETA_ALIGN,  MOVE_BACKWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_CURSOR_RIGHT},
-  // /* Avance et enlève le curseur */
-  // {650.0,  175.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_CURSOR_RETRACT},
-  // /* Dépose tout */
-  // {655.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // {700.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // {750.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // {800.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // /* Avance */
-  // {1000.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  /* Recule */
-  //{MATCH_START_POSITION_X_YELLOW,   1200.0,  NO_THETA_ALIGN,  MOVE_BACKWARD,   NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  /* Tourne vers le centre */
-  //{1400.0,   1200.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
+  //{MATCH_START_POSITION_X_YELLOW,  MATCH_START_POSITION_Y,  MATCH_START_POSITION_THETA_YELLOW,  MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
+  /* Avance jusqu'à presque le centre de la table */
+  {1250.0, 1000.0, NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance jusqu'à la première carrière (coté droite) */
+  {1250.0,  250.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance jusqu'à la zone de mur de droite */
+  { 200.0,  750.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance devant le Graal */
+  { 350.0, 1250.0,   0.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Recule pour prendre le Graal */
+  { 175.0, 1250.0, NO_THETA_ALIGN,  MOVE_BACKWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance au centre de la zone de fin */
+  { 250.0, 1000.0, NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true}
 };
-
-#define nbMovementYellow                  sizeof(trajectoryYellowPoseArray) / sizeof(trajectoryYellowPoseArray[0])
 
 /* côté jaune */
-inline pose_t trajectoryBluePoseArray[6] = {
+#define TRAJECTORY_BLUE_POSE_NB 6
+static pose_t trajectoryBluePoseArray[TRAJECTORY_BLUE_POSE_NB] = {
   /* Position de départ */
-  //{MATCH_START_POSITION_X,  MATCH_START_POSITION_Y,  MATCH_START_POSITION_THETA,  MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  /* Avance jusqu'au premier tas de caisse */
-  {MATCH_START_POSITION_X_BLUE,  1350.0,    MATCH_START_POSITION_THETA,  MOVE_FORWARD,  NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_GRAB_BOXES},
-  /* Avance jusqu'à la première zone de dépose */
-  {MATCH_START_POSITION_X_BLUE,  800.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  /* Avance jusqu'au deuxième tas de caisse */
-  {MATCH_START_POSITION_X_BLUE,   550.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_GRAB_BOXES},
-  /* Fais un tour */
-  {3000.0 - 400.0,  550.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  {3000.0 - 400.0,  1200.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  {3000.0 - 175.0,  1500.0,  90.0, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE}
-  // /* Avance jusqu'à la bordure */
-  // {MATCH_START_POSITION_X_BLUE,  125.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  // /* Recule */
-  // {MATCH_START_POSITION_X_BLUE,  175.0,  NO_THETA_ALIGN,  MOVE_BACKWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  // /* Tourne et recule, met le curseur */
-  // {3000.0 - 125.0,  175.0,  NO_THETA_ALIGN,  MOVE_BACKWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_CURSOR_LEFT},
-  // /* Avance et enlève le curseur */
-  // {3000.0 - 650.0,  175.0,  NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_CURSOR_RETRACT},
-  // /* Dépose tout */
-  // {3000.0 - 655.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // {3000.0 - 700.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // {3000.0 - 750.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // {3000.0 - 800.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_SORT_ALL},
-  // /* Avance */
-  // {3000.0 - 1000.0,  175.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  /* Recule */
-  //{MATCH_START_POSITION_X_BLUE,   1200.0,  NO_THETA_ALIGN,  MOVE_BACKWARD,   NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
-  /* Tourne vers le centre */
-  //{3000.0 - 1400.0,   1200.0,  NO_THETA_ALIGN,  MOVE_FORWARD,   NO_RESET_THETA, OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
+  //{MATCH_START_POSITION_X_YELLOW,  MATCH_START_POSITION_Y,  MATCH_START_POSITION_THETA_BLUE,  MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE},
+  /* Avance jusqu'à presque le centre de la table */
+  {1750.0, 1000.0, NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance jusqu'à la première carrière (coté droite) */
+  {1750.0,  250.0,  90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance jusqu'à la zone de mur de droite */
+  {2800.0,  750.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance devant le Graal */
+  {2650.0, 1250.0,   0.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Recule pour prendre le Graal */
+  {2825.0, 1250.0, NO_THETA_ALIGN,  MOVE_BACKWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  /* Avance au centre de la zone de fin */
+  {2750.0, 1000.0, NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true}
 };
 
-#define nbMovementBlue                  sizeof(trajectoryBluePoseArray) / sizeof(trajectoryBluePoseArray[0])
-
-inline pose_t WaitingYellowPose_t =
+static pose_t WaitingYellowPose_t =
   /* Position d'attente */
-{175.0,  1350.0,  90.0, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE};
-inline pose_t EndZoneYellowPose_t =
+{175.0,  1350.0,  90.0, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true};
+static pose_t EndZoneYellowPose_t =
   /* Position de fin de match */
-{175.0,  1825.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE};
+{175.0,  1825.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true};
 
 
-inline pose_t WaitingBluePose_t =
+static pose_t WaitingBluePose_t =
   /* Position d'attente */
-{3000.0 - 175.0,  1350.0,  90.0, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE};
-inline pose_t EndZoneBluePose_t =
+{3000.0 - 175.0,  1350.0,  90.0, MOVE_FORWARD,   NO_RESET_THETA,  OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true};
+static pose_t EndZoneBluePose_t =
   /* Position de fin de match */
-{3000.0 - 175.0,  1825.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE};
+{3000.0 - 175.0,  1825.0,  NO_THETA_ALIGN, MOVE_FORWARD,   NO_RESET_THETA,  NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true};
 
 #endif
 

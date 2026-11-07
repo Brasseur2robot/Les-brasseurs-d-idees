@@ -92,11 +92,11 @@ void TrajectoryBaseInit()
       break;
 
     case MATCH_COLOR_BLUE:
-      nbMovement = nbMovementBlue;
+      nbMovement = TRAJECTORY_BLUE_POSE_NB;
       break;
 
     case MATCH_COLOR_YELLOW:
-      nbMovement = nbMovementYellow;
+      nbMovement = TRAJECTORY_YELLOW_POSE_NB;
       break;
   }
 }
@@ -636,7 +636,7 @@ void TrajectoryMgrCalibTrajectory()
       /* Start sequence */
       TrajectoryCalibrateBorder(trajectoryIndex_u8);
       /* To calibrate the distance instead */
-      //TrajectoryCalibrateDistance(2000.0);
+      //TrajectoryCalibrateDistance(1000.0);
       /* To calibrate the rotation instead */
       //TrajectoryCalibrateRotation(3600.0);
       /* To calibrate with the square method */
@@ -929,30 +929,30 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Move backwards until border, with no pids */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          OdometrySetThetaDeg(0.0);
+          OdometrySetThetaDeg(-90.0);
         }
         else
         {
-          OdometrySetThetaDeg(180.0);
+          OdometrySetThetaDeg(-90.0);
         }
         PositionMgrSetOrientationControl(true);
         PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_SLOW);
         break;
       case 1:
-        /* Reset the x coordinate, and the theta orientation */
+        /* Reset the y coordinate, and the theta orientation */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          OdometrySetXMilliMeter(ROBOT_BACKWIDTH);
-          OdometrySetThetaDeg(0.0);
+          OdometrySetYMilliMeter(2000.0 - ROBOT_BACKWIDTH);
+          OdometrySetThetaDeg(-90.0);
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMilliMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+          PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
         }
         else
         {
-          OdometrySetXMilliMeter(3000.0 - ROBOT_BACKWIDTH);
-          OdometrySetThetaDeg(180.0);
+          OdometrySetXMilliMeter(2000.0 - ROBOT_BACKWIDTH);
+          OdometrySetThetaDeg(-90.0);
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+          PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
         }
         /* Move forward X cm */
 
@@ -962,27 +962,38 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Rotate Ccw or Cw ? */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          PositionMgrGotoOrientationDegree(-90.0);
+          PositionMgrGotoOrientationDegree(90.0);
         }
         else
         {
-          PositionMgrGotoOrientationDegree(90.0);
+          PositionMgrGotoOrientationDegree(-90.0);
         }
         break;
 
       case 3:
         /* Move backwards until border */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMilliMeter(-600.0, true, VITESSE_SLOW);
+        PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_SLOW);
         break;
 
       case 4:
         /* Reset the y coordinate */
-        OdometrySetYMilliMeter(2000.0 - ROBOT_BACKWIDTH);
-        OdometrySetThetaDeg(-90.0);
-        /* Move forward */
-        PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+        if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
+        {
+          OdometrySetXMilliMeter(ROBOT_BACKWIDTH);
+          OdometrySetThetaDeg(0.0);
+          /* Move forward */
+          PositionMgrSetOrientationControl(true);
+          PositionMgrGotoDistanceMilliMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+        }
+        else
+        {
+          OdometrySetXMilliMeter(3000.0 - ROBOT_BACKWIDTH);
+          OdometrySetThetaDeg(180.0);
+          /* Move forward */
+          PositionMgrSetOrientationControl(true);
+          PositionMgrGotoDistanceMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+        }
         /* Finished */
 
         // /* Great Hack */
