@@ -6,7 +6,7 @@
  ******************************************************************************/
 #ifdef ROBOT_CORE
 
-#define MOTOR_DEADZONE        4.0
+#define MOTOR_DEADZONE        10.0
 
 /*
  * The ROBOT_CORE motor has a reduction ratio of 30:1 and a maximum speed of 220 rpm.
@@ -15,7 +15,7 @@
  * tops per wheel rotation.
  */
 #define N_TOP_PER_WHEEL_TURN  4.0 * 16384       /* Encoder top number per wheel turn [-] */
-#define FACTOR_DISTANCE       0.92184426329 /* Factor to adjust the top count */
+#define FACTOR_DISTANCE       0.9204644870      /* Factor to adjust the top count */
 #define FACTOR_WHEEL_LEFT     1.0
 #define FACTOR_WHEEL_RIGHT    1.0
 /*
@@ -38,7 +38,7 @@
  */
 #define WHEELBASE_M           0.250 * 0.99802005834  /* Wheelbase of the robot [m] */
 //#define RAD_TO_TOP            N_TOP_PER_WHEEL_TURN / (WHEEL_DIAMETER_M / WHEELBASE_M ) / PI
-#define RAD_TO_TOP            (148946.4629952465 * FACTOR_DISTANCE)
+#define RAD_TO_TOP            (149111.9590652412 * FACTOR_DISTANCE)
 
 #define BACK_LENGTH           0.0 /* Length between wheel center and the back of the ROBOT_CORE */
 

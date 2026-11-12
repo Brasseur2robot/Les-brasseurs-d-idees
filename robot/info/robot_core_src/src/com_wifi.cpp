@@ -3,6 +3,7 @@
  ******************************************************************************/
 #include <esp_now.h>
 #include <WiFi.h>
+#include <WifiUdp.h>
 #include "com_wifi.h"
 
 /******************************************************************************
@@ -23,6 +24,8 @@
 #define PLAYLOAD_START        9
 #define SIZE_MESSAGE	        2
 
+const char *ssid = "Yggdrasil";
+const char *password = "interdit_aux_mioches!";
 /******************************************************************************
    Types declarations
  ******************************************************************************/
@@ -39,6 +42,8 @@ int SlaveCnt = 0;
 
 uint8_t message[SIZE_MESSAGE] = {ID_PING, PLAYLOAD_PING};
 
+int port;
+WiFiUDP udp;
 /******************************************************************************
    Functions Definitions
  ******************************************************************************/
@@ -51,25 +56,108 @@ uint8_t message[SIZE_MESSAGE] = {ID_PING, PLAYLOAD_PING};
    @result    none
 
 */
-void ComWifiInit(bool scan_b) {
-  /* Set device in STA mode to begin with */
-  WiFi.mode(WIFI_STA);
-  Serial.println("ComWifi|Init");
-  /* This is the mac address of the Master in Station Mode */
-  Serial.print("ComWifi|STA MAC: ");
-  Serial.println(WiFi.macAddress());
-  /* Init ESPNow with a fallback logic */
-  ComWifiInitESPNow();
-  // Once ESPNow is successfully Init, we will register for Send CB to
-  // get the status of Trasnmitted packet
-  //esp_now_register_send_cb(ComWifiOnDataSent);
+// void ComWifiInit(bool scan_b) {
+//   /* Set device in STA mode to begin with */
+//   WiFi.mode(WIFI_STA);
+//   Serial.println("ComWifi|Init");
+//   /* This is the mac address of the Master in Station Mode */
+//   Serial.print("ComWifi|STA MAC: ");
+//   Serial.println(WiFi.macAddress());
+//   /* Init ESPNow with a fallback logic */
+//   ComWifiInitESPNow();
+//   // Once ESPNow is successfully Init, we will register for Send CB to
+//   // get the status of Trasnmitted packet
+//   //esp_now_register_send_cb(ComWifiOnDataSent);
 
-  delay(1000);
-  if (scan_b == true)
-  {
-    while (ComWifiSearchPami() == 0) {
-      // Do the search while nothing found
-    }
+//   delay(1000);
+//   if (scan_b == true)
+//   {
+//     while (ComWifiSearchPami() == 0) {
+//       // Do the search while nothing found
+//     }
+//   }
+// }
+
+void ComWifiInit()
+{
+  // Connexion au WiFi
+  WiFi.persistent(false);
+  WiFi.begin(ssid, password);
+  Serial.print("Tentative de connexion...");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(100);
+  }
+  Serial.println("\n");
+
+  // Affichage des information de connexion
+  get_network_info();
+
+  Serial.println("\n");
+
+  port = 47269;
+
+  // // Attente de la réception du port
+  // Serial.println("Indiquez le port du serveur teleplot:\n");
+  // while (!Serial.available())
+  //   ;
+  // // Lecture du port
+  // port = 0;
+  // while (Serial.available()) {
+  //   int chiffre;
+  //   chiffre = Serial.read();
+  //   if (chiffre < '0' || chiffre > '9') {
+  //     break;
+  //   }
+  //   port = port * 10 + (chiffre - '0');
+  // }
+
+  // Serial.printf("port lu:%d\n", port);
+}
+
+void send_packet()
+{
+  /*udp.beginPacket("teleplot.fr", port);
+    udp.printf("s:%lu§ms\n", millis() );
+    udp.printf("cos:%lu:%2.3f\n", millis(), cos(millis()/1000.) );
+    udp.printf("sin:%lu:%2.3f\n", millis(), sin(millis()/1000.) );
+    udp.endPacket();*/
+  
+  udp.beginPacket("192.168.0.34", port);
+  udp.printf("s:%lu§ms\n", millis() );
+  udp.printf("cos:%lu:%2.3f\n", millis(), cos(millis()/1000.) );
+  udp.printf("sin:%lu:%2.3f\n", millis(), sin(millis()/1000.) );
+  udp.endPacket();
+}
+
+void SendPacketPid(long time, double pidDistanceRef, double pidDistanceMesure, double pidOrientationRef, double pidOrientationMesure, uint8_t positionMgrState_en_g, double commande_gauche, double commande_droite)
+{
+  udp.beginPacket("192.168.0.34", port);
+  udp.printf("pidDistRef:%lu:%2.3f\n", time, pidDistanceRef);
+  udp.printf("pidDistMes:%lu:%2.3f\n", time, pidDistanceMesure);
+  udp.printf("pidOrientRef:%lu:%2.3f\n", time, pidOrientationRef);
+  udp.printf("pidOrientMes:%lu:%2.3f\n", time, pidOrientationMesure);
+  udp.printf("posMgrState:%lu:%u\n", time, positionMgrState_en_g);
+  udp.printf("cmdeGauche:%lu:%2.3f\n", time, commande_gauche);
+  udp.printf("cmdeDroite:%lu:%2.3f\n", time, commande_droite);
+  udp.endPacket();
+}
+
+void get_network_info()
+{
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.print("[*] Network information for ");
+    Serial.println(ssid);
+
+    Serial.println("[+] BSSID : " + WiFi.BSSIDstr());
+    Serial.print("[+] Gateway IP : ");
+    Serial.println(WiFi.gatewayIP());
+    Serial.print("[+] Subnet Mask : ");
+    Serial.println(WiFi.subnetMask());
+    Serial.println((String) "[+] RSSI : " + WiFi.RSSI() + " dB");
+    Serial.print("[+] ESP32 IP : ");
+    Serial.println(WiFi.localIP());
   }
 }
 

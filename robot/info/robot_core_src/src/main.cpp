@@ -65,7 +65,8 @@ void setup() {
   Serial.println("Init Robot Core Brd");
   ActionMgrInit();
   //ActuatorInit();
-  ComWifiInit(false);
+  //ComWifiInit(false);
+  ComWifiInit();
   ControllerInit(false);
   ColorSensorInit();
   IhmInit();
@@ -88,7 +89,7 @@ void setup() {
 void loop() {
   //  MotorTest(30);
   //  OdometryEncoderTest();
-  ActionMgrUpdate(DEBUG_TIME);
+  //ActionMgrUpdate(DEBUG_TIME);
   //  ActuatorUpdate(DEBUG_TIME);
   ActuatorDxlUpdate(DEBUG_TIME);
   ColorSensorUpdate(DEBUG_TIME);
@@ -98,6 +99,6 @@ void loop() {
   MatchMgrUpdate(DEBUG_TIME);
   PositionMgrUpdate(DEBUG_TIME);
   //  SensorUpdate(DEBUG_TIME);
-  ServoBoardUpdate(DEBUG_TIME);
+  //ServoBoardUpdate(DEBUG_TIME);
   TrajectoryMgrUpdate(DEBUG_TIME);
 }

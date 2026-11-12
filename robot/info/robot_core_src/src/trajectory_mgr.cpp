@@ -625,10 +625,12 @@ void TrajectoryMgrCalibTrajectory()
       /* No state */
       //Serial.println("No state");
       break;
+
     case POSITION_STATE_MOVING:
       /* Nothing to do */
       //Serial.println("Traj loop : Moving");
       break;
+
     case POSITION_STATE_STOPPED:
       /* Next move */
       Serial.print("Traj loop : Next move, index : ");
@@ -640,7 +642,7 @@ void TrajectoryMgrCalibTrajectory()
       /* To calibrate the rotation instead */
       //TrajectoryCalibrateRotation(3600.0);
       /* To calibrate with the square method */
-      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1.0);
+      //TrajectoryCalibrateSquare(trajectoryIndex_u8, 1000.0);
       /* Increment the sequence index */
       if (trajectoryIndex_u8 < 255)
       {
@@ -651,10 +653,17 @@ void TrajectoryMgrCalibTrajectory()
         trajectoryIndex_u8 = 255;
       }
       break;
+
     case POSITION_STATE_EMERGENCY_ACTIVATED:
       /* What to do ?*/
       //Serial.println("Emergency");
       break;
+    
+    case POSITION_STATE_BLOCKED:
+      /* Set state to stopped, this is specific to calibration moves */
+      PositionMgrSetState(POSITION_STATE_STOPPED);
+      break;
+
     default:
       break;
   }
@@ -926,36 +935,45 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
     switch (trajectoryIndex_u8)
     {
       case 0:
-        /* Move backwards until border, with no pids */
+        /* Reset the angle according to init pos */
+        PositionMgrStop();
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
-        {
+        { 
           OdometrySetThetaDeg(-90.0);
         }
         else
         {
           OdometrySetThetaDeg(-90.0);
         }
+        PositionMgrStart();
+        
+        /* Move backwards until border, with no pids */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_SLOW);
+        PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_PROXI);
         break;
+
       case 1:
         /* Reset the y coordinate, and the theta orientation */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
+          PositionMgrStop();
           OdometrySetYMilliMeter(2000.0 - ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(-90.0);
+          PositionMgrStart();
+          /* Move forward X cm */
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+          PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_PROXI);
         }
         else
         {
+          PositionMgrStop();
           OdometrySetXMilliMeter(2000.0 - ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(-90.0);
+          PositionMgrStart();
+          /* Move forward X cm */
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+          PositionMgrGotoDistanceMilliMeter(2000.0 - MATCH_START_POSITION_Y - ROBOT_BACKWIDTH, true, VITESSE_PROXI);
         }
-        /* Move forward X cm */
-
         break;
 
       case 2:
@@ -973,26 +991,30 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
       case 3:
         /* Move backwards until border */
         PositionMgrSetOrientationControl(true);
-        PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_SLOW);
+        PositionMgrGotoDistanceMilliMeter(-150.0, true, VITESSE_PROXI);
         break;
 
       case 4:
         /* Reset the y coordinate */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
+          PositionMgrStop();
           OdometrySetXMilliMeter(ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(0.0);
+          PositionMgrStart();
           /* Move forward */
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMilliMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+          PositionMgrGotoDistanceMilliMeter(MATCH_START_POSITION_X_YELLOW - ROBOT_BACKWIDTH, true, VITESSE_PROXI);
         }
         else
         {
+          PositionMgrStop();
           OdometrySetXMilliMeter(3000.0 - ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(180.0);
+          PositionMgrStart();
           /* Move forward */
           PositionMgrSetOrientationControl(true);
-          PositionMgrGotoDistanceMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true, VITESSE_SLOW);
+          PositionMgrGotoDistanceMilliMeter(3000.0 - MATCH_START_POSITION_X_BLUE - ROBOT_BACKWIDTH, true, VITESSE_PROXI);
         }
         /* Finished */
 

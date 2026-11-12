@@ -16,6 +16,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "config.h"
 #include "led.h"
+#include "position_mgr.h"
 
 /******************************************************************************
    Constants and Macros
@@ -243,12 +244,43 @@ void LedSetError(int errorCode, bool set_b)
       break;
 
     case ERROR_LIDAR:
-      pixels.setPixelColor(9, color_u32);
+      pixels.setPixelColor(10, color_u32);
       break;
 
     default:
       break;
   }
+  pixels.show();
+}
+
+void LedSetPositionState(int stateCode)
+{
+  uint32_t color_u32;
+
+  switch (stateCode)
+  {
+    case POSITION_STATE_NONE:
+      color_u32 = pixels.Color(0, 0, 0);
+      break;
+    
+    case POSITION_STATE_MOVING:
+      color_u32 = pixels.Color(150, 80, 0);
+      break;
+    
+    case POSITION_STATE_STOPPED:
+      color_u32 = pixels.Color(0, 150, 0);
+      break;
+
+    case POSITION_STATE_EMERGENCY_ACTIVATED:
+      color_u32 = pixels.Color(150, 0, 0);
+      break;
+
+    default:
+      color_u32 = pixels.Color(0, 0, 0);
+      break;  
+  }
+
+  pixels.setPixelColor(9, color_u32);
   pixels.show();
 }
 

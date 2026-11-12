@@ -35,6 +35,7 @@ void LedSetAnim(int ledId, int animId);
 void LedSetBlinkNb(int ledId, int nb);
 void LedUpdate(bool timeeasure_b);
 void LedSetError(int errorCode, bool set_b);
+void LedSetPositionState(int stateCode);
 
 void LedAnimAllOff();
 

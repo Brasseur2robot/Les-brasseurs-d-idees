@@ -14,12 +14,14 @@
 
 #define KP_DISTANCE         0.02
 #define KI_DISTANCE         0.0
-#define KD_DISTANCE         0.001
+#define KD_DISTANCE         0.001 //0.001
 
-#define KP_ORIENTATION      0.002
+#define KP_ORIENTATION      0.004
 #define KI_ORIENTATION      0.0
-#define KD_ORIENTATION      0.0001
+#define KD_ORIENTATION      0.0002
 
+#define VITESSE_PROXI       250.0   /* [mm.s-1] */
+#define ACCELERATION_PROXI  500.0   /* [mm.s-2] */
 #define VITESSE_SLOW        500.0   /* [mm.s-1] */
 #define ACCELERATION_SLOW   500.0   /* [mm.s-2] */
 #define VITESSE_MAX         750.0   /* [mm.s-1] */

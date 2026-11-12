@@ -14,7 +14,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define RAMP_NEW_DEBUG          true
+#define RAMP_NEW_DEBUG          false
 #define RAMP_UPDATE_DEBUG       false
 #define RAMP_EMERGENCY_DEBUG    false
 
@@ -155,9 +155,9 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
   ramp_pst->timeCurrentMs_u32 = timeCurrent_u32;
 
   /* increase speed by the amount of acceleration */
-  ramp_pst->speedCurrentTopPerS_i32 += ramp_pst->accelerationCurrentTopPerS_i32 * (int32_t)ramp_pst->timeCurrentMs_u32 / 1000;
+  ramp_pst->speedCurrentTopPerS_i32 += round(ramp_pst->accelerationCurrentTopPerS_i32 * (int32_t)ramp_pst->timeCurrentMs_u32 / 1000);
   /* increase distance by formulas */
-  ramp_pst->distanceCurrentTop_i32 += ramp_pst->accelerationCurrentTopPerS_i32 / 2 * ((int32_t)ramp_pst->timeCurrentMs_u32 * (int32_t)ramp_pst->timeCurrentMs_u32) / 1000000 + ramp_pst->speedCurrentTopPerS_i32 * (int32_t)ramp_pst->timeCurrentMs_u32 / 1000;
+  ramp_pst->distanceCurrentTop_i32 += round(ramp_pst->accelerationCurrentTopPerS_i32 / 2 * ((int32_t)ramp_pst->timeCurrentMs_u32 * (int32_t)ramp_pst->timeCurrentMs_u32) / 1000000) + round(ramp_pst->speedCurrentTopPerS_i32 * (int32_t)ramp_pst->timeCurrentMs_u32 / 1000);
 
   /* compute distance to go */
   int32_t distanceTogoTop_i32 = ramp_pst->direction_g_i8 * (ramp_pst->distanceTotalTop_i32 - ramp_pst->distanceCurrentTop_i32);
@@ -167,7 +167,7 @@ void RampUpdate(RampParametersSt * ramp_pst, uint32_t timeCurrent_u32, bool time
     if (ramp_pst->speedTotalTopPerS_i32 == 0)
     {
       /* Compute breaking distance */
-      ramp_pst->distanceBrakeTop_i32 = ramp_pst->direction_g_i8 * (ramp_pst->speedCurrentTopPerS_i32 * ramp_pst->speedCurrentTopPerS_i32 / 2 / ramp_pst->accelerationMaxTopPerS_i32);
+      ramp_pst->distanceBrakeTop_i32 = (int32_t)( round((double)ramp_pst->direction_g_i8 * ((double)ramp_pst->speedCurrentTopPerS_i32 * (double)ramp_pst->speedCurrentTopPerS_i32 / 2.0 / (double)ramp_pst->accelerationMaxTopPerS_i32) ) );
 
       /* if breaking distance is >= distance to go, should ramp down , because speedTotal is 0 */
       if (ramp_pst->distanceBrakeTop_i32 >= distanceTogoTop_i32)

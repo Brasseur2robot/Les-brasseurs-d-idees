@@ -10,7 +10,11 @@
 /******************************************************************************
  * Function Declarations
  ******************************************************************************/
-void ComWifiInit(bool scan_b);
+//void ComWifiInit(bool scan_b);
+void ComWifiInit();
+void send_packet();
+void SendPacketPid(long time, double pidDistanceRef, double pidDistanceMesure, double pidOrientationRef, double pidOrientationMesure, uint8_t positionMgrState_en_g, double commande_gauche, double commande_droite);
+void get_network_info();
 void ComWifiInitESPNow();
 bool ComWifiSearchPami();
 void ComWifiScanForSlave();
