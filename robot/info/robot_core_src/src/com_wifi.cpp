@@ -4,6 +4,7 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include <WifiUdp.h>
+#include "config.h"
 #include "com_wifi.h"
 
 /******************************************************************************
@@ -80,40 +81,43 @@ WiFiUDP udp;
 
 void ComWifiInit()
 {
-  // Connexion au WiFi
-  WiFi.persistent(false);
-  WiFi.begin(ssid, password);
-  Serial.print("Tentative de connexion...");
+  if (DEBUG_TELEPLOT)
+  {
+    // Connexion au WiFi
+    WiFi.persistent(false);
+    WiFi.begin(ssid, password);
+    Serial.print("Tentative de connexion...");
 
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(100);
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.print(".");
+      delay(100);
+    }
+    Serial.println("\n");
+
+    // Affichage des information de connexion
+    get_network_info();
+
+    Serial.println("\n");
+
+    port = 47269;
+
+    // // Attente de la réception du port
+    // Serial.println("Indiquez le port du serveur teleplot:\n");
+    // while (!Serial.available())
+    //   ;
+    // // Lecture du port
+    // port = 0;
+    // while (Serial.available()) {
+    //   int chiffre;
+    //   chiffre = Serial.read();
+    //   if (chiffre < '0' || chiffre > '9') {
+    //     break;
+    //   }
+    //   port = port * 10 + (chiffre - '0');
+    // }
+
+    // Serial.printf("port lu:%d\n", port);
   }
-  Serial.println("\n");
-
-  // Affichage des information de connexion
-  get_network_info();
-
-  Serial.println("\n");
-
-  port = 47269;
-
-  // // Attente de la réception du port
-  // Serial.println("Indiquez le port du serveur teleplot:\n");
-  // while (!Serial.available())
-  //   ;
-  // // Lecture du port
-  // port = 0;
-  // while (Serial.available()) {
-  //   int chiffre;
-  //   chiffre = Serial.read();
-  //   if (chiffre < '0' || chiffre > '9') {
-  //     break;
-  //   }
-  //   port = port * 10 + (chiffre - '0');
-  // }
-
-  // Serial.printf("port lu:%d\n", port);
 }
 
 void send_packet()

@@ -26,7 +26,7 @@
 
 #define POSITION_BLOCKING_THRESHOLD_DISTANCE      1000.0
 #define POSITION_BLOCKING_THRESHOLD_ORIENTATION   5000.0
-#define POSITION_BLOCKING_COUNT_MAX               10.0
+#define POSITION_BLOCKING_COUNT_MAX               20.0
 #define POSITION_BLOCKING_DEBUG                   false
 
 /******************************************************************************
@@ -311,7 +311,9 @@ void PositionMgrUpdate(bool timeMeasure_b) {
 
     /* Update Led */
     LedSetPositionState(positionMgrState_en_g);
-    SendPacketPid(currentTime_u32, pidDistance_st_g.reference_d, mesureDistance_d, pidOrientation_st_g.reference_d, mesureOrientation_d, positionMgrState_en_g, commandeDistance_d - commandeOrientation_d, commandeDistance_d + commandeOrientation_d);
+    if (DEBUG_TELEPLOT) {
+      SendPacketPid(currentTime_u32, pidDistance_st_g.reference_d, mesureDistance_d, pidOrientation_st_g.reference_d, mesureOrientation_d, positionMgrState_en_g, commandeDistance_d - commandeOrientation_d, commandeDistance_d + commandeOrientation_d);
+    }
 
     /* Store the last execution time */
     lastExecutionTime_u32 = currentTime_u32;
