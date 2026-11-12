@@ -24,7 +24,7 @@
 #define ACCELERATION_PROXI  500.0   /* [mm.s-2] */
 #define VITESSE_SLOW        500.0   /* [mm.s-1] */
 #define ACCELERATION_SLOW   500.0   /* [mm.s-2] */
-#define VITESSE_MAX         750.0   /* [mm.s-1] */
+#define VITESSE_MAX         1000.0  /* [mm.s-1] */
 #define ACCELERATION_MAX    750.0   /* [mm.s-2] */
 
 #endif

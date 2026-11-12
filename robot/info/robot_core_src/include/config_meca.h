@@ -6,7 +6,7 @@
  ******************************************************************************/
 #ifdef ROBOT_CORE
 
-#define MOTOR_DEADZONE        10.0
+#define MOTOR_DEADZONE        4.0
 
 /*
  * The ROBOT_CORE motor has a reduction ratio of 30:1 and a maximum speed of 220 rpm.

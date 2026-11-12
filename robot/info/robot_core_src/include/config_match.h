@@ -47,11 +47,11 @@ static pose_t trajectoryYellowPoseArray[TRAJECTORY_YELLOW_POSE_NB] = {
   /* Avance jusqu'à presque le centre de la table */
   {1250.0, 1000.0, NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance jusqu'à la première carrière (coté droite) */
-  {1250.0,  250.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  {1250.0,  300.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance jusqu'à la zone de mur de droite */
-  { 200.0,  750.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  { 250.0,  750.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance devant le Graal */
-  { 350.0, 1250.0,   0.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  { 350.0, 1250.0,   0.0,           MOVE_BACKWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Recule pour prendre le Graal */
   { 175.0, 1250.0, NO_THETA_ALIGN,  MOVE_BACKWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance au centre de la zone de fin */
@@ -66,11 +66,11 @@ static pose_t trajectoryBluePoseArray[TRAJECTORY_BLUE_POSE_NB] = {
   /* Avance jusqu'à presque le centre de la table */
   {1750.0, 1000.0, NO_THETA_ALIGN,  MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance jusqu'à la première carrière (coté droite) */
-  {1750.0,  250.0,  90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  {1750.0,  300.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance jusqu'à la zone de mur de droite */
-  {2800.0,  750.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  {2650.0,  750.0, -90.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance devant le Graal */
-  {2650.0, 1250.0,   0.0,           MOVE_FORWARD,  NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
+  {2650.0, 1250.0, 180.0,           MOVE_BACKWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Recule pour prendre le Graal */
   {2825.0, 1250.0, NO_THETA_ALIGN,  MOVE_BACKWARD, NO_RESET_THETA, NO_OBSTACLE_SENSOR, 0, ACTION_MGR_ID_NONE, true},
   /* Avance au centre de la zone de fin */

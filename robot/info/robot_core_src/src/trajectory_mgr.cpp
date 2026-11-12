@@ -389,7 +389,7 @@ uint8_t Trajectory(double colorSide)
         }
 
         /* Do the aim */
-        PositionMgrGotoOrientationDegree(orientationToGoDeg_d);
+        PositionMgrGotoOrientationDegree(orientationToGoDeg_d, 1500.0);
         /* Set the state to Go to */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_GO_TO;
         break;
@@ -428,7 +428,7 @@ uint8_t Trajectory(double colorSide)
           Serial.println("[Final rotation]");
         }
         /* Do the Rotation */
-        PositionMgrGotoOrientationDegree(orientationFinalToGoDeg_d);
+        PositionMgrGotoOrientationDegree(orientationFinalToGoDeg_d, VITESSE_MAX);
         /* Set waiting state */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_WAYPOINT_SUPP_DELAY;
 
@@ -515,7 +515,7 @@ uint8_t Trajectory(double colorSide)
         /* Do not return in emergency */
         ObstacleSensorStop();
         /* Rotation */
-        PositionMgrGotoOrientationDegree(colorSide * TRAJECTORY_EMERGENCY_1ST_ROTATION_DEG);
+        PositionMgrGotoOrientationDegree(colorSide * TRAJECTORY_EMERGENCY_1ST_ROTATION_DEG, VITESSE_SLOW);
         /* Next state of emergency */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_1ST_TRANSLATION;
         break;
@@ -531,7 +531,7 @@ uint8_t Trajectory(double colorSide)
 
       case TRAJECTORY_EMERGENCY_2ND_ROTATION:
         /* Rotation inverse */
-        PositionMgrGotoOrientationDegree(colorSide * (-TRAJECTORY_EMERGENCY_2ND_ROTATION_DEG));
+        PositionMgrGotoOrientationDegree(colorSide * (-TRAJECTORY_EMERGENCY_2ND_ROTATION_DEG), VITESSE_SLOW);
         /* Next state of emergency */
         trajectoryMgrWaypointState_en_g = TRAJECTORY_EMERGENCY_2ND_TRANSLATION;
         break;
@@ -817,7 +817,7 @@ void TrajectoryCalibrateRotation(double angle_d)
 
   if (trajectoryFinished_b == false)
   {
-    PositionMgrGotoOrientationDegree(angleMult_d * angle_d);
+    PositionMgrGotoOrientationDegree(angleMult_d * angle_d, VITESSE_SLOW);
     trajectoryFinished_b = true;
   }
 }
@@ -864,7 +864,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeMm_d
         break;
       case 1:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(angleDeg_d);
+        PositionMgrGotoOrientationDegree(angleDeg_d, VITESSE_SLOW);
         break;
       case 2:
         //Serial.print(", Distance : 1m");
@@ -872,7 +872,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeMm_d
         break;
       case 3:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(angleDeg_d);
+        PositionMgrGotoOrientationDegree(angleDeg_d, VITESSE_SLOW);
         break;
       case 4:
         //Serial.print(", Distance : 1m");
@@ -880,7 +880,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeMm_d
         break;
       case 5:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(angleDeg_d);
+        PositionMgrGotoOrientationDegree(angleDeg_d, VITESSE_SLOW);
         break;
       case 6:
         //Serial.print(", Distance : 1m");
@@ -888,7 +888,7 @@ void TrajectoryCalibrateSquare(uint8_t trajectoryIndex_u8, double squareSizeMm_d
         break;
       case 7:
         //Serial.print(", Orientation : 90°");
-        PositionMgrGotoOrientationDegree(angleDeg_d);
+        PositionMgrGotoOrientationDegree(angleDeg_d,VITESSE_SLOW);
         break;
       case 8:
         // trajectory over
@@ -967,7 +967,7 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         else
         {
           PositionMgrStop();
-          OdometrySetXMilliMeter(2000.0 - ROBOT_BACKWIDTH);
+          OdometrySetYMilliMeter(2000.0 - ROBOT_BACKWIDTH);
           OdometrySetThetaDeg(-90.0);
           PositionMgrStart();
           /* Move forward X cm */
@@ -980,11 +980,11 @@ void TrajectoryCalibrateBorder(uint8_t trajectoryIndex_u8)
         /* Rotate Ccw or Cw ? */
         if ( MatchMgrGetColor() == MATCH_COLOR_YELLOW)
         {
-          PositionMgrGotoOrientationDegree(90.0);
+          PositionMgrGotoOrientationDegree(90.0, VITESSE_SLOW);
         }
         else
         {
-          PositionMgrGotoOrientationDegree(-90.0);
+          PositionMgrGotoOrientationDegree(-90.0, VITESSE_SLOW);
         }
         break;
 

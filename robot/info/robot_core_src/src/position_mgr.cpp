@@ -489,7 +489,7 @@ void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b, doub
    @result    none
 
 */
-void PositionMgrGotoOrientationDegree(double theta_deg) {
+void PositionMgrGotoOrientationDegree(double theta_deg, double speed_d) {
   //IhmStop();
   //Serial.println(theta_deg);
   positionMgrState_en_g = POSITION_STATE_MOVING;
@@ -498,7 +498,7 @@ void PositionMgrGotoOrientationDegree(double theta_deg) {
   startDistance_i32_g = OdometryGetDistanceTop();
   startOrientation_i32_g = OdometryGetOrientationTop();
 
-  RampNew(&rampOrientation_st_g, (int32_t)round(RadToTop(theta_deg * PI / 180.0)), 0, (int32_t)round(MilliMeterToTop(VITESSE_SLOW)), (int32_t)round(MilliMeterToTop(ACCELERATION_SLOW)));
+  RampNew(&rampOrientation_st_g, (int32_t)round(RadToTop(theta_deg * PI / 180.0)), 0, (int32_t)round(MilliMeterToTop(speed_d)), (int32_t)round(MilliMeterToTop(1500.0)));
   
   BlockDetectorInit(&blockDetectorOrientation_st_g, POSITION_BLOCKING_THRESHOLD_ORIENTATION);
 

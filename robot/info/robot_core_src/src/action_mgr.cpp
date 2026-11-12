@@ -390,7 +390,7 @@ void ActionMgrUpdate(bool timeMeasure_b)
                 nextStepSet_b = true;
                 break;
               case 2u:
-                PositionMgrGotoOrientationDegree(actuatorTargetCurrent_d);
+                PositionMgrGotoOrientationDegree(actuatorTargetCurrent_d, VITESSE_SLOW);
                 Serial.print("ActionMgr|CurrentStep - GotoOrientation : ");
                 Serial.println(actuatorTargetCurrent_d);
                 nextStepSet_b = true;
