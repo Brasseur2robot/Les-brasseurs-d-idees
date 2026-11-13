@@ -20,7 +20,7 @@
 #define PID_DISTANCE_CURVE_DEBUG false
 #define PID_ORIENTATION_DEBUG false
 #define PID_ORIENTATION_CURVE_DEBUG false
-#define POSITION_MGR_DEBUG true
+#define POSITION_MGR_DEBUG false
 
 #define POSITION_MGR_DISTANCE_MAX_ERROR_TOP       500
 #define POSITION_MGR_ORIENTATION_MAX_ERROR_TOP    2500
@@ -118,7 +118,7 @@ void PositionMgrInit() {
 
 void PositionMgrStart() {
   positionMgrEnable_b = true;
-  positionTimeoutEnable_b = false;
+  positionTimeoutEnable_b = true;
   
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
 
@@ -524,7 +524,7 @@ void PositionMgrGotoOrientationDegree(double theta_deg, double speed_d) {
   startDistance_i32_g = OdometryGetDistanceTop();
   startOrientation_i32_g = OdometryGetOrientationTop();
 
-  RampNew(&rampOrientation_st_g, (int32_t)round(RadToTop(theta_deg * PI / 180.0)), 0, (int32_t)round(MilliMeterToTop(speed_d)), (int32_t)round(MilliMeterToTop(1500.0)));
+  RampNew(&rampOrientation_st_g, (int32_t)round(RadToTop(theta_deg * PI / 180.0)), 0, (int32_t)round(MilliMeterToTop(speed_d)), (int32_t)round(MilliMeterToTop(2000.0)));
   
   BlockDetectorStop(&blockDetectorOrientation_st_g);
 }

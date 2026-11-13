@@ -89,7 +89,7 @@ void setup() {
 void loop() {
   //  MotorTest(30);
   //  OdometryEncoderTest();
-  //ActionMgrUpdate(DEBUG_TIME);
+  ActionMgrUpdate(DEBUG_TIME);
   //  ActuatorUpdate(DEBUG_TIME);
   ActuatorDxlUpdate(DEBUG_TIME);
   ColorSensorUpdate(DEBUG_TIME);

@@ -662,6 +662,8 @@ void TrajectoryMgrCalibTrajectory()
     case POSITION_STATE_BLOCKED:
       /* Set state to stopped, this is specific to calibration moves */
       PositionMgrSetState(POSITION_STATE_STOPPED);
+      PositionMgrStop();
+      PositionMgrStart();
       break;
 
     default:

@@ -18,7 +18,7 @@
 /******************************************************************************
    Constants and Macros
  ******************************************************************************/
-#define ACTION_MGR_DEBUG            false
+#define ACTION_MGR_DEBUG            true
 #define ACTION_MGR_UPDATE_PERIOD    0.1
 
 #define SENSOR_COLOR_ID             1
@@ -62,6 +62,14 @@ static actionStep_t actionStepReady_st[ACTION_MGR_READY_NBSTEPS] = {
   {ACTION_ACTUATOR_TYPE_SERVO, SERVO_BOARD_CURSOR_RIGHT_ID, SERVO_BOARD_CURSOR_RIGHT_RETRACTED, NODELAY, WAIT},
   /* Grabber opens */
   {ACTION_ACTUATOR_TYPE_DYNAMIXEL, ACTUATOR_DXL_GRABBER_ID, ACTUATOR_DXL_GRABBER_EXTENDED, NODELAY, NOWAIT}
+};
+
+#define ACTION_MGR_ASSEMBLE_BOXES_NBSTEPS  2
+static actionStep_t actionStepAssembleBoxes_st[ACTION_MGR_ASSEMBLE_BOXES_NBSTEPS] = {
+  /* Approach */
+  {ACTION_ACTUATOR_TYPE_MOTOR, 1u, 50.0, 1000, WAIT},
+  /* Go back*/
+  {ACTION_ACTUATOR_TYPE_MOTOR, 1u, -50.0, NODELAY, WAIT},
 };
 
 #define ACTION_MGR_GRAB_BOXES_NBSTEPS  13
@@ -234,7 +242,7 @@ static actionStep_t actionStepShutdown_st[ACTION_MGR_SHUTDOWN_NBSTEPS] = {
 static actionCatalog_t actionMgrCatalog_st[13] = {
   {ACTION_MGR_ID_NONE, NULL},
   {ACTION_MGR_ID_READY, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
-  {ACTION_MGR_ID_ASSEMBLE_BOXES, &actionStepReady_st[0], ACTION_MGR_READY_NBSTEPS},
+  {ACTION_MGR_ID_ASSEMBLE_BOXES, &actionStepAssembleBoxes_st[0], ACTION_MGR_ASSEMBLE_BOXES_NBSTEPS},
   {ACTION_MGR_ID_GRAB_BOXES, &actionStepGrabBoxes_st[0], ACTION_MGR_GRAB_BOXES_NBSTEPS},
   {ACTION_MGR_ID_TRANSPORT, &actionStepTransport_st[0], ACTION_MGR_TRANSPORT_NBSTEPS},
   {ACTION_MGR_ID_SORT_ALL, &actionStepSortAll_st[0], ACTION_MGR_SORT_ALL_NBSTEPS},
@@ -384,13 +392,13 @@ void ActionMgrUpdate(bool timeMeasure_b)
             switch (actuatorIdCurrent_u8)
             {
               case 1u:
-                PositionMgrGotoDistanceMilliMeter(actuatorTargetCurrent_d, true, VITESSE_SLOW);
+                PositionMgrGotoDistanceMilliMeter(actuatorTargetCurrent_d, true, VITESSE_PROXI);
                 Serial.print("ActionMgr|CurrentStep - GotoDistance : ");
                 Serial.println(actuatorTargetCurrent_d);
                 nextStepSet_b = true;
                 break;
               case 2u:
-                PositionMgrGotoOrientationDegree(actuatorTargetCurrent_d, VITESSE_SLOW);
+                PositionMgrGotoOrientationDegree(actuatorTargetCurrent_d, VITESSE_PROXI);
                 Serial.print("ActionMgr|CurrentStep - GotoOrientation : ");
                 Serial.println(actuatorTargetCurrent_d);
                 nextStepSet_b = true;
@@ -591,6 +599,11 @@ bool ActionMgrSetNextAction(uint8_t actionId_u8, bool isWait_b)
         break;
     
       case ACTION_MGR_ID_ASSEMBLE_BOXES:
+        actionMgrState_en_g = ACTION_MGR_STATE_NEXT_STEP;
+        actionMgrCurrentActionId_u8_g = actionId_u8;
+        actionMgrCurrentStep_u8_g = 0;
+        actionMgrNbStep_u8_g = actionMgrCatalog_st[actionMgrCurrentActionId_u8_g].nbSteps;
+        actionMgrCurrentActionIsWait_b_g = isWait_b;
         break;
     
       case ACTION_MGR_ID_GRAB_BOXES:

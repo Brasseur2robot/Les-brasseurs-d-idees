@@ -175,9 +175,9 @@ void MatchMgrSwitchState()
     if ((matchMgrColor_en_g != MATCH_COLOR_NONE) && (matchMgrState_en_g == MATCH_STATE_COLOR_SELECTION) )
     {
       /* Set in transport mode */
-      ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
+      //ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
       matchMgrState_en_g = MATCH_STATE_BORDER_ADJUST;
-      MatchMgrSetWaitingTimer(3000);
+      MatchMgrSetWaitingTimer(2000);
       ObstacleSensorStop();
     }
   }
