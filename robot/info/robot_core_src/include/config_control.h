@@ -27,6 +27,9 @@
 #define VITESSE_MAX         1000.0  /* [mm.s-1] */
 #define ACCELERATION_MAX    750.0   /* [mm.s-2] */
 
+#define POSITION_BLOCKING_THRESHOLD_DISTANCE      1000.0
+#define POSITION_BLOCKING_THRESHOLD_ORIENTATION   5000.0
+
 #endif
 
 #endif
