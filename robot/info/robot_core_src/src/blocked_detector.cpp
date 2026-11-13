@@ -43,11 +43,26 @@
 
 */
 void BlockDetectorInit(BlockedDetectorSt * blockDetector_st, uint16_t threshold_u16) {
+  blockDetector_st->enable_b = false;
   blockDetector_st->mesure_d = 0.0;
   blockDetector_st->mesureLast_d = 0.0;
   blockDetector_st->blockingThreshold_u16 = threshold_u16;
   blockDetector_st->blockingCount_u8 = 0;
-  blockDetector_st->blockState = false;
+  blockDetector_st->blockState_b = false;
+}
+
+void BlockDetectorStart(BlockedDetectorSt * blockDetector_st)
+{
+  blockDetector_st->enable_b = true;
+}
+
+void BlockDetectorStop(BlockedDetectorSt * blockDetector_st)
+{
+  blockDetector_st->enable_b = false;
+  blockDetector_st->mesure_d = 0.0;
+  blockDetector_st->mesureLast_d = 0.0;
+  blockDetector_st->blockingCount_u8 = 0;
+  blockDetector_st->blockState_b = false;
 }
 
 /**
@@ -65,41 +80,47 @@ void BlockDetectorUpdate(BlockedDetectorSt * blockDetector_st, double mesure_d, 
   if (POSITION_BLOCKING_DEBUG)
     Serial.print("Position blocking : ");
 
-  /* if command is non nill and if robot is not moving enough */
-  if ( (abs(commande_d) > 50.0) && (abs(blockDetector_st->mesure_d - blockDetector_st->mesureLast_d) < blockDetector_st->blockingThreshold_u16) ) {
-    if (blockDetector_st->blockingCount_u8 < POSITION_BLOCKING_COUNT_MAX) {
-      blockDetector_st->blockingCount_u8++;
+  if (blockDetector_st->enable_b == true) {
+    /* if command is non nill and if robot is not moving enough */
+    if ( (abs(commande_d) > 50.0) && (abs(blockDetector_st->mesure_d - blockDetector_st->mesureLast_d) < blockDetector_st->blockingThreshold_u16) ) {
+      if (blockDetector_st->blockingCount_u8 < POSITION_BLOCKING_COUNT_MAX) {
+        blockDetector_st->blockingCount_u8++;
 
-      if (POSITION_BLOCKING_DEBUG) {
-        Serial.print("counting ");
-        Serial.print(blockDetector_st->blockingCount_u8);
+        if (POSITION_BLOCKING_DEBUG) {
+          Serial.print("counting ");
+          Serial.print(blockDetector_st->blockingCount_u8);
+        }
       }
-    }
-    if (blockDetector_st->blockingCount_u8 >= POSITION_BLOCKING_COUNT_MAX) {
-      /* Blocked! */
-      blockDetector_st->blockState = true;
+      if (blockDetector_st->blockingCount_u8 >= POSITION_BLOCKING_COUNT_MAX) {
+        /* Blocked! */
+        blockDetector_st->blockState_b = true;
+
+        if (POSITION_BLOCKING_DEBUG)
+          Serial.print("blocked!");
+      }
+    } else {
+      /* Count reset */
+      blockDetector_st->blockingCount_u8 = 0;
 
       if (POSITION_BLOCKING_DEBUG)
-        Serial.print("blocked!");
+        Serial.print("reset!");
     }
-  } else {
-    /* Count reset */
-    blockDetector_st->blockingCount_u8 = 0;
 
-    if (POSITION_BLOCKING_DEBUG)
-      Serial.print("reset!");
+    blockDetector_st->mesureLast_d = blockDetector_st->mesure_d;
+    
+  } else{
+    blockDetector_st->blockState_b = false;
+
+    if (POSITION_BLOCKING_DEBUG) {
+      Serial.print("disabled");
+    }
   }
 
-  if (POSITION_BLOCKING_DEBUG) {
-    //Serial.println();
-  }
-
-  blockDetector_st->mesureLast_d = blockDetector_st->mesure_d;
+  
 }
 
-bool BlockDetectorGetState(BlockedDetectorSt * blockDetector_st)
-{
-  return blockDetector_st->blockState;
+bool BlockDetectorGetState(BlockedDetectorSt * blockDetector_st) {
+  return blockDetector_st->blockState_b;
 }
 
 /******************************************************************************

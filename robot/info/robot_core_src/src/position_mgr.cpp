@@ -20,7 +20,7 @@
 #define PID_DISTANCE_CURVE_DEBUG false
 #define PID_ORIENTATION_DEBUG false
 #define PID_ORIENTATION_CURVE_DEBUG false
-#define POSITION_MGR_DEBUG false
+#define POSITION_MGR_DEBUG true
 
 #define POSITION_MGR_DISTANCE_MAX_ERROR_TOP       500
 #define POSITION_MGR_ORIENTATION_MAX_ERROR_TOP    2500
@@ -43,6 +43,9 @@ typedef enum {
  ******************************************************************************/
 int32_t startDistance_i32_g;
 int32_t startOrientation_i32_g;
+double consigneDistance_d;
+double consigneOrientation_d;
+
 PositionManagerMvtTypeEn positionMgrMvtType_en_g;
 PositionManagerStateEn positionMgrState_en_g;
 bool emergencyActivated_b_g;
@@ -60,6 +63,8 @@ BlockedDetectorSt blockDetectorOrientation_st_g;
    Module Global Variables
  ******************************************************************************/
 bool positionMgrEnable_b;
+bool positionTimeoutEnable_b;
+uint8_t positionTimeOutCount_u8 = 0;
 
 /******************************************************************************
    Functions Definitions
@@ -77,8 +82,13 @@ bool positionMgrEnable_b;
 void PositionMgrInit() {
   positionMgrMvtType_en_g = MVT_TYPE_NONE;
   positionMgrState_en_g = POSITION_STATE_NONE;
+  positionMgrEnable_b = false;
+  positionTimeoutEnable_b = false;
+
   startDistance_i32_g = 0;
   startOrientation_i32_g = 0;
+  consigneDistance_d = 0.0;
+  consigneOrientation_d = 0.0;
   emergencyActivated_b_g = false;
 
   /* init pid submodule */
@@ -108,18 +118,39 @@ void PositionMgrInit() {
 
 void PositionMgrStart() {
   positionMgrEnable_b = true;
-  /* Some sort of Goto/Stay at actual position */
+  positionTimeoutEnable_b = false;
+  
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
-  startDistance_i32_g = OdometryGetDistanceTop();
-  startOrientation_i32_g = OdometryGetOrientationTop();
-  RampInit(&rampDistance_st_g);
-  RampInit(&rampOrientation_st_g);
-  BlockDetectorInit(&blockDetectorDistance_st_g, POSITION_BLOCKING_THRESHOLD_DISTANCE);
-  BlockDetectorInit(&blockDetectorOrientation_st_g, POSITION_BLOCKING_THRESHOLD_ORIENTATION);
+
+  PidStart(&pidDistance_st_g);
+  PidStart(&pidOrientation_st_g);
+
+  BlockDetectorStart(&blockDetectorDistance_st_g);
+  BlockDetectorStart(&blockDetectorOrientation_st_g);
 }
 
 void PositionMgrStop() {
   positionMgrEnable_b = false;
+
+  positionTimeoutEnable_b = false;
+  positionTimeOutCount_u8 = 0;
+
+  /* Some sort of Goto/Stay at actual position */
+  positionMgrMvtType_en_g = MVT_TYPE_NONE;
+
+  startDistance_i32_g = OdometryGetDistanceTop();
+  startOrientation_i32_g = OdometryGetOrientationTop();
+  consigneDistance_d = startDistance_i32_g;
+  consigneOrientation_d = startOrientation_i32_g;
+
+  PidStop(&pidDistance_st_g);
+  PidStop(&pidOrientation_st_g);
+
+  RampInit(&rampDistance_st_g);
+  RampInit(&rampOrientation_st_g);
+
+  BlockDetectorStop(&blockDetectorDistance_st_g);
+  BlockDetectorStop(&blockDetectorOrientation_st_g);
 }
 
 /**
@@ -139,7 +170,6 @@ void PositionMgrUpdate(bool timeMeasure_b) {
 
   currentTime_u32 = millis();
   static uint32_t lastExecutionTime_u32 = currentTime_u32; /* Quick fix to not have a big time calculated at first execution */
-  static uint8_t timeOutCount_u8 = 0;
 
   /* Manages the update loop every pidGetDeltaTime() */
   if ((currentTime_u32 - lastExecutionTime_u32) >= (DELTA_TIME_S * 1000.0)) {
@@ -153,8 +183,10 @@ void PositionMgrUpdate(bool timeMeasure_b) {
     uint32_t durationMeasureStart_u32 = 0;
     uint32_t durationMeasure_u32 = 0;
 
-    double consigneDistance_d = 0.0;
-    double consigneOrientation_d = 0.0;
+    double mesureDistance_d;
+    double mesureOrientation_d;
+    static double commandeDistance_d;
+    static double commandeOrientation_d;
 
     if (timeMeasure_b)
       durationMeasureStart_u32 = micros();
@@ -192,58 +224,63 @@ void PositionMgrUpdate(bool timeMeasure_b) {
         break;
 
       default:
-        consigneDistance_d = 0.0;
-        consigneOrientation_d = 0.0;
+        consigneDistance_d = startDistance_i32_g;
+        consigneOrientation_d = startOrientation_i32_g;
         break;
     }
-    // Serial.println( 1.2 * TopToMilliMeter((double)(RampGetDistanceBrake(&rampDistance_st_g)) ) );
+
+    /* With the new braking distance, set the detection threshold */
     ObstacleSensorSetThreshold( (uint16_t)( 2.0 * TopToMilliMeter(RampGetDistanceBrake(&rampDistance_st_g)) ) );
-    //Serial.println(ObstacleSensorDetected());
 
-
-    /* if Ramp init, then stopped */
-    if ((RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) {
+    /* According to ramp state, estimate if move is finished or not */
+     if ((RampGetState(&rampDistance_st_g) == RAMP_STATE_INIT) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_INIT)) {
+      /* if Ramp init, then stopped */
       positionMgrState_en_g = POSITION_STATE_STOPPED;
-      //Serial.print("Ramp init, state stopped, ");
+      if (POSITION_MGR_DEBUG)
+        Serial.print("Ramp init, state stopped, ");
     } else {
       /* if one of both ramp finished */
       if (((positionMgrMvtType_en_g == MVT_TYPE_DISTANCE) && (RampGetState(&rampDistance_st_g) == RAMP_STATE_FINISHED))
           || ((positionMgrMvtType_en_g == MVT_TYPE_ORIENTATION) && (RampGetState(&rampOrientation_st_g) == RAMP_STATE_FINISHED))) {
-        //Serial.print("Ramp finished, ");
-        /* count timeout detection */
-        // if (timeOutCount_u8 < 200) {
-        //   timeOutCount_u8 += 1;
-        //   positionMgrState_en_g = POSITION_STATE_MOVING;
-          //Serial.print("Incrementing timeout, ");
-          //Serial.print(timeOutCount_u8);
-          //Serial.print(", ");
 
-          /* if both pid error < acceptable range -> stopped */
-          if ( (abs(pidDistance_st_g.error_d) < POSITION_MGR_DISTANCE_MAX_ERROR_TOP) && (abs(pidOrientation_st_g.error_d) < POSITION_MGR_ORIENTATION_MAX_ERROR_TOP) ) {
-            positionMgrState_en_g = POSITION_STATE_STOPPED;
-            //Serial.print("Position reached, ");
-          }
-          else {
-            //Serial.print("Position not reached, ");
-          }
-        // } else {
-        //   positionMgrState_en_g = POSITION_STATE_STOPPED;
-        //   timeOutCount_u8 = 0;
-        //   //Serial.println("Timeout reached");
-        //   /* Both ramp should finish, robot should stay controlled at current pos */
-        //   RampInit(&rampDistance_st_g);
-        //   RampInit(&rampOrientation_st_g);
-        //   startDistance_i32_g = OdometryGetDistanceTop();
-        //   startOrientation_i32_g = OdometryGetOrientationTop();
-        //   consigneDistance_d = startDistance_i32_g;
-        //   consigneOrientation_d = startOrientation_i32_g;
+        if (POSITION_MGR_DEBUG)  
+          Serial.print("Ramp finished, ");
 
-        //}
+        /* if both pid error < acceptable range -> stopped */
+        if ( (abs(pidDistance_st_g.error_d) < POSITION_MGR_DISTANCE_MAX_ERROR_TOP) && (abs(pidOrientation_st_g.error_d) < POSITION_MGR_ORIENTATION_MAX_ERROR_TOP) ) {
+          positionMgrState_en_g = POSITION_STATE_STOPPED;
+          if (POSITION_MGR_DEBUG)
+            Serial.print("Position reached, ");
+
+        } else {
+          /* Timeout detection */
+          if (positionTimeoutEnable_b == true) {
+            if (positionTimeOutCount_u8 < 200) {
+              positionTimeOutCount_u8 += 1;
+              positionMgrState_en_g = POSITION_STATE_MOVING;
+              //Serial.print("Incrementing timeout, ");
+              //Serial.print(positionTimeOutCount_u8);
+              //Serial.print(", ");
+            } else {
+              positionMgrState_en_g = POSITION_STATE_STOPPED;
+              positionTimeOutCount_u8 = 0;
+              //Serial.println("Timeout reached");
+              
+              /* Both ramp should finish, robot should stay controlled at current pos */
+              PositionMgrStop();
+              PositionMgrStart();
+            }
+          } else {
+            positionMgrState_en_g = POSITION_STATE_MOVING;
+            if (POSITION_MGR_DEBUG)
+              Serial.print("Position not reached, ");
+          }
+        }
       } else {
-        //Serial.print("State Moving");
-        //timeOutCount_u8 = 0;
         /* else still moving */
         positionMgrState_en_g = POSITION_STATE_MOVING;
+        if (POSITION_MGR_DEBUG)
+          Serial.print("Ramp not finished, state Moving");
       }
     }
 
@@ -252,12 +289,12 @@ void PositionMgrUpdate(bool timeMeasure_b) {
     PidSetReference(&pidOrientation_st_g, consigneOrientation_d);
 
     /* Gets the current distance and orientation of the robot */
-    double mesureDistance_d = OdometryGetDistanceTop();
-    double mesureOrientation_d = OdometryGetOrientationTop();
+    mesureDistance_d = OdometryGetDistanceTop();
+    mesureOrientation_d = OdometryGetOrientationTop();
 
     /* Sets the current distance and orientation in the pids, they compute the outputs for the motors */
-    double commandeDistance_d = PidUpdate(&pidDistance_st_g, mesureDistance_d, DEBUG_TIME);
-    double commandeOrientation_d = PidUpdate(&pidOrientation_st_g, mesureOrientation_d, DEBUG_TIME);
+    commandeDistance_d = PidUpdate(&pidDistance_st_g, mesureDistance_d, DEBUG_TIME);
+    commandeOrientation_d = PidUpdate(&pidOrientation_st_g, mesureOrientation_d, DEBUG_TIME);
 
     /* Sends the pids outputs to the motors, only if the module is started */
     if (positionMgrEnable_b == true) {
@@ -280,8 +317,6 @@ void PositionMgrUpdate(bool timeMeasure_b) {
         break;
 
       default:
-        consigneDistance_d = 0.0;
-        consigneOrientation_d = 0.0;
         break;
     }
 
@@ -291,14 +326,8 @@ void PositionMgrUpdate(bool timeMeasure_b) {
       positionMgrState_en_g = POSITION_STATE_BLOCKED;
       
       /* Both ramp should finish, robot should stay controlled at current pos */
-      BlockDetectorInit(&blockDetectorDistance_st_g, POSITION_BLOCKING_THRESHOLD_DISTANCE);
-      BlockDetectorInit(&blockDetectorOrientation_st_g, POSITION_BLOCKING_THRESHOLD_ORIENTATION);
-      RampInit(&rampDistance_st_g);
-      RampInit(&rampOrientation_st_g);
-      startDistance_i32_g = OdometryGetDistanceTop();
-      startOrientation_i32_g = OdometryGetOrientationTop();
-      consigneDistance_d = startDistance_i32_g;
-      consigneOrientation_d = startOrientation_i32_g;
+      PositionMgrStop();
+      PositionMgrStart();
     }
     else
     {
@@ -458,6 +487,8 @@ void PositionMgrGotoXYTheta(double x_m, double y_m, double theta_deg) {
 */
 void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b, double speed_d) {
   //IhmStop();
+  PositionMgrStop();
+  PositionMgrStart();
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_DISTANCE;
 
@@ -470,10 +501,7 @@ void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b, doub
   else
     RampNew(&rampDistance_st_g, (int32_t)round(MilliMeterToTop(distanceMm_d)), (int32_t)round(MilliMeterToTop(speed_d)), (int32_t)round(MilliMeterToTop(speed_d)), (int32_t)round(MilliMeterToTop(ACCELERATION_MAX)));
 
-  BlockDetectorInit(&blockDetectorDistance_st_g, POSITION_BLOCKING_THRESHOLD_DISTANCE);
-
-  PidStop(&pidDistance_st_g);
-  PidStart(&pidDistance_st_g);
+  BlockDetectorStop(&blockDetectorOrientation_st_g);
 }
 
 /**
@@ -488,6 +516,8 @@ void PositionMgrGotoDistanceMilliMeter(double distanceMm_d, bool braking_b, doub
 void PositionMgrGotoOrientationDegree(double theta_deg, double speed_d) {
   //IhmStop();
   //Serial.println(theta_deg);
+  PositionMgrStop();
+  PositionMgrStart();
   positionMgrState_en_g = POSITION_STATE_MOVING;
   positionMgrMvtType_en_g = MVT_TYPE_ORIENTATION;
 
@@ -496,10 +526,7 @@ void PositionMgrGotoOrientationDegree(double theta_deg, double speed_d) {
 
   RampNew(&rampOrientation_st_g, (int32_t)round(RadToTop(theta_deg * PI / 180.0)), 0, (int32_t)round(MilliMeterToTop(speed_d)), (int32_t)round(MilliMeterToTop(1500.0)));
   
-  BlockDetectorInit(&blockDetectorOrientation_st_g, POSITION_BLOCKING_THRESHOLD_ORIENTATION);
-
-  PidStop(&pidOrientation_st_g);
-  PidStart(&pidOrientation_st_g);
+  BlockDetectorStop(&blockDetectorOrientation_st_g);
 }
 
 /**
