@@ -1,0 +1,147 @@
+{
+   "widgets": [
+      {
+         "type": "chart",
+         "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 0
+         },
+         "series": [
+            {
+               "name": "pidDistRef",
+               "sourceNames": [
+                  "pidDistRef"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "pidDistRef",
+                  "_id": "data-serie-0",
+                  "stroke": "rgba(231,76,60,1)",
+                  "fill": "rgba(231,76,60,0.1)"
+               },
+               "type": "number"
+            },
+            {
+               "name": "pidDistMes",
+               "sourceNames": [
+                  "pidDistMes"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "pidDistMes",
+                  "_id": "data-serie-7",
+                  "stroke": "rgba(52,152,219,1)",
+                  "fill": "rgba(52,152,219,0.1)"
+               },
+               "type": "number"
+            }
+         ]
+      },
+      {
+         "type": "chart",
+         "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 0
+         },
+         "series": [
+            {
+               "name": "pidOrientRef",
+               "sourceNames": [
+                  "pidOrientRef"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "pidOrientRef",
+                  "_id": "data-serie-2",
+                  "stroke": "rgba(231,76,60,1)",
+                  "fill": "rgba(231,76,60,0.1)"
+               },
+               "type": "number"
+            },
+            {
+               "name": "pidOrientMes",
+               "sourceNames": [
+                  "pidOrientMes"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "pidOrientMes",
+                  "_id": "data-serie-8",
+                  "stroke": "rgba(52,152,219,1)",
+                  "fill": "rgba(52,152,219,0.1)"
+               },
+               "type": "number"
+            }
+         ]
+      },
+      {
+         "type": "chart",
+         "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 0
+         },
+         "series": [
+            {
+               "name": "posMgrState",
+               "sourceNames": [
+                  "posMgrState"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "posMgrState",
+                  "_id": "data-serie-4",
+                  "stroke": "rgba(231,76,60,1)",
+                  "fill": "rgba(231,76,60,0.1)"
+               },
+               "type": "number"
+            }
+         ]
+      },
+      {
+         "type": "chart",
+         "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 0,
+            "y": 0
+         },
+         "series": [
+            {
+               "name": "cmdeGauche",
+               "sourceNames": [
+                  "cmdeGauche"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "cmdeGauche",
+                  "_id": "data-serie-5",
+                  "stroke": "rgba(231,76,60,1)",
+                  "fill": "rgba(231,76,60,0.1)"
+               },
+               "type": "number"
+            },
+            {
+               "name": "cmdeDroite",
+               "sourceNames": [
+                  "cmdeDroite"
+               ],
+               "formula": "",
+               "options": {
+                  "_serie": "cmdeDroite",
+                  "_id": "data-serie-9",
+                  "stroke": "rgba(52,152,219,1)",
+                  "fill": "rgba(52,152,219,0.1)"
+               },
+               "type": "number"
+            }
+         ]
+      }
+   ],
+   "viewDuration": 15
+}
