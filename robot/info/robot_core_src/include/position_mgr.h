@@ -45,8 +45,22 @@ bool PositionMgrGetEmergencyState();
 void PositionMgrSetEmergencyState(bool state);
 void PositionMgrGetPosition();
 void PositionMgrSetDistanceControl(bool state_b);
+void PositionMgrSetDistanceCoefficientKp(double kp_d);
+void PositionMgrSetDistanceCoefficientKi(double ki_d);
+void PositionMgrSetDistanceCoefficientKd(double kd_d);
 void PositionMgrSetOrientationControl(bool state_b);
+void PositionMgrSetOrientationCoefficientKp(double kp_d);
+void PositionMgrSetOrientationCoefficientKi(double ki_d);
+void PositionMgrSetOrientationCoefficientKd(double kd_d);
 bool PositionMgrGetDistanceControl();
+double PositionMgrGetDistanceCoefficientKp();
+double PositionMgrGetDistanceCoefficientKi();
+double PositionMgrGetDistanceCoefficientKd();
 bool PositionMgrGetOrientationControl();
+double PositionMgrGetOrientationCoefficientKp();
+double PositionMgrGetOrientationCoefficientKi();
+double PositionMgrGetOrientationCoefficientKd();
+void PositionMgrTuneDistance(bool state_b);
+void PositionMgrTuneOrientation(bool state_b);
 
 #endif

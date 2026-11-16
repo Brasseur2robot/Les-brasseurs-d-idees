@@ -3,8 +3,9 @@
  ******************************************************************************/
 #include <Arduino.h>
 #include "config.h"
-#include "blocked_detector.h"
+#include "blocked_detector.h" 
 #include "com_wifi.h"
+#include "eeprom.h"
 #include "led.h"
 #include "motor.h"
 #include "obstacle_sensor.h"
@@ -98,8 +99,29 @@ void PositionMgrInit() {
   PidSetDeltaTime(&pidDistance_st_g, DELTA_TIME_S);
   PidSetDeltaTime(&pidOrientation_st_g, DELTA_TIME_S);
 
-  PidSetCoefficients(&pidDistance_st_g, KP_DISTANCE, KI_DISTANCE, KD_DISTANCE);
-  PidSetCoefficients(&pidOrientation_st_g, KP_ORIENTATION, KI_ORIENTATION, KD_ORIENTATION);
+  if (EepromGetEnable() == true) {
+    /* Get coeff from eeprom if enabled */
+    PidSetCoefficients(&pidDistance_st_g, EepromGetDouble("pidDistKP"), EepromGetDouble("pidDistKI"), EepromGetDouble("pidDistKD"));
+    PidSetCoefficients(&pidOrientation_st_g, EepromGetDouble("pidOrieKP"), EepromGetDouble("pidOrieKI"), EepromGetDouble("pidOrieKD"));
+  } else {
+    /* else get the standard coefficients */
+    PidSetCoefficients(&pidDistance_st_g, KP_DISTANCE, KI_DISTANCE, KD_DISTANCE);
+    PidSetCoefficients(&pidOrientation_st_g, KP_ORIENTATION, KI_ORIENTATION, KD_ORIENTATION);
+  }
+
+  Serial.print("Distance : Kp ");
+  Serial.print(PidGetCoefficientKp(&pidDistance_st_g), 4);
+  Serial.print(", Ki ");
+  Serial.print(PidGetCoefficientKi(&pidDistance_st_g), 4);
+  Serial.print(", Kd ");
+  Serial.print(PidGetCoefficientKd(&pidDistance_st_g), 4);
+  Serial.print(", Orientation : Kp ");
+  Serial.print(PidGetCoefficientKp(&pidOrientation_st_g), 4);
+  Serial.print(", Ki ");
+  Serial.print(PidGetCoefficientKi(&pidOrientation_st_g), 4);
+  Serial.print(", Kd ");
+  Serial.print(PidGetCoefficientKd(&pidOrientation_st_g), 4);
+  Serial.println();
 
   PidStart(&pidDistance_st_g);
   PidStart(&pidOrientation_st_g);
@@ -585,6 +607,18 @@ void PositionMgrSetDistanceControl(bool state_b) {
   }
 }
 
+void PositionMgrSetDistanceCoefficientKp(double kp_d) {
+  PidSetCoefficientKp(&pidDistance_st_g, kp_d);
+}
+
+void PositionMgrSetDistanceCoefficientKi(double ki_d) {
+  PidSetCoefficientKi(&pidDistance_st_g, ki_d);
+}
+
+void PositionMgrSetDistanceCoefficientKd(double kd_d) {
+  PidSetCoefficientKd(&pidDistance_st_g, kd_d);
+}
+
 void PositionMgrSetOrientationControl(bool state_b) {
   if (state_b == true) {
     PidStart(&pidOrientation_st_g);
@@ -593,12 +627,88 @@ void PositionMgrSetOrientationControl(bool state_b) {
   }
 }
 
+void PositionMgrSetOrientationCoefficientKp(double kp_d) {
+  PidSetCoefficientKp(&pidOrientation_st_g, kp_d);
+}
+
+void PositionMgrSetOrientationCoefficientKi(double ki_d) {
+  PidSetCoefficientKi(&pidOrientation_st_g, ki_d);
+}
+
+void PositionMgrSetOrientationCoefficientKd(double kd_d) {
+  PidSetCoefficientKd(&pidOrientation_st_g, kd_d);
+}
+
 bool PositionMgrGetDistanceControl() {
   return PidGetEnable(&pidDistance_st_g);
 }
 
+double PositionMgrGetDistanceCoefficientKp() {
+  return PidGetCoefficientKp(&pidDistance_st_g);
+}
+
+double PositionMgrGetDistanceCoefficientKi() {
+  return PidGetCoefficientKi(&pidDistance_st_g);
+}
+
+double PositionMgrGetDistanceCoefficientKd() {
+  return PidGetCoefficientKd(&pidDistance_st_g);
+}
+
 bool PositionMgrGetOrientationControl() {
   return PidGetEnable(&pidOrientation_st_g);
+}
+
+double PositionMgrGetOrientationCoefficientKp() {
+  return PidGetCoefficientKp(&pidOrientation_st_g);
+}
+
+double PositionMgrGetOrientationCoefficientKi() {
+  return PidGetCoefficientKi(&pidOrientation_st_g);
+}
+
+double PositionMgrGetOrientationCoefficientKd() {
+  return PidGetCoefficientKd(&pidOrientation_st_g);
+}
+
+void PositionMgrTuneDistance(bool state_b)
+{
+  if (state_b == true)
+  {
+    positionTimeoutEnable_b = false;
+
+    PositionMgrSetDistanceControl(true);
+    PositionMgrSetOrientationControl(false);
+
+    RampInit(&rampDistance_st_g);
+    RampInit(&rampOrientation_st_g);
+
+    BlockDetectorStop(&blockDetectorDistance_st_g);
+    BlockDetectorStop(&blockDetectorOrientation_st_g);
+  } else {
+    PositionMgrStop();
+    PositionMgrStart();
+  }
+}
+
+void PositionMgrTuneOrientation(bool state_b)
+{
+  if (state_b == true)
+  {
+    positionTimeoutEnable_b = false;
+
+    PositionMgrSetDistanceControl(false);
+    PositionMgrSetOrientationControl(true);
+
+    RampInit(&rampDistance_st_g);
+    RampInit(&rampOrientation_st_g);
+
+    BlockDetectorStop(&blockDetectorDistance_st_g);
+    BlockDetectorStop(&blockDetectorOrientation_st_g);
+  } else {
+    PositionMgrStop();
+    PositionMgrStart();
+  }
 }
 
 /******************************************************************************

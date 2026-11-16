@@ -97,6 +97,36 @@ void PidSetCoefficients(PidControllerSt * pid_pst, double kp_d, double ki_d, dou
   pid_pst->kd_d = kd_d;
 }
 
+void PidSetCoefficientKp(PidControllerSt * pid_pst, double kp_d)
+{
+  pid_pst->kp_d = kp_d;
+}
+
+void PidSetCoefficientKi(PidControllerSt * pid_pst, double ki_d)
+{
+  pid_pst->ki_d = ki_d;
+}
+
+void PidSetCoefficientKd(PidControllerSt * pid_pst, double kd_d)
+{
+  pid_pst->kd_d = kd_d;
+}
+
+double PidGetCoefficientKp(PidControllerSt * pid_pst)
+{
+  return pid_pst->kp_d;
+}
+
+double PidGetCoefficientKi(PidControllerSt * pid_pst)
+{
+  return pid_pst->ki_d;
+}
+
+double PidGetCoefficientKd(PidControllerSt * pid_pst)
+{
+  return pid_pst->kd_d;
+}
+
 bool PidGetEnable(PidControllerSt * pid_pst)
 {
   return pid_pst->enable_b;

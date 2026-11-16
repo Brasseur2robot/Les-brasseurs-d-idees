@@ -22,10 +22,12 @@
 #include "actuator_dxl.h"
 #include "controller.h"
 #include "color_sensor.h"
+#include "eeprom.h"
 #include "ihm.h"
 #include "io_expander.h"
 #include "motor.h"
 #include "match_mgr.h"
+#include "position_mgr.h"
 #include "robot_mgr.h"
 #include "servo_board.h"
 #include "sound.h"
@@ -77,6 +79,13 @@ int selectedServoId = 0;
 
 int selectedVolume = SOUND_VOLUME;
 
+double controlDistancePidKp;
+double controlDistancePidKi;
+double controlDistancePidKd;
+double controlOrientationPidKp;
+double controlOrientationPidKi;
+double controlOrientationPidKd;
+
 void changeColor()
 {
   /* Set color to none */
@@ -102,6 +111,73 @@ void changeColor()
 
   }
 }
+
+MENU_SCREEN(DistanceScreen, DistanceItems,
+              ITEM_BOOL("Tune Pdist", false, "On", "Off", [](const bool value) {
+              /* if true, autonomous mode is on, if false, controller mode is on*/
+              if (value == true) {
+                /* tune */
+                PositionMgrTuneDistance(true);
+              } else {
+                /* Disable autonomous mode */
+                PositionMgrTuneDistance(false);
+              }
+              Serial.println(value ? "Dist tune" : "Dist not tune");
+            }),
+            ITEM_RANGE_REF<double>("Kp", controlDistancePidKp, -0.1, 0.0, 10.0, [](const Ref<double> value_d) {
+              /* Sets the coefficient accordingly and save it */
+              PositionMgrSetDistanceCoefficientKp(value_d / 100.0);
+              EepromSetDouble("pidDistKP", value_d / 100.0);
+            }, "%0.1f"),
+            ITEM_RANGE_REF<double>("Ki", controlDistancePidKi, -0.1, 0.0, 10.0, [](const Ref<double> value_d) {
+              /* Sets the coefficient accordingly and save it */
+              PositionMgrSetDistanceCoefficientKi(value_d / 100.0);
+              EepromSetDouble("pidDistKI", value_d / 100.0);
+            }, "%0.1f"),
+            ITEM_RANGE_REF<double>("Kd", controlDistancePidKd, -0.1, 0.0, 10.0, [](const Ref<double> value_d) {
+              /* Sets the coefficient accordingly and save it */
+              PositionMgrSetDistanceCoefficientKd(value_d / 1000.0);
+              EepromSetDouble("pidDistKD", value_d / 1000.0);
+            }, "%0.1f"),
+            );
+
+MENU_SCREEN(OrientationScreen, OrientationItems,
+            ITEM_BOOL("Tune POrie", false, "On", "Off", [](const bool value) {
+              /* if true, autonomous mode is on, if false, controller mode is on*/
+              if (value == true) {
+                /* tune */
+                PositionMgrTuneOrientation(true);
+              } else {
+                /* Disable autonomous mode */
+                PositionMgrTuneOrientation(false);
+              }
+              Serial.println(value ? "Orie tune" : "Orie not tune");
+            }),
+            ITEM_RANGE_REF<double>("Kp", controlOrientationPidKp, -0.1, 0.0, 10.0, [](const Ref<double> value_d) {
+              /* Sets the coefficient accordingly and save it */
+              PositionMgrSetOrientationCoefficientKp(value_d / 1000.0);
+              EepromSetDouble("pidOrieKP", value_d / 1000.0);
+            }, "%0.1f"),
+            ITEM_RANGE_REF<double>("Ki", controlOrientationPidKi, -0.1, 0.0, 10.0, [](const Ref<double> value_d) {
+              /* Sets the coefficient accordingly and save it */
+              PositionMgrSetOrientationCoefficientKi(value_d / 1000.0);
+              EepromSetDouble("pidOrieKI", value_d / 1000.0);
+            }, "%0.1f"),
+            ITEM_RANGE_REF<double>("Kd", controlOrientationPidKd, -0.1, 0.0, 10.0, [](const Ref<double> value_d) {
+              /* Sets the coefficient accordingly and save it */
+              PositionMgrSetOrientationCoefficientKd(value_d / 10000.0);
+              EepromSetDouble("pidOrieKD", value_d / 10000.0);
+            }, "%0.1f"),
+            );
+
+MENU_SCREEN(ControlCfgScreen, ControlCfgItems,
+            ITEM_SUBMENU("Distance", DistanceScreen),
+            ITEM_SUBMENU("Orientation", OrientationScreen),
+            ITEM_COMMAND("Reset gains", []() {
+              /* Reset all gains */
+              EepromReset();
+            }),
+            );
 
 MENU_SCREEN(InputDbgScreen, InputDbgItems,
             ITEM_VALUE("Io 0 ", Input0_b, "%d")
@@ -310,7 +386,7 @@ MENU_SCREEN(mainScreen, mainItems,
                 /* Disable autonomous mode */
                 //TODO replace with an elegant PositionMgrStop()
                 PositionMgrStop();
-                ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
+                //ActionMgrSetNextAction(ACTION_MGR_ID_TRANSPORT, WAIT);
                 /* Enable controller mode */
                 controllerEnable(true);
               }
@@ -329,7 +405,9 @@ MENU_SCREEN(mainScreen, mainItems,
 
             ITEM_SUBMENU("Servo Cfg", ServoCfgScreen),
 
-            ITEM_SUBMENU("Input debug", InputDbgScreen)
+            ITEM_SUBMENU("Input debug", InputDbgScreen),
+
+            ITEM_SUBMENU("Control Cfg", ControlCfgScreen)
             );
 
 /******************************************************************************
@@ -343,6 +421,14 @@ void IhmInit() {
   Serial.println(dxlPosition);
   /* Set RGB color to orange, signaling that the robot init is not finished */
   IhmSetColor(255, 165, 0);
+
+  /* Set the values of the menu */
+  controlDistancePidKp = PositionMgrGetDistanceCoefficientKp() * 100.0;
+  controlDistancePidKi = PositionMgrGetDistanceCoefficientKi() * 100.0;
+  controlDistancePidKd = PositionMgrGetDistanceCoefficientKd() * 1000.0;
+  controlOrientationPidKp = PositionMgrGetOrientationCoefficientKp() * 1000.0;
+  controlOrientationPidKi = PositionMgrGetOrientationCoefficientKi() * 1000.0;
+  controlOrientationPidKd = PositionMgrGetOrientationCoefficientKd() * 10000.0;
 }
 
 void IhmUpdate(bool timeMeasure_b) {

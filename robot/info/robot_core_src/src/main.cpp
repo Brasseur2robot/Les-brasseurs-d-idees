@@ -10,6 +10,7 @@
 #include "com_wifi.h"
 #include "controller.h"
 #include "color_sensor.h"
+#include "eeprom.h"
 #include "ihm.h"
 #include "io_expander.h"
 #include "led.h"
@@ -69,7 +70,7 @@ void setup() {
   ComWifiInit();
   ControllerInit(false);
   ColorSensorInit();
-  IhmInit();
+  EepromInit();
   IoExpanderInit();
   LedInit();
   MatchMgrInit();
@@ -82,6 +83,7 @@ void setup() {
   //SoundInit();
   TrajectoryMgrInit();
   RobotMgrInit();
+  IhmInit();
   /* Set RGB color to green, signaling the robot init is finished */
   IhmSetColor(0, 255, 0);
 }

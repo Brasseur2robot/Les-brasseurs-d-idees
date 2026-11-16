@@ -14,7 +14,7 @@
 
 #define KP_DISTANCE         0.02
 #define KI_DISTANCE         0.0
-#define KD_DISTANCE         0.001 //0.001
+#define KD_DISTANCE         0.001
 
 #define KP_ORIENTATION      0.004
 #define KI_ORIENTATION      0.0

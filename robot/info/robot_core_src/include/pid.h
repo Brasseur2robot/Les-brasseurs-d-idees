@@ -35,7 +35,12 @@ void PidSetAntiWindUp(PidControllerSt * pid_pst, bool value_b);
 void PidSetDeltaTime(PidControllerSt * pid_pst, double value_d);
 void PidSetReference(PidControllerSt * pid_pst, double value_d);
 void PidSetCoefficients(PidControllerSt * pid_pst, double kp_d, double ki_d, double kd_d);
-
+void PidSetCoefficientKp(PidControllerSt * pid_pst, double kp_d);
+void PidSetCoefficientKi(PidControllerSt * pid_pst, double ki_d);
+void PidSetCoefficientKd(PidControllerSt * pid_pst, double kd_d);
+double PidGetCoefficientKp(PidControllerSt * pid_pst);
+double PidGetCoefficientKi(PidControllerSt * pid_pst);
+double PidGetCoefficientKd(PidControllerSt * pid_pst);
 bool PidGetEnable(PidControllerSt * pid_pst);
 double PidGetDeltaTime(PidControllerSt * pid_pst);
 double PidGetError(PidControllerSt * pid_pst);
